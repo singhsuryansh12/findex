@@ -45,10 +45,13 @@ export function BrainPanel({
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [stage, setStage] = useState<BrainStatus | null>(null);
-  const endRef = useRef<HTMLDivElement>(null);
+  const messagesRef = useRef<HTMLDivElement>(null);
   const initialHandled = useRef<string | null>(null);
 
-  useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, stage]);
+  useEffect(() => {
+    const container = messagesRef.current;
+    if (container) container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
+  }, [messages, stage]);
   useEffect(() => {
     if (initialPrompt && initialHandled.current !== initialPrompt && !busy) {
       initialHandled.current = initialPrompt;
@@ -125,7 +128,7 @@ export function BrainPanel({
         <div className="brain-title-row"><span className="brain-orb"><Sparkles size={15} /></span><div><div className="brain-title">Financial Brain</div><div className="brain-status">Grounded in your demo ledger</div></div></div>
         <button className="icon-button-dark brain-mobile-close" onClick={onClose} aria-label="Close Financial Brain"><X size={14} /></button>
       </header>
-      <div className="brain-messages" aria-live="polite">
+      <div className="brain-messages" aria-live="polite" ref={messagesRef}>
         {messages.map((message) => (
           <div className={`message ${message.role}`} key={message.id}>
             {message.content || (message.role === "assistant" && busy ? "…" : "")}
@@ -133,7 +136,6 @@ export function BrainPanel({
           </div>
         ))}
         {stage && <div className="brain-stage"><LoaderCircle className="spin" size={12} />{statusLabels[stage]}</div>}
-        <div ref={endRef} />
       </div>
       <div className="suggestions" aria-label="Suggested prompts">
         {suggestions.map((suggestion) => <button className="suggestion" onClick={() => void send(suggestion)} disabled={busy} key={suggestion}>{suggestion}</button>)}

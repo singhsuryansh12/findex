@@ -13,6 +13,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "screenshots": "tsx scripts/capture-screenshots.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --ignore-pattern .next --ignore-pattern coverage",
     "validate": "npm run typecheck && npm run test && npm run build",

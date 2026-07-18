@@ -19,6 +19,12 @@ The frozen acceptance prompt is:
 
 FinDex answers **$366.21 across 8 Dining transactions, June 1–30, 2026**, with a deterministic comparison to May.
 
+## Product preview
+
+![FinDex populated desktop dashboard](public/dashboard-desktop.png)
+
+<img src="public/dashboard-mobile.png" alt="FinDex responsive dashboard at 390 pixels" width="390" />
+
 ## Architecture
 
 ```mermaid
