@@ -28,6 +28,7 @@ import { formatMoney, getCategoryName, getMerchantName } from "@/lib/finance/eng
 import { compactDate } from "@/lib/finance/dates";
 import type { WidgetArtifact } from "@/lib/widgets/contracts";
 import { BrainPanel } from "@/components/brain/brain-panel";
+import { BrandLogo } from "@/components/brand/brand-logo";
 import { GeneratedWidgetCard } from "@/components/widgets/generated-widget-card";
 import { ForecastChart } from "./forecast-chart";
 import { Landing } from "./landing";
@@ -95,7 +96,7 @@ export function FinDexApp({ dataset, snapshot }: { dataset: DemoDataset; snapsho
   return (
     <div className="app-shell">
       <aside className="sidebar" aria-label="Primary navigation">
-        <span className="brand-mark brand-mark-small"><Sparkles size={14} /></span>
+        <BrandLogo compact small />
         <nav className="sidebar-nav">
           <button className="nav-button active" aria-label="Overview"><LayoutDashboard size={18} /></button>
           <button className="nav-button" aria-label="Cashflow"><BarChart3 size={18} /></button>
@@ -109,7 +110,7 @@ export function FinDexApp({ dataset, snapshot }: { dataset: DemoDataset; snapsho
       <div className="app-content">
         <header className="topbar">
           <div>
-            <div className="brand" style={{ display: "none" }}><span className="brand-mark brand-mark-small"><Sparkles size={14} /></span><span>FinDex</span></div>
+            <BrandLogo small className="topbar-brand" />
             <div className="topbar-context">Overview&nbsp; / &nbsp;Financial home</div>
           </div>
           <div className="topbar-date"><CalendarDays size={13} />As of {compactDate(dataset.metadata.asOfDate)} · Demo data</div>

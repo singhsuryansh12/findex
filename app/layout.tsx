@@ -24,8 +24,11 @@ export const metadata: Metadata = {
   description:
     "An AI-native financial operating system with predictive cashflow and tools built live by Codex.",
   icons: {
-    icon: "/favicon.svg",
-    shortcut: "/favicon.svg",
+    icon: [
+      { url: "/favicon.ico", sizes: "64x64" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/favicon.ico",
   },
   openGraph: {
     title: "FinDex — Your financial life, anticipated",
