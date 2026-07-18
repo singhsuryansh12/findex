@@ -1,0 +1,26 @@
+{
+  "name": "findex-widget-sandbox",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint GeneratedWidget.tsx GeneratedWidget.test.tsx --no-error-on-unmatched-pattern",
+    "test": "vitest run",
+    "bundle": "esbuild GeneratedWidget.tsx --bundle --platform=browser --format=esm --external:react --external:recharts --outfile=/tmp/widget.js"
+  },
+  "dependencies": {
+    "@openai/codex-sdk": "0.144.6",
+    "@testing-library/jest-dom": "6.9.1",
+    "@testing-library/react": "16.3.2",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "eslint": "9.39.4",
+    "esbuild": "0.27.4",
+    "jsdom": "29.1.1",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
+    "recharts": "3.9.2",
+    "typescript": "5.9.3",
+    "vitest": "4.1.10"
+  }
+}
