@@ -18,7 +18,7 @@ import {
   workspaceReviewSchema,
 } from "./contracts";
 import { buildDeadline, buildPolicy, independentSignal, reviewPolicy, stageDeadlines, type ModelPolicy } from "./model-policy";
-import { logModelTrace, normalizeModelError, requireCompletedResponse, requireParsedResponse, traceFor, usageOf, WorkspaceModelError } from "./openai-response";
+import { logModelFailureContext, logModelTrace, normalizeModelError, requireCompletedResponse, requireParsedResponse, traceFor, usageOf, WorkspaceModelError } from "./openai-response";
 import { isEditableWorkspacePath } from "./policy";
 import { quickCheckWorkspace, validateAndBundleWorkspace } from "./sandbox";
 import { signArtifactSignature, signCapabilityToken } from "./signing";
@@ -177,7 +177,7 @@ async function createBuilderResponse(client: OpenAI, options: {
     input: options.input,
     previous_response_id: options.previousResponseId,
     tools: builderTools,
-    tool_choice: "auto",
+    tool_choice: "required",
     parallel_tool_calls: false,
     max_output_tokens: options.policy.maxOutputTokens,
   }, { signal: options.signal, maxRetries: 0 });
@@ -222,7 +222,13 @@ async function runBuilderPass(options: {
       throw error;
     }
     const calls = response.output.filter((item): item is Responses.ResponseFunctionToolCall => item.type === "function_call");
-    if (!calls.length) break;
+    if (!calls.length) {
+      throw new WorkspaceModelError("PLAN_INVALID", "Findex could not finish the workspace source pass.", {
+        responseId: response.id,
+        responseStatus: response.status,
+        usage: usageOf(response),
+      });
+    }
     const outputs: Responses.ResponseInputItem.FunctionCallOutput[] = [];
     for (const call of calls) {
       const result = await executeBuilderTool(call, options.files, checkState);
@@ -288,6 +294,7 @@ export async function buildWorkspaceDraft(options: {
     };
   } catch (rawError) {
     const error = normalizeModelError(rawError, "workspace build");
+    logModelFailureContext(options.requestId, options.repair ? "repair" : "building", error);
     const trace = traceFor({
       stage: options.repair ? "repair" : "building", model: policy.model, effort: policy.effort,
       attempt: options.repair ? 2 : 1, durationMs: Date.now() - startedAt, usage: error.metadata.usage,

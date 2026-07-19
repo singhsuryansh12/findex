@@ -28,6 +28,7 @@ The initial Brain request has a 210-second ceiling and the route retains a 300-s
 - Planning permits at most two paid attempts. Token exhaustion retries with a larger output cap. A completed but semantically invalid simple/standard plan may retry once with Sol/medium. Explicit refusal, content filtering, and timeout do not escalate reasoning.
 - Transient provider failures may receive one explicit same-policy planning retry. Assessment failure does not spend another request; it falls back to `standard`.
 - Workspace generation permits one initial build and at most one targeted repair. Source-validation and semantic-review diagnostics are combined before that repair.
+- Every source-generation turn requires a bounded file, check, or finish tool call. A completed text-only response is a contract failure, and Findex records its response ID, status, and usage without logging the response body.
 - Validation retries once only for a sandbox or platform transient. Source, policy, interaction, accessibility, or financial defects are never treated as platform transients.
 - Publication requires deterministic validation plus an independent review score of at least 90 with every acceptance criterion passing. Failure or cancellation leaves the previously published workspace unchanged.
 
