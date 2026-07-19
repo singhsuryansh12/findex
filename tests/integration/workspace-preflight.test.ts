@@ -51,6 +51,36 @@ function toolResponse(id: string, name: string, args: Record<string, unknown>) {
 }
 
 describe("workspace builder preflight parity", () => {
+  it("requires a builder tool call and preserves response metadata when the contract is violated", async () => {
+    vi.spyOn(console, "info").mockImplementation(() => undefined);
+    vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const create = vi.fn().mockResolvedValue({
+      id: "resp_text_only",
+      status: "completed",
+      output: [{ type: "message", content: [{ type: "output_text", text: "Here is your workspace." }] }],
+      incomplete_details: null,
+      usage: { input_tokens: 21, output_tokens: 34, total_tokens: 55 },
+    } as unknown as Responses.Response);
+    const client = { responses: { create } } as unknown as OpenAI;
+
+    await expect(buildWorkspaceDraft({
+      client,
+      plan: firePlan(),
+      assessment: { level: "standard", riskFlags: [], rationale: "Editable retirement assumptions" },
+      active: null,
+      requestId: "tool-contract-regression",
+    })).rejects.toMatchObject({
+      code: "PLAN_INVALID",
+      metadata: {
+        responseId: "resp_text_only",
+        responseStatus: "completed",
+        usage: { inputTokens: 21, outputTokens: 34, totalTokens: 55 },
+      },
+    });
+    expect(create).toHaveBeenCalledTimes(1);
+    expect(create.mock.calls[0]?.[0]).toMatchObject({ tool_choice: "required", parallel_tool_calls: false });
+  });
+
   it("returns the actionable SDK compiler diagnostic for the exact one-argument regression", async () => {
     const result = await quickCheckWorkspace([{ path: "src/App.tsx", content: badStateSource }, styles]);
     expect(result.passed).toBe(false);
