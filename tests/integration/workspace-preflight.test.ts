@@ -51,7 +51,7 @@ function toolResponse(id: string, name: string, args: Record<string, unknown>) {
 }
 
 describe("workspace builder preflight parity", () => {
-  it("requires a builder tool call and preserves response metadata when the contract is violated", async () => {
+  it("forces a bounded first tool and preserves response metadata when the contract is violated", async () => {
     vi.spyOn(console, "info").mockImplementation(() => undefined);
     vi.spyOn(console, "warn").mockImplementation(() => undefined);
     const create = vi.fn().mockResolvedValue({
@@ -77,8 +77,9 @@ describe("workspace builder preflight parity", () => {
         usage: { inputTokens: 21, outputTokens: 34, totalTokens: 55 },
       },
     });
-    expect(create).toHaveBeenCalledTimes(1);
-    expect(create.mock.calls[0]?.[0]).toMatchObject({ tool_choice: "required", parallel_tool_calls: false });
+    expect(create).toHaveBeenCalledTimes(2);
+    expect(create.mock.calls[0]?.[0]).toMatchObject({ tool_choice: { type: "function", name: "list_files" }, parallel_tool_calls: false });
+    expect(create.mock.calls[1]?.[0]).toMatchObject({ tool_choice: { type: "function", name: "list_files" }, previous_response_id: "resp_text_only" });
   });
 
   it("retries one explicit transient provider failure without changing model or reasoning", async () => {
@@ -100,8 +101,26 @@ describe("workspace builder preflight parity", () => {
     })).resolves.toMatchObject({ model: "gpt-5.6-terra", effort: "medium" });
 
     expect(create).toHaveBeenCalledTimes(4);
-    expect(create.mock.calls[0]?.[0]).toMatchObject({ model: "gpt-5.6-terra", reasoning: { effort: "medium" } });
-    expect(create.mock.calls[1]?.[0]).toMatchObject({ model: "gpt-5.6-terra", reasoning: { effort: "medium" } });
+    expect(create.mock.calls[0]?.[0]).toMatchObject({ model: "gpt-5.6-terra", reasoning: { effort: "medium" }, tool_choice: { type: "function", name: "list_files" } });
+    expect(create.mock.calls[1]?.[0]).toMatchObject({ model: "gpt-5.6-terra", reasoning: { effort: "medium" }, tool_choice: { type: "function", name: "list_files" } });
+  });
+
+  it("classifies an exhausted build signal as timeout even when the provider error name is minified", async () => {
+    vi.spyOn(console, "info").mockImplementation(() => undefined);
+    vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const create = vi.fn().mockRejectedValue(Object.assign(new Error("bundled abort"), { name: "g" }));
+    const client = { responses: { create } } as unknown as OpenAI;
+    const signal = AbortSignal.abort(new DOMException("The operation timed out", "TimeoutError"));
+
+    await expect(buildWorkspaceDraft({
+      client,
+      plan: firePlan(),
+      assessment: { level: "standard", riskFlags: [], rationale: "Editable retirement assumptions" },
+      active: null,
+      requestId: "minified-timeout-regression",
+      signal,
+    })).rejects.toMatchObject({ code: "PLAN_TIMEOUT" });
+    expect(create).toHaveBeenCalledTimes(1);
   });
 
   it("returns the actionable SDK compiler diagnostic for the exact one-argument regression", async () => {

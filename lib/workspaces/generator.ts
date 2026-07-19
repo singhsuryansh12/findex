@@ -169,6 +169,7 @@ type BuilderResponseOptions = {
   input: string | Responses.ResponseInput;
   previousResponseId?: string;
   signal: AbortSignal;
+  toolChoice?: "auto" | Responses.ToolChoiceFunction;
 };
 
 async function createBuilderResponse(client: OpenAI, options: BuilderResponseOptions) {
@@ -179,7 +180,7 @@ async function createBuilderResponse(client: OpenAI, options: BuilderResponseOpt
     input: options.input,
     previous_response_id: options.previousResponseId,
     tools: builderTools,
-    tool_choice: "required",
+    tool_choice: options.toolChoice ?? "auto",
     parallel_tool_calls: false,
     max_output_tokens: options.policy.maxOutputTokens,
   }, { signal: options.signal, maxRetries: 0 });
@@ -201,6 +202,7 @@ async function runBuilderPass(options: {
     try {
       return await createBuilderResponse(options.client, request);
     } catch (rawError) {
+      if (request.signal.aborted) throw normalizeModelError(request.signal.reason ?? rawError, "workspace build");
       const error = normalizeModelError(rawError, "workspace build");
       if (error.code !== "MODEL_TRANSIENT" || transientRetryUsed) throw error;
       transientRetryUsed = true;
@@ -222,8 +224,10 @@ async function runBuilderPass(options: {
     instructions: builderInstructions(options.plan, options.active, options.diagnostics),
     input: `Current editable files:\n${JSON.stringify(filesForModel(options.files))}`,
     signal: options.signal,
+    toolChoice: { type: "function", name: "list_files" },
   });
   let continuationUsed = false;
+  let toolRecoveryUsed = false;
   let finished = false;
   const checkState: BuilderCheckState = { passedForCurrentFiles: false };
   for (let turn = 0; turn < 30 && !finished; turn += 1) {
@@ -247,6 +251,18 @@ async function runBuilderPass(options: {
     }
     const calls = response.output.filter((item): item is Responses.ResponseFunctionToolCall => item.type === "function_call");
     if (!calls.length) {
+      if (!toolRecoveryUsed) {
+        toolRecoveryUsed = true;
+        response = await requestBuilderResponse({
+          policy: options.policy,
+          instructions: builderInstructions(options.plan, options.active, options.diagnostics),
+          input: "Continue the workspace build through the file tools. Inspect the current files, implement the plan, run the check, and call finish_workspace.",
+          previousResponseId: response.id,
+          signal: options.signal,
+          toolChoice: { type: "function", name: "list_files" },
+        });
+        continue;
+      }
       throw new WorkspaceModelError("PLAN_INVALID", "Findex could not finish the workspace source pass.", {
         responseId: response.id,
         responseStatus: response.status,
@@ -317,7 +333,9 @@ export async function buildWorkspaceDraft(options: {
       effort: policy.effort,
     };
   } catch (rawError) {
-    const error = normalizeModelError(rawError, "workspace build");
+    const error = signal.aborted
+      ? normalizeModelError(signal.reason ?? rawError, "workspace build")
+      : normalizeModelError(rawError, "workspace build");
     logModelFailureContext(options.requestId, options.repair ? "repair" : "building", error);
     const trace = traceFor({
       stage: options.repair ? "repair" : "building", model: policy.model, effort: policy.effort,
