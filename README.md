@@ -1,65 +1,100 @@
-# FinDex — Financial OS
+# FinDex — Generative Financial OS
 
-FinDex is a predictive, AI-native personal finance dashboard. It anticipates the next 30 days of cashflow, answers questions from a deterministic mock ledger, and can add a custom interactive React tool to the dashboard without a page reload.
+FinDex is a predictive, AI-native personal finance dashboard. It anticipates the next 30 days of cashflow, answers questions from a deterministic demo ledger, and builds or revises arbitrary finance-native React workspaces from natural-language prompts.
 
-The public demo is intentionally single-user and uses only generated US/USD data. It never asks for bank credentials, creates financial transactions, or presents model-generated calculations as financial truth.
+The public demo is intentionally anonymous and single-user. It never asks for bank credentials, moves money, executes trades, or represents model output as individualized financial advice.
 
 ![FinDex social preview](public/findex-og.png)
 
-## The four demo flows
+## Product flows
 
-1. **Rich deterministic ledger** — 12 months, 576 posted transactions, three reconciled accounts, linked transfers, recurring income and liabilities, and no empty states.
-2. **Predictive cashflow** — a tested 30-day checking projection and a protected safe-to-spend headline derived from the lowest balance in the window.
-3. **Financial Brain** — a typed SSE chat endpoint that delegates all currency calculations to read-only TypeScript tools.
-4. **Generative UI Factory** — a strict `WidgetSpec` becomes React code through the Codex CLI, passes validation, and renders in Sandpack without navigation. Local development can use the signed-in CLI directly; the hosted demo runs the same CLI-backed workflow in disposable E2B.
+1. **Deterministic ledger** — 12 months of reconciled transactions, recurring income and liabilities, and integer-cent calculations.
+2. **Predictive cashflow** — a tested 30-day projection and reserve-protected safe-to-spend amount.
+3. **Financial Brain** — grounded read-only ledger answers plus a natural-language workspace planner.
+4. **Generative workspace** — GPT-5.6 Sol assesses complexity, asks one focused clarification round when necessary, writes a multi-file React application, validates it, reviews it independently, and publishes an immutable version.
+5. **Saved library** — multiple projects, revisions, version history, restore, rename, duplicate, deletion, and generated-tool state in IndexedDB.
 
-The frozen acceptance prompt is:
+The frozen ledger prompt remains:
 
 > How much did I spend on dining out last month?
 
-FinDex answers **$366.21 across 8 Dining transactions, June 1–30, 2026**, with a deterministic comparison to May.
-
-## Product preview
-
-![FinDex populated desktop dashboard](public/dashboard-desktop.png)
-
-<img src="public/dashboard-mobile.png" alt="FinDex responsive dashboard at 390 pixels" width="390" />
+FinDex answers **$366.21 across 8 Dining transactions, June 1–30, 2026**, with provenance and a deterministic comparison to May.
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-    U["Unified Brain chat"] --> R["Next.js /api/brain · typed SSE"]
-    R --> Q["Read-only TypeScript finance tools"]
-    Q --> A["Grounded answer + provenance"]
-    R --> S["Sanitized WidgetSpec v1"]
-    S --> X["Executor · local or E2B"]
-    X --> C["Codex SDK · CLI-backed React edits"]
-    C --> V["Diff · typecheck · lint · test · bundle · policy scan"]
-    V --> P["Cross-origin Sandpack iframe"]
-    P --> W["Interactive dashboard widget"]
+    U["Natural-language prompt"] --> B["/api/brain · SSE"]
+    B --> C["Sol complexity preflight"]
+    C --> P["Sol structured workspace plan"]
+    P --> Q{"Clarification needed?"}
+    Q -->|Yes, once| U
+    Q -->|No| G["Sol controlled file-tool loop"]
+    G --> S["Local validator or Vercel Sandbox"]
+    S --> V["Policy · TypeScript · tests · bundle"]
+    V --> R["Independent Sol review + repair"]
+    R --> A["Immutable WorkspaceArtifactV2"]
+    A --> I["CSP-locked opaque iframe"]
+    I <--> K["Validated capability broker"]
+    A --> D["IndexedDB project/version library"]
 ```
 
-The layers have deliberately different responsibilities:
+There is no widget-kind enum, prompt keyword classifier, FIRE scaffold, generated-source fallback, or browser-side compiler. A failed build leaves the last published version unchanged and reports the real diagnostic.
 
-| Layer | Responsibility |
-| --- | --- |
-| Finance engine | Integer-cent aggregation, transfer exclusion, recurrence expansion, forecast, and safe-to-spend math |
-| OpenAI Responses API | Select the appropriate read-only finance tool and explain its returned result; it does not write widget code |
-| Codex SDK / CLI | Write or repair `GeneratedWidget.tsx` from a sanitized spec and filtered mock data |
-| E2B | Provide a disposable workspace, validation commands, deadline, and guaranteed cleanup |
-| Sandpack | Compile and hot-render the validated browser artifact in a cross-origin iframe with React, React DOM, `react-is`, and Recharts pinned as one compatible runtime |
-| Verified sample | Keep the demo useful during missing credentials, timeout, or validation failure; always visibly labeled |
+Detailed design references:
 
-## Stack
+- [Architecture and repository boundaries](docs/ARCHITECTURE.md)
+- [Generated workspace security](docs/SECURITY.md)
+- [Testing and release verification](docs/TESTING.md)
+- [Demo and release runbook](docs/DEMO_RUNBOOK.md)
+- [Contribution guidelines](CONTRIBUTING.md)
 
-- Next.js 16 App Router, React 19, strict TypeScript
-- Tailwind CSS v4, Radix primitives, Lucide, Recharts 3
-- OpenAI Responses API with strict function schemas
-- `@openai/codex-sdk`, which launches the bundled Codex CLI, locally or inside a versioned E2B template
-- Sandpack for lazy-loaded browser compilation
-- Zod, Vitest, Testing Library, and Playwright
-- Imported static JSON for zero-latency, Vercel-compatible demo storage
+## Repository layout
+
+```text
+app/                              Next.js UI and API entry points
+components/{brain,dashboard,workspaces}/
+                                  Feature-oriented React components
+lib/{brain,finance,workspaces}/   Contracts and domain/application services
+infrastructure/workspace-sandbox/ Pinned hosted/local build template
+scripts/                          Data, screenshot, and snapshot operations
+tests/{unit,integration,e2e,evaluations}/
+                                  Verification by boundary and cost
+docs/                             Architecture, security, testing, and runbooks
+```
+
+## Adaptive GPT-5.6 Sol policy
+
+Every AI stage uses the enforced `gpt-5.6-sol` model:
+
+| Complexity | Typical request | Reasoning | Budget | Repairs |
+| --- | --- | --- | --- | --- |
+| Simple | One view, hypothetical inputs, straightforward math | low | 90s | 1 |
+| Standard | Multiple calculations/charts, ledger data, export | medium | 160s | 2 |
+| Complex | Live data, runtime AI, persistence, migrations, multi-view/tax/portfolio logic | high | 240s | 2 |
+
+A low-effort strict preflight selects the initial tier. The server raises the tier from declared capabilities and persistence requirements, so prompt text cannot lower safeguards. A failed validation raises the next repair one effort tier, capped at high. Model, effort, rationale, escalations, token usage, validation, and timings are recorded in every artifact.
+
+## Security boundary
+
+- Sol can only list, read, write, exactly patch, or delete bounded `src/**/*.ts`, `tsx`, and CSS files, run a trusted check, and finish. It has no arbitrary shell tool.
+- Imports are limited to pinned React, ReactDOM, Recharts, Lucide, date-fns, relative source, and `@findex/workspace-sdk`.
+- Static validation rejects path escapes, dynamic imports, network APIs, browser storage, parent/document/window access, unsafe HTML, nested frames, scripts, forms, runtime evaluation, external CSS URLs, source over 256 KB, and bundles over 2 MB.
+- Hosted checks use a pinned Vercel Sandbox snapshot with `networkPolicy: "deny-all"`. OpenAI and provider credentials never enter generated files or the sandbox.
+- Published code runs as a precompiled IIFE in `<iframe sandbox="allow-scripts">`, without `allow-same-origin`, under CSP that denies connections, navigation, objects, forms, media, and external resources.
+- A one-time `MessageChannel` connects the iframe to the trusted host. All RPC payloads are validated and checked against a signed, session- and artifact-bound capability grant.
+
+## Capabilities
+
+Generated applications can request only capabilities granted by their structured plan:
+
+- demo-ledger snapshot, transactions, recurring obligations, and forecast;
+- Twelve Data symbol search, quotes, and time series;
+- cited OpenAI web research;
+- bounded Sol analysis over supplied context;
+- namespaced IndexedDB state and controlled JSON/CSV export.
+
+Provider failures remain explicit and timestamped. Mock values are never substituted or labeled as live data. Quotes cache for 60 seconds, time series for 15 minutes, and research for 30 minutes. The anonymous demo limits capability calls, expensive AI/research actions, and builds per session.
 
 ## Local setup
 
@@ -71,127 +106,98 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) and choose **Login as Demo User**. The dashboard and deterministic Brain flows work without API credentials. With live widgets disabled or unavailable, FinDex uses the labeled verified FIRE fixture.
+Open [http://localhost:3000](http://localhost:3000) and choose **Login as Demo User**. Deterministic ledger questions work without credentials. Generative builds require `OPENAI_API_KEY`; missing credentials return an explicit failure and never a sample tool.
 
-For live widget generation on your own machine, sign in once with `codex login` (or provide `CODEX_API_KEY`) and use:
-
-```bash
-WIDGET_EXECUTION_MODE=local npm run dev
-```
-
-The local executor creates an ephemeral scaffold under the operating system temp directory, invokes the CLI through the Codex SDK, validates the result, and deletes the workspace. Do not copy local Codex authentication files into a deployment.
-
-For browser tests, install Chromium once:
+Local builds use an isolated temporary directory with the same fixed TypeScript, bundle, Vitest, Chromium interaction, responsive screenshot, and review path as hosted builds:
 
 ```bash
-npx playwright install chromium
+WORKSPACE_EXECUTION_MODE=local npm run dev
 ```
+
+## Hosted sandbox setup
+
+Authenticate or link the Vercel project, then create the pinned dependency snapshot once:
+
+```bash
+npm run sandbox:snapshot
+```
+
+Copy the printed `VERCEL_SANDBOX_SNAPSHOT_ID` into the Vercel environment. Snapshot creation temporarily allows the npm registry and Playwright's Chromium CDN for the pinned install, then switches networking to deny-all, typechecks, bundles, runs Vitest and Chromium, and snapshots the verified toolchain. Every user build starts from that immutable snapshot and remains network-denied.
 
 ## Environment
 
-All credentials remain server-only. No variable uses a `NEXT_PUBLIC_` prefix.
+All credentials are server-only; none uses a `NEXT_PUBLIC_` prefix.
 
 | Variable | Purpose |
 | --- | --- |
-| `OPENAI_API_KEY` | Financial Brain Responses API credential; also used as the Codex credential when `CODEX_API_KEY` is empty |
-| `CODEX_API_KEY` | Optional dedicated credential for hosted Codex automation |
-| `E2B_API_KEY` | Creates and destroys disposable widget sandboxes |
-| `E2B_TEMPLATE` | Versioned template name or ID |
-| `OPENAI_CHAT_MODEL` | Brain model; defaults to `gpt-5.6-terra` |
-| `CODEX_MODEL` | Hosted E2B widget coding model; defaults to `gpt-5.3-codex` |
-| `CODEX_REASONING_EFFORT` | Hosted Codex effort; defaults to `high` |
-| `LOCAL_CODEX_MODEL` | Signed-in local CLI model; defaults to the faster `gpt-5.6-terra` |
-| `LOCAL_CODEX_REASONING_EFFORT` | Local CLI effort; defaults to `medium` to fit the interactive deadline |
-| `DEMO_AS_OF` | Fixture date used when regenerating data |
-| `DEMO_SEED` | Deterministic seed |
-| `DEMO_SESSION_SECRET` | HMAC secret for anonymous demo sessions |
-| `ENABLE_LIVE_WIDGETS` | Set `false` to force the verified sample path |
-| `WIDGET_EXECUTION_MODE` | `auto`, `local`, `e2b`, or `disabled`; `auto` uses configured E2B in production and local CLI in development |
+| `OPENAI_API_KEY` | Sol planning, generation, review, grounded answers, runtime AI, and cited research |
+| `OPENAI_BUILD_MODEL` | Documented enforced value `gpt-5.6-sol`; non-Sol values are ignored |
+| `TWELVE_DATA_API_KEY` | Server-side symbol, quote, and time-series data |
+| `WORKSPACE_EXECUTION_MODE` | `auto`, `local`, `vercel`, or `disabled`; auto selects Vercel in production |
+| `VERCEL_SANDBOX_SNAPSHOT_ID` | Pinned hosted validation/build image |
+| `DEMO_SESSION_SECRET` | HMAC signing for anonymous sessions, clarification tokens, and artifact grants |
+| `DEMO_AS_OF`, `DEMO_SEED` | Deterministic ledger regeneration inputs |
 
-## Data and finance invariants
+## Brain and artifact interfaces
 
-The generator accepts explicit seed and date inputs:
+`POST /api/brain` accepts bounded history, optional active-version source context, and optional clarification answers. It streams:
+
+- `assistant_delta`
+- `build_progress`
+- `tool_result`
+- `clarification_required`
+- `workspace_published`
+- `workspace_failed`
+
+`WorkspaceArtifactV2` contains project/version lineage, prompt, plan, multi-file source, compiled JS/CSS and content hash, a server signature, manifest, capability grants, state schema, validation/review results, Sol model and effort provenance, per-phase timings, token usage, repair count, and a signed broker token.
+
+`POST /api/workspace/capability` revalidates the session, artifact ID, signed grant, exact capability, rate limit, and capability-specific Zod input before touching ledger, market, web-search, or AI services.
+
+## Browser persistence
+
+Projects, immutable versions, bundles, and namespaced generated-tool state use IndexedDB. Only the active project ID stays in `localStorage`. Restore creates a new head version rather than deleting newer history. Storage usage is checked on load and after publication; the UI warns at 80% and never silently evicts user work.
+
+## Data invariants
+
+Regenerate the stable demo ledger with:
 
 ```bash
 npm run seed -- --seed findex-2026 --as-of 2026-07-19
 ```
 
-The committed `data/demo-data.json` contains stable IDs shared across accounts, merchants, categories, recurring rules, and transactions. Money is signed integer cents; dates are ISO date-only values. Each seed run asserts:
-
-- account balance reconciliation;
-- referential integrity and unique transaction IDs;
-- at least 12 monthly buckets and 450 posted transactions;
-- balanced two-sided transfers;
-- previous-calendar-month dining coverage and the frozen expected total;
-- available future cash liabilities.
-
-Transfers and credit-card payments affect cash balances but are excluded from income/spending totals. The forecast expands checking-impacting recurrences through day 30:
-
-```text
-projected balance = current checking + cumulative known income − cumulative cash liabilities
-daily safe to spend = max(0, projected balance − $1,500 reserve)
-headline safe to spend = minimum daily safe-to-spend value across the 30-day window
-```
-
-## Financial Brain contract
-
-`POST /api/brain` accepts a signed anonymous session and bounded history, then streams:
-
-- `status`: `thinking`, `querying`, `sandboxing`, `coding`, `validating`, `rendering`
-- `text_delta`
-- `tool_result` with provenance
-- `widget`
-- recoverable `error`
-
-Strict read-only tools are `get_spending_summary`, `compare_spending_periods`, `list_recurring_obligations`, `get_cashflow_forecast`, `get_financial_snapshot`, and `request_widget`. Relative time resolves against the fixture’s `2026-07-19` as-of date in `America/New_York`; “last month” is the previous calendar month.
-
-Public controls cap prompts at 500 characters, Brain turns at 25, and widget generations at three per signed anonymous session.
-
-## Generative UI safety boundary
-
-The route converts build intent into `WidgetSpec v1`; raw conversation text is not sent to the coding agent. The data envelope contains aggregates, forecast points, recurring obligations, and at most 100 purpose-filtered mock transactions. It strips account IDs and unrelated fields.
-
-Codex can edit only `GeneratedWidget.tsx` and its optional test. Artifacts may import React, Recharts, and `./widget-kit`. Validation rejects changed or newly created files outside the allowlist, source over 25 KB, invalid TypeScript, lint/test/bundle failures, network APIs, dynamic imports, `eval`, `Function`, parent-window access, unsafe HTML, scripts, and iframes. One repair turn is allowed. The route has a 120-second cap, generation has a 90-second deadline, and the E2B sandbox or local temporary workspace is destroyed in `finally` for success, failure, abort, and timeout.
-
-The Codex SDK is not a second code-generation implementation: it launches the bundled `codex` CLI and exchanges structured JSONL events with it. The finance chat remains on the Responses API because its job is strict function calling over deterministic tools, while Codex is reserved for coding work.
-
-### Build the E2B template
-
-Authenticate E2B, set `E2B_API_KEY`, then run:
-
-```bash
-E2B_TEMPLATE=findex-codex-widget:v2 npm run e2b:template
-```
-
-The template extends E2B’s Codex image, installs the exact React/TypeScript/test toolchain (including a React-matched `react-is` peer), and commits a clean Git baseline. Set `WIDGET_EXECUTION_MODE=e2b`, the resulting template name or ID, `E2B_API_KEY`, and a server-only Codex credential in Vercel.
+Money is signed integer cents and dates are ISO date-only values. The seed verifies balance reconciliation, references, unique transactions, at least 12 monthly buckets and 450 posted transactions, balanced transfers, calendar-month dining coverage, and future cash liabilities. Transfers affect balances but are excluded from spending/income totals.
 
 ## Verification
 
 ```bash
 npm run typecheck
-npm run lint
 npm test
-npm run test:e2e
+npm run lint
 npm run build
+npm run test:e2e
+npm run test:local-sandbox
+npm run verify:local
 ```
 
-The suite covers seed and reference integrity, integer cents, transfer exclusion, previous calendar months, leap-year/month-end recurrence, forecast deltas, reserve protection, exact Brain tool mapping, bounded prompts, filtered widget data, banned artifact APIs, labeled fallback behavior, desktop login, 390px layout, streamed provenance, no-reload insertion, and artifact persistence.
+The regular suite covers finance invariants, adaptive effort floors, multi-file policy and bundling, adversarial APIs, signed grants, broker authorization, missing-provider states, IndexedDB versions/state, explicit no-fallback behavior, desktop/mobile layout, iframe isolation, interaction, and reload persistence.
 
-Live OpenAI/E2B smoke tests are intentionally separate because they consume external services. Use the checklist in [docs/DEMO_RUNBOOK.md](docs/DEMO_RUNBOOK.md) before the final deployment.
+The opt-in live corpus contains more than 40 diverse, ambiguous, out-of-scope, and adversarial prompts. It plans all prompts and builds a configurable sample (three by default):
 
-## Vercel deployment
+```bash
+RUN_LIVE_GENERATION_EVALS=1 LIVE_EVAL_BUILD_LIMIT=3 npm run test:gen-eval
+```
 
-1. Import the public repository into Vercel.
-2. Add every value from `.env.example` in Project Settings; replace the session secret and use `WIDGET_EXECUTION_MODE=e2b` for live hosted generation.
-3. Use Node.js 22 and the standard `npm run build` command.
-4. Confirm the selected Vercel plan permits the route’s `maxDuration = 120` requirement.
-5. Run the deployed smoke checks, then freeze the commit at least two hours before judging.
+The JSON report is written to ignored `test-results/generative-eval.json`.
 
-Static JSON is intentional: Vercel functions do not provide durable local SQLite storage. Successful artifacts persist only in versioned browser `localStorage`; keys and sandbox identifiers never do.
+With release credentials configured, smoke-test OpenAI runtime analysis, normalized Twelve Data, and the full network-denied Vercel Sandbox path:
 
-## Limits
+```bash
+RUN_LIVE_PROVIDER_EVALS=1 npm run test:live-providers
+```
 
-FinDex is a hackathon demo, not a financial institution or financial-advice system. It has no real authentication, bank connection, multi-user database, transaction capability, arbitrary backend execution, or production handling of personal financial data. Real-data production use would require audited schemas, stronger isolation, consent and deletion flows, durable encrypted storage, and a separately hosted network-denied renderer.
+## Deployment limits
+
+Use Node.js 22 and a Vercel plan supporting the 300-second Brain route. The app is an anonymous demo, not a bank or adviser: it has no real authentication, bank connection, cloud collaboration, trading, money movement, or production handling of personal financial data.
 
 ## License
 

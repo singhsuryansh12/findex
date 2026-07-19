@@ -2,46 +2,50 @@
 
 ## Freeze checklist
 
-- [ ] Public repository is accessible in a signed-out browser.
-- [ ] Vercel deployment is public and uses the frozen commit.
-- [ ] `npm run validate` passes from a clean checkout.
-- [ ] `npm run test:e2e` passes after `npx playwright install chromium`.
-- [ ] No browser console errors on desktop or a 390×844 viewport.
-- [ ] `OPENAI_API_KEY`, `E2B_API_KEY`, `E2B_TEMPLATE`, `WIDGET_EXECUTION_MODE=e2b`, and `DEMO_SESSION_SECRET` are present in Vercel. Add `CODEX_API_KEY` when widget generation uses a separate credential.
-- [ ] No secret is prefixed `NEXT_PUBLIC_` or included in a client bundle.
-- [ ] Live sandbox generation completes in under 90 seconds.
-- [ ] E2B shows no orphaned sandboxes after success, retry, failure, abort, and timeout checks.
-- [ ] Fallback is visibly labeled “Verified sample” with a working Retry control.
+- [ ] `npm run verify:local` passes from a clean checkout.
+- [ ] No console errors or horizontal overflow on desktop and 390×844.
+- [ ] `OPENAI_API_KEY`, `TWELVE_DATA_API_KEY`, `VERCEL_SANDBOX_SNAPSHOT_ID`, `WORKSPACE_EXECUTION_MODE=vercel`, and a strong `DEMO_SESSION_SECRET` are configured.
+- [ ] No credential uses a `NEXT_PUBLIC_` prefix or appears in generated source, bundles, sandbox environment, or iframe messages.
+- [ ] Vercel Sandbox shows deny-all networking and no running sandbox after success, repair, failure, abort, and timeout.
+- [ ] A missing OpenAI/provider key produces a clear unavailable state and never publishes a fallback calculator.
+- [ ] The deployed Brain route supports the 300-second maximum duration.
 
-## Two-minute judging path
+## Demo path
 
-1. Open the public URL in a clean browser profile.
-2. Choose **Login as Demo User**. Call out the frozen “As of Jul 19” label and populated dashboard.
-3. Hover or focus the forecast and point out the Jul 20 card payment, Jul 24 cash trough, reserve line, and Aug 1 income.
-4. Ask: **How much did I spend on dining out last month?**
-5. Show the exact `$366.21`, 8-transaction, June 1–30 provenance chip. TypeScript computed the result; the model selected the tool and explained it.
-6. Ask: **Build me a FIRE calculator.**
-7. Narrate sandboxing, coding, validation, and rendering stages.
-8. Show the “Built live by Codex” badge, source view, validation results, and unchanged URL.
-9. Adjust monthly contribution, retirement age, and return rate. Show instant chart/stat recomputation.
-10. Resize to mobile or use the prepared 390px device view; open the full-screen Brain sheet.
+1. Login as the demo user and show the populated ledger and 30-day forecast.
+2. Ask **How much did I spend on dining out last month?** and show `$366.21`, eight transactions, and the June provenance chip.
+3. Ask for a custom workspace unrelated to retirement, such as a cash-versus-financing decision lab.
+4. Narrate complexity assessment, structured planning, coding, checks, independent review, and immutable publication.
+5. Change every generated input and show relevant outputs update without URL navigation.
+6. Prompt a revision such as **Add an opportunity-cost chart and CSV export**; verify version 2 retains version 1 in history.
+7. Create another workspace, switch between projects, rename, duplicate, restore a version, and reload.
+8. Demonstrate a live-data workspace with source and freshness, then show its explicit unavailable state with the provider key disabled.
+9. Open the generated source/plan, validation score, effort, complexity rationale, capabilities, and educational disclosure.
+10. Repeat the core path at 390px and confirm the generated iframe and Brain remain usable.
 
-## Live service smoke test
+## Security smoke checks
 
-Run once locally and once against the deployed URL before freeze:
+- Request `fetch`, local storage, parent DOM access, an iframe, a new npm package, environment secrets, or arbitrary shell commands; the build must fail policy checks.
+- Attempt to invoke an ungranted capability or reuse an artifact grant with another artifact ID; the broker must return 403.
+- Force invalid TypeScript and confirm repair escalates effort one tier before publication.
+- Force final review failure or timeout and confirm the prior workspace version remains active.
+- Inspect the generated iframe: its sandbox attribute is exactly `allow-scripts`, its CSP has `connect-src 'none'`, and its origin is opaque.
 
-- Brain generic query uses `OPENAI_CHAT_MODEL` and returns a deterministic tool result.
-- FIRE build uses `CODEX_MODEL`, edits only the allowlisted files, and returns `mode: live`.
-- Validation report contains typecheck, lint, render/interaction test, bundle, and host policy scan.
-- Generated source has no account IDs or unrelated transactions.
-- Refresh preserves the artifact; Reset Demo removes it.
-- The Sandpack frame renders “FIRE runway” with no dependency-resolution overlay, and changing a range control updates immediately.
-- Disable `ENABLE_LIVE_WIDGETS` and verify the labeled sample plus Retry path.
-- Force an invalid artifact or timeout in a non-production branch and verify the sample is returned and the sandbox is killed.
+## Live evaluation
+
+Run before freezing a release:
+
+```bash
+npm run test:local-sandbox
+RUN_LIVE_GENERATION_EVALS=1 LIVE_EVAL_BUILD_LIMIT=5 npm run test:gen-eval
+RUN_LIVE_PROVIDER_EVALS=1 npm run test:live-providers
+```
+
+Review `test-results/generative-eval.json` for relevance, disclosed assumptions, correct capability grants, review scores of at least 90, and zero FIRE/unrelated fallback leakage.
 
 ## Recovery
 
-- **Financial Brain model unavailable:** deterministic demo prompts remain functional; use `ENABLE_LIVE_WIDGETS=false` only when the Codex generation path is also unavailable.
-- **E2B unavailable:** the route catches failure, kills any created sandbox, and returns the labeled sample.
-- **Slow venue network:** preload the public page and keep a second clean tab ready. Do not represent the sample as live output.
-- **Deployment regression:** roll Vercel back to the frozen deployment; do not change finance fixture values during judging.
+- **OpenAI unavailable:** deterministic ledger prompts remain functional; generative requests report unavailable without changing the active workspace.
+- **Vercel Sandbox unavailable:** the build fails safely and retains the last published version. Do not switch production to the local executor.
+- **Twelve Data unavailable:** market tools show unavailable/stale status; they never silently use demo prices.
+- **Deployment regression:** roll back to the last verified deployment and preserve browser-stored workspaces.
