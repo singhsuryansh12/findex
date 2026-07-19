@@ -6,7 +6,7 @@ type BrandLogoProps = {
 
 export function BrandLogo({ compact = false, small = false, className = "" }: BrandLogoProps) {
   return (
-    <span className={`brand-logo ${small ? "brand-logo-small" : ""} ${className}`.trim()} aria-label="FinDex">
+    <span className={`brand-logo ${small ? "brand-logo-small" : ""} ${className}`.trim()} role="img" aria-label="FinDex">
       <svg className="brand-symbol" viewBox="0 0 40 40" role="img" aria-hidden="true">
         <rect width="40" height="40" rx="12" fill="currentColor" />
         <path d="M12.5 29V11.5H27.5" className="brand-monogram" />

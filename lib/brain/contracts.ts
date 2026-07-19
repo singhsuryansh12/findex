@@ -15,6 +15,18 @@ export const brainRequestSchema = z.object({
 
 export type BrainRequest = z.infer<typeof brainRequestSchema>;
 
+export type BrainInsightCard = {
+  kind: "spending" | "cashflow" | "portfolio" | "decision" | "recurring";
+  title: string;
+  conclusion: string;
+  status?: "covered" | "tight" | "not_covered";
+  metrics: Array<{ label: string; value: string; tone?: "positive" | "warning" | "neutral" }>;
+  provenance: string;
+  assumptions: string[];
+  relatedHref: "/demo/spending" | "/demo/portfolio" | "/demo/cash-flow";
+  relatedLabel: string;
+};
+
 export type BrainEvent =
   | { type: "assistant_delta"; delta: string }
   | {
@@ -24,6 +36,7 @@ export type BrainEvent =
     complexity?: z.infer<typeof buildComplexityLevelSchema>;
   }
   | { type: "tool_result"; tool: string; summary: string; provenance: string }
+  | { type: "insight_card"; card: BrainInsightCard }
   | { type: "clarification_required"; questions: string[]; token: string; planTitle: string }
   | { type: "workspace_published"; artifact: WorkspaceArtifactV2 }
   | { type: "workspace_failed"; message: string; recoverable: boolean }

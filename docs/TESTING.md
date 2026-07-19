@@ -4,11 +4,11 @@
 
 | Suite | Command | Coverage |
 | --- | --- | --- |
-| Unit | `npm run test:unit` | Finance invariants, schemas, complexity floors, policy, signing, provider normalization, quotas, RPC inputs |
+| Unit | `npm run test:unit` | Ledger/portfolio reconciliation, cash-flow and purchase scenarios, schemas, complexity floors, policy, signing, provider normalization, quotas, RPC inputs |
 | Integration | `npm run test:integration` | Brain SSE, capability authorization, immutable IndexedDB versions, state, explicit failure behavior |
 | Standard validation | `npm run validate` | TypeScript, all non-live Vitest suites, ESLint, production Next.js build |
 | Local sandbox parity | `npm run test:local-sandbox` | Fixed build commands, Vitest, Chromium controls, screenshots, responsive output |
-| End-to-end | `npm run test:e2e` | Desktop/mobile dashboard, Brain, failure state, iframe isolation, persistence, version UI, reload |
+| End-to-end | `npm run test:e2e` | Brain-first login, routed Spending/Portfolio/Cash Flow journeys, filters, recurring calendar, charts and table alternatives, decision scenarios, axe scans, reflow, iframe isolation, persistence, version UI, refresh/back navigation |
 | Sol corpus | `RUN_LIVE_GENERATION_EVALS=1 npm run test:gen-eval` | More than 40 varied, ambiguous, revision, out-of-scope, and adversarial prompts |
 | Live providers | `RUN_LIVE_PROVIDER_EVALS=1 npm run test:live-providers` | OpenAI runtime analysis, normalized Twelve Data, network-denied Vercel Sandbox |
 
@@ -26,6 +26,7 @@ Do not silently skip provider checks during a production release. If credentials
 - Every planned input must be accessible and materially change non-control output.
 - Every planned output must be visible at desktop or mobile sizes.
 - No console error or document overflow is allowed.
+- Serious/critical axe violations, missing visible focus, missing semantic table/chart alternatives, and 390px/200%-equivalent reflow failures are release blockers.
 - No unrelated fallback, fabricated live value, uncited research claim, or hidden credential is allowed.
 - Independent review must score at least 90 and pass every acceptance criterion.
 

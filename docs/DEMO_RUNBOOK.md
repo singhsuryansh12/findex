@@ -12,16 +12,16 @@
 
 ## Demo path
 
-1. Login as the demo user and show the populated ledger and 30-day forecast.
-2. Ask **How much did I spend on dining out last month?** and show `$366.21`, eight transactions, and the June provenance chip.
-3. Ask for a custom workspace unrelated to retirement, such as a cash-versus-financing decision lab.
-4. Narrate complexity assessment, structured planning, coding, checks, independent review, and immutable publication.
-5. Change every generated input and show relevant outputs update without URL navigation.
-6. Prompt a revision such as **Add an opportunity-cost chart and CSV export**; verify version 2 retains version 1 in history.
-7. Create another workspace, switch between projects, rename, duplicate, restore a version, and reload.
-8. Demonstrate a live-data workspace with source and freshness, then show its explicit unavailable state with the provider key disabled.
-9. Open the generated source/plan, validation score, effort, complexity rationale, capabilities, and educational disclosure.
-10. Repeat the core path at 390px and confirm the generated iframe and Brain remain usable.
+1. Login as the demo user and confirm `/demo/brain` opens with one composer, four prompts, three financial glances, and no chart overload.
+2. Ask **How much did I spend on dining out last month?** and show `$366.21`, eight transactions, June provenance, calculation notes, and the Spending deep link.
+3. Open Spending, apply the last-calendar-month + Dining filters, and reconcile the `$366.21` summary with eight displayed rows. Show Recurring in both list and calendar layouts.
+4. Open Portfolio and reconcile `$145,450` of investments, `$180,557.72` net worth, the 60/20/15/5 synthetic target comparison, account cards, contributions, and holdings.
+5. Open Cash Flow, switch between 30/60/90 days, inspect assumptions and the table alternative, and expand the checking runway.
+6. Return to the Brain and test a car on `2026-08-15` with `$15,000` upfront and `$650/month`; show the base-versus-scenario **Not covered** result.
+7. Ask for a custom workspace unrelated to retirement, such as a cash-versus-financing decision lab, and narrate assessment, planning, checks, review, and publication.
+8. Open **My tools**, change generated inputs, revise the tool, verify version history, rename, duplicate, restore, and reload.
+9. Demonstrate a live-data workspace with source and freshness, then show its explicit unavailable state with the provider key disabled.
+10. Repeat the core path at 390px and confirm the four-item bottom navigation, tables/cards, generated iframe, and Brain remain usable without horizontal overflow.
 
 ## Security smoke checks
 

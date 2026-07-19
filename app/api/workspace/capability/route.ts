@@ -1,8 +1,9 @@
 import OpenAI from "openai";
 import { z } from "zod";
-import { demoData, getFilteredTransactions, getFinancialSnapshot, getForecast } from "@/lib/finance/engine";
+import { demoData, getCashFlowForecast, getFilteredTransactions, getFinancialSnapshot, getForecast, getPortfolioSnapshot } from "@/lib/finance/engine";
 import {
   analyzeInputSchema,
+  cashFlowInputSchema,
   emptyCapabilityInputSchema,
   marketSearchInputSchema,
   parseCapabilityInput,
@@ -98,6 +99,14 @@ async function executeCapability(capability: z.infer<typeof capabilityNameSchema
   if (capability === "ledger.forecast") {
     emptyCapabilityInputSchema.parse(input);
     return { result: getForecast(), source: "FinDex deterministic forecast", freshAt: ledgerFreshAt };
+  }
+  if (capability === "ledger.portfolio") {
+    emptyCapabilityInputSchema.parse(input);
+    return { result: getPortfolioSnapshot(), source: "FinDex deterministic demo portfolio", freshAt: ledgerFreshAt };
+  }
+  if (capability === "ledger.cashflow") {
+    const parsed = cashFlowInputSchema.parse(input);
+    return { result: getCashFlowForecast({ days: Number(parsed.days) as 30 | 60 | 90 }), source: "FinDex deterministic cash-flow model", freshAt: ledgerFreshAt };
   }
   if (capability === "ledger.recurring") {
     emptyCapabilityInputSchema.parse(input);

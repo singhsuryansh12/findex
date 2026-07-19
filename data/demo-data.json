@@ -1,12 +1,13 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "metadata": {
     "seed": "findex-2026",
     "asOfDate": "2026-07-19",
     "generatedAt": "2026-07-19T16:00:00.000Z",
     "currency": "USD",
     "timezone": "America/New_York",
-    "expectedDiningLastMonthCents": 36621
+    "expectedDiningLastMonthCents": 36621,
+    "expectedNetWorthCents": 18055772
   },
   "persona": {
     "id": "demo-jordan",
@@ -16,7 +17,9 @@
     "role": "Product lead",
     "location": "Brooklyn, NY",
     "age": 30,
-    "reserveFloorCents": 150000
+    "reserveFloorCents": 150000,
+    "grossAnnualIncomeCents": 10000000,
+    "monthlyTakeHomeCents": 656000
   },
   "accounts": [
     {
@@ -45,6 +48,298 @@
       "mask": "9008",
       "openingBalanceCents": -85000,
       "currentBalanceCents": -204744
+    }
+  ],
+  "investmentAccounts": [
+    {
+      "id": "fidelity-401k",
+      "name": "Northstar 401(k)",
+      "institution": "Fidelity",
+      "type": "401k",
+      "taxTreatment": "tax_deferred",
+      "currentValueCents": 8642000,
+      "description": "Employer retirement plan"
+    },
+    {
+      "id": "vanguard-roth",
+      "name": "Roth IRA",
+      "institution": "Vanguard",
+      "type": "roth_ira",
+      "taxTreatment": "roth",
+      "currentValueCents": 2836000,
+      "description": "After-tax retirement account"
+    },
+    {
+      "id": "schwab-taxable",
+      "name": "Individual brokerage",
+      "institution": "Schwab",
+      "type": "brokerage",
+      "taxTreatment": "taxable",
+      "currentValueCents": 2174000,
+      "description": "Flexible long-term investing"
+    },
+    {
+      "id": "fidelity-hsa",
+      "name": "Health savings account",
+      "institution": "Fidelity",
+      "type": "hsa",
+      "taxTreatment": "hsa",
+      "currentValueCents": 893000,
+      "description": "Invested health savings"
+    }
+  ],
+  "holdings": [
+    {
+      "id": "401k-fxaix",
+      "accountId": "fidelity-401k",
+      "symbol": "FXAIX",
+      "name": "Fidelity 500 Index",
+      "assetClass": "us_equity",
+      "marketValueCents": 5185200
+    },
+    {
+      "id": "401k-ftihx",
+      "accountId": "fidelity-401k",
+      "symbol": "FTIHX",
+      "name": "Fidelity Total International Index",
+      "assetClass": "international_equity",
+      "marketValueCents": 1728400
+    },
+    {
+      "id": "401k-fxnax",
+      "accountId": "fidelity-401k",
+      "symbol": "FXNAX",
+      "name": "Fidelity U.S. Bond Index",
+      "assetClass": "bonds",
+      "marketValueCents": 1296300
+    },
+    {
+      "id": "401k-cash",
+      "accountId": "fidelity-401k",
+      "symbol": "SPAXX",
+      "name": "Government money market",
+      "assetClass": "cash",
+      "marketValueCents": 432100
+    },
+    {
+      "id": "roth-vti",
+      "accountId": "vanguard-roth",
+      "symbol": "VTI",
+      "name": "Vanguard Total Stock Market ETF",
+      "assetClass": "us_equity",
+      "marketValueCents": 1701600
+    },
+    {
+      "id": "roth-vxus",
+      "accountId": "vanguard-roth",
+      "symbol": "VXUS",
+      "name": "Vanguard Total International Stock ETF",
+      "assetClass": "international_equity",
+      "marketValueCents": 567200
+    },
+    {
+      "id": "roth-bnd",
+      "accountId": "vanguard-roth",
+      "symbol": "BND",
+      "name": "Vanguard Total Bond Market ETF",
+      "assetClass": "bonds",
+      "marketValueCents": 283600
+    },
+    {
+      "id": "roth-qqqm",
+      "accountId": "vanguard-roth",
+      "symbol": "QQQM",
+      "name": "Invesco NASDAQ 100 ETF",
+      "assetClass": "us_equity",
+      "marketValueCents": 283600
+    },
+    {
+      "id": "taxable-vti",
+      "accountId": "schwab-taxable",
+      "symbol": "VTI",
+      "name": "Vanguard Total Stock Market ETF",
+      "assetClass": "us_equity",
+      "marketValueCents": 1087000
+    },
+    {
+      "id": "taxable-vxus",
+      "accountId": "schwab-taxable",
+      "symbol": "VXUS",
+      "name": "Vanguard Total International Stock ETF",
+      "assetClass": "international_equity",
+      "marketValueCents": 434800
+    },
+    {
+      "id": "taxable-bnd",
+      "accountId": "schwab-taxable",
+      "symbol": "BND",
+      "name": "Vanguard Total Bond Market ETF",
+      "assetClass": "bonds",
+      "marketValueCents": 217400
+    },
+    {
+      "id": "taxable-sgov",
+      "accountId": "schwab-taxable",
+      "symbol": "SGOV",
+      "name": "iShares 0-3 Month Treasury Bond ETF",
+      "assetClass": "cash",
+      "marketValueCents": 434800
+    },
+    {
+      "id": "hsa-fzrox",
+      "accountId": "fidelity-hsa",
+      "symbol": "FZROX",
+      "name": "Fidelity ZERO Total Market Index",
+      "assetClass": "us_equity",
+      "marketValueCents": 625100
+    },
+    {
+      "id": "hsa-fzilx",
+      "accountId": "fidelity-hsa",
+      "symbol": "FZILX",
+      "name": "Fidelity ZERO International Index",
+      "assetClass": "international_equity",
+      "marketValueCents": 178600
+    },
+    {
+      "id": "hsa-cash",
+      "accountId": "fidelity-hsa",
+      "symbol": "CASH",
+      "name": "HSA cash reserve",
+      "assetClass": "cash",
+      "marketValueCents": 89300
+    }
+  ],
+  "portfolioHistory": [
+    {
+      "month": "2025-08",
+      "valueCents": 11200000,
+      "cumulativeContributionsCents": 0
+    },
+    {
+      "month": "2025-09",
+      "valueCents": 11376000,
+      "cumulativeContributionsCents": 150000
+    },
+    {
+      "month": "2025-10",
+      "valueCents": 11551000,
+      "cumulativeContributionsCents": 300000
+    },
+    {
+      "month": "2025-11",
+      "valueCents": 11804000,
+      "cumulativeContributionsCents": 450000
+    },
+    {
+      "month": "2025-12",
+      "valueCents": 11972000,
+      "cumulativeContributionsCents": 600000
+    },
+    {
+      "month": "2026-01",
+      "valueCents": 12225000,
+      "cumulativeContributionsCents": 760000
+    },
+    {
+      "month": "2026-02",
+      "valueCents": 12371000,
+      "cumulativeContributionsCents": 920000
+    },
+    {
+      "month": "2026-03",
+      "valueCents": 12586000,
+      "cumulativeContributionsCents": 1080000
+    },
+    {
+      "month": "2026-04",
+      "valueCents": 12781000,
+      "cumulativeContributionsCents": 1240000
+    },
+    {
+      "month": "2026-05",
+      "valueCents": 13205000,
+      "cumulativeContributionsCents": 1420000
+    },
+    {
+      "month": "2026-06",
+      "valueCents": 13852000,
+      "cumulativeContributionsCents": 1600000
+    },
+    {
+      "month": "2026-07",
+      "valueCents": 14545000,
+      "cumulativeContributionsCents": 1780000
+    }
+  ],
+  "investmentContributions": [
+    {
+      "id": "employee-401k",
+      "accountId": "fidelity-401k",
+      "name": "Employee 401(k)",
+      "annualPlanCents": 1200000,
+      "cadence": "semi_monthly",
+      "amountCents": 50000,
+      "source": "payroll"
+    },
+    {
+      "id": "employer-match",
+      "accountId": "fidelity-401k",
+      "name": "Employer match",
+      "annualPlanCents": 400000,
+      "cadence": "semi_monthly",
+      "amountCents": 16667,
+      "source": "employer"
+    },
+    {
+      "id": "roth-contribution",
+      "accountId": "vanguard-roth",
+      "name": "Roth IRA auto-invest",
+      "annualPlanCents": 360000,
+      "cadence": "monthly",
+      "amountCents": 30000,
+      "source": "checking"
+    },
+    {
+      "id": "hsa-contribution",
+      "accountId": "fidelity-hsa",
+      "name": "HSA payroll contribution",
+      "annualPlanCents": 180000,
+      "cadence": "monthly",
+      "amountCents": 15000,
+      "source": "payroll"
+    },
+    {
+      "id": "taxable-contribution",
+      "accountId": "schwab-taxable",
+      "name": "Brokerage auto-invest",
+      "annualPlanCents": 300000,
+      "cadence": "monthly",
+      "amountCents": 25000,
+      "source": "checking"
+    }
+  ],
+  "taxLimitReferences": [
+    {
+      "id": "401k",
+      "year": 2026,
+      "limitCents": 2450000,
+      "label": "401(k) employee deferral limit",
+      "sourceUrl": "https://www.irs.gov/retirement-plans/plan-participant-employee/retirement-topics-401k-and-profit-sharing-plan-contribution-limits"
+    },
+    {
+      "id": "ira",
+      "year": 2026,
+      "limitCents": 750000,
+      "label": "Traditional and Roth IRA combined limit",
+      "sourceUrl": "https://www.irs.gov/retirement-plans/plan-participant-employee/retirement-topics-ira-contribution-limits"
+    },
+    {
+      "id": "hsa_self",
+      "year": 2026,
+      "limitCents": 440000,
+      "label": "HSA self-only contribution limit",
+      "sourceUrl": "https://www.irs.gov/irb/2025-21_IRB"
     }
   ],
   "categories": [

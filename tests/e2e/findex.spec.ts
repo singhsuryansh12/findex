@@ -1,11 +1,13 @@
 import { expect, test } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
 import { bundleWorkspace } from "@/lib/workspaces/bundle";
 
 async function enterDemo(page: import("@playwright/test").Page) {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: /Money,/ })).toBeVisible();
   await page.getByRole("button", { name: "Login as Demo User" }).click();
-  await expect(page.getByRole("heading", { name: /Morning, Jordan/ })).toBeVisible();
+  await expect(page).toHaveURL(/\/demo\/brain$/);
+  await expect(page.getByRole("heading", { name: "Ask about your money, or test a decision." })).toBeVisible();
 }
 
 async function seedWorkspace(page: import("@playwright/test").Page) {
@@ -64,18 +66,99 @@ export default function App(){const [amount,setAmount]=useState(50000);return <m
   await page.reload();
 }
 
-test("demo login reaches the populated predictive dashboard", async ({ page }) => {
+test("demo login lands on a calm Brain-first home", async ({ page }, testInfo) => {
   await enterDemo(page);
-  await expect(page.getByText("Safe to spend", { exact: true }).first()).toBeVisible();
-  await expect(page.getByText("$7,309")).toBeVisible();
-  await expect(page.getByLabel("Thirty day projected balance and safe-to-spend chart")).toBeVisible();
-  await expect(page.getByText("Latest transactions")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Open Financial Brain" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Financial Brain" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Financial glances" }).getByRole("button")).toHaveCount(3);
+  await expect(page.getByRole("button", { name: "Can I afford a car next month?" })).toBeVisible();
+  await expect(page.locator(".recharts-wrapper")).toHaveCount(0);
+  if (testInfo.project.name === "mobile-390") {
+    await expect(page.getByRole("navigation", { name: "Mobile navigation" }).getByRole("button")).toHaveCount(4);
+  } else {
+    await expect(page.getByRole("complementary", { name: "Primary navigation" })).toBeVisible();
+  }
 });
 
-test("Financial Brain streams the exact grounded dining answer", async ({ page }, testInfo) => {
+test("route navigation, refresh, and browser history preserve each money view", async ({ page }) => {
   await enterDemo(page);
-  if (testInfo.project.name === "mobile-390") await page.getByRole("button", { name: "Ask FinDex" }).click();
+  await page.getByRole("button", { name: /^Spending/ }).click();
+  await expect(page).toHaveURL(/\/demo\/spending$/);
+  await expect(page.getByRole("heading", { name: "See where your money went." })).toBeVisible();
+  await page.getByRole("button", { name: /^Portfolio/ }).click();
+  await expect(page.getByRole("heading", { name: "Your long-term money, in one picture." })).toBeVisible();
+  await page.reload();
+  await expect(page).toHaveURL(/\/demo\/portfolio$/);
+  await expect(page.getByText("$145,450", { exact: true }).first()).toBeVisible();
+  await page.goBack();
+  await expect(page).toHaveURL(/\/demo\/spending$/);
+  await page.getByRole("button", { name: /^Cash flow/ }).click();
+  await expect(page.getByRole("heading", { name: "Know what your money can handle next." })).toBeVisible();
+});
+
+test("transaction filters and totals stay reconciled with displayed rows", async ({ page }) => {
+  await enterDemo(page);
+  await page.goto("/demo/spending");
+  await page.getByLabel("Date preset").selectOption("last_month");
+  await page.getByLabel("Category").selectOption("dining");
+  await page.getByLabel("Type").selectOption("expense");
+  const summary = page.getByRole("region", { name: "Filtered transaction summary" });
+  await expect(summary.getByText("$366.21", { exact: true })).toBeVisible();
+  await expect(summary.getByText("8", { exact: true })).toBeVisible();
+  const table = page.getByRole("table", { name: "Transactions matching the selected filters" });
+  await expect(table.locator("tbody tr")).toHaveCount(8);
+  await expect(table.locator("tbody tr")).toContainText(["Dining", "Dining", "Dining", "Dining", "Dining", "Dining", "Dining", "Dining"]);
+  await page.getByRole("button", { name: "Reset", exact: true }).click();
+  await page.getByLabel("Search transactions").fill("Sweetgreen");
+  await expect(table.locator("tbody tr").first()).toContainText("Sweetgreen");
+  await page.getByLabel("Account").selectOption("checking");
+  await page.getByLabel("Sort").selectOption("amount_high");
+  await page.getByRole("button", { name: "Recurring only" }).click();
+  await expect(page.getByRole("button", { name: "Recurring only" })).toHaveAttribute("aria-pressed", "true");
+});
+
+test("recurring activity provides distinct list and calendar alternatives", async ({ page }) => {
+  await enterDemo(page);
+  await page.goto("/demo/spending");
+  await page.getByRole("tab", { name: "Recurring" }).click();
+  await expect(page.getByText("Bills, subscriptions, and investing")).toBeVisible();
+  await expect(page.getByText("$79.97", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Calendar" }).click();
+  await expect(page.getByLabel("Next 30 days recurring calendar")).toBeVisible();
+  await expect(page.getByText("Roth IRA auto-invest")).toBeVisible();
+});
+
+test("portfolio totals, allocation, account cards, and holdings reconcile", async ({ page }) => {
+  await enterDemo(page);
+  await page.goto("/demo/portfolio");
+  await expect(page.getByText("$145,450", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("$180,557.72", { exact: true })).toBeVisible();
+  for (const amount of ["$86,420", "$28,360", "$21,740", "$8,930"]) await expect(page.getByText(amount, { exact: true })).toBeVisible();
+  for (const allocation of ["61.1% · target 60%", "20.0% · target 20%", "12.4% · target 15%", "6.6% · target 5%"]) await expect(page.getByText(allocation, { exact: true })).toBeVisible();
+  const table = page.getByRole("table", { name: "Synthetic investment holdings as of July 19, 2026" });
+  const total = await table.locator("tbody tr td:last-child").allTextContents().then((values) => values.reduce((sum, value) => sum + Number(value.replace(/[$,]/g, "")), 0));
+  expect(total).toBe(145_450);
+  await page.getByLabel("Sort").selectOption("asset");
+  await expect(table.locator("tbody tr").first()).toContainText("FXNAX");
+});
+
+test("cash-flow horizons update details without double-counting payroll", async ({ page }) => {
+  await enterDemo(page);
+  await page.goto("/demo/cash-flow");
+  const summary = page.getByRole("region", { name: "Cash flow summary" });
+  await expect(summary.getByText("$6,560", { exact: true })).toBeVisible();
+  await expect(summary.getByText("$858", { exact: true })).toBeVisible();
+  await expect(page.getByRole("img", { name: "90 day monthly income, outflow, and investing projection" })).toBeVisible();
+  await page.getByRole("button", { name: "30 days" }).click();
+  await expect(page.getByRole("img", { name: "30 day monthly income, outflow, and investing projection" })).toBeVisible();
+  await expect(page.getByText("401(k) and HSA payroll contributions are not deducted from take-home again.")).toBeVisible();
+  await page.getByRole("button", { name: "Aug 2026" }).click();
+  await expect(page.locator(".fd-month-detail").getByRole("heading", { name: "Aug 2026" })).toBeVisible();
+  await page.getByText("View forecast as a table").click();
+  await expect(page.locator(".fd-chart-data table")).toBeVisible();
+});
+
+test("Financial Brain streams the exact grounded dining answer", async ({ page }) => {
+  await enterDemo(page);
   const input = page.getByLabel("Message the Financial Brain");
   await input.fill("How much did I spend on dining out last month?");
   await page.getByRole("button", { name: "Send message" }).click();
@@ -83,9 +166,22 @@ test("Financial Brain streams the exact grounded dining answer", async ({ page }
   await expect(page.locator(".provenance-chip").last()).toContainText("8 Dining transactions · Jun 1–30");
 });
 
-test("unconfigured generation fails explicitly without publishing an unrelated fallback", async ({ page }, testInfo) => {
+test("a car scenario compares the base forecast with a not-covered result", async ({ page }) => {
   await enterDemo(page);
-  if (testInfo.project.name === "mobile-390") await page.getByRole("button", { name: "Ask FinDex" }).click();
+  await page.getByRole("button", { name: "Can I afford a car next month?" }).click();
+  await page.getByLabel("Purchase date").fill("2026-08-15");
+  await page.getByLabel("Upfront cost").fill("15000");
+  await page.getByLabel("Monthly payment").fill("650");
+  await page.getByRole("button", { name: "Run decision check" }).click();
+  const card = page.getByRole("article", { name: "This purchase is not covered" });
+  await expect(card).toBeVisible();
+  await expect(card).toContainText("Base lowest checking");
+  await expect(card).toContainText("Scenario lowest checking");
+  await expect(card.getByRole("link", { name: "Inspect the forecast" })).toHaveAttribute("href", "/demo/cash-flow");
+});
+
+test("unconfigured generation fails explicitly without publishing an unrelated fallback", async ({ page }) => {
+  await enterDemo(page);
   await page.getByLabel("Message the Financial Brain").fill("Build a cash versus EMI planner for a major purchase");
   await page.getByRole("button", { name: "Send message" }).click();
   await expect(page.locator(".message.assistant").last()).toContainText("OPENAI_API_KEY");
@@ -124,4 +220,19 @@ test("layout has no horizontal document overflow at 390px", async ({ page }, tes
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(1);
   await expect(page.getByRole("navigation", { name: "Mobile navigation" })).toBeVisible();
+});
+
+test("critical views pass automated accessibility and reflow checks", async ({ page }, testInfo) => {
+  await enterDemo(page);
+  const axe = await new AxeBuilder({ page }).exclude("nextjs-portal").analyze();
+  expect(axe.violations.filter((violation) => violation.impact === "critical" || violation.impact === "serious")).toEqual([]);
+  await page.keyboard.press("Tab");
+  await expect(page.locator(":focus-visible")).toBeVisible();
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(page.getByRole("region", { name: "Financial Brain" })).toBeVisible();
+  if (testInfo.project.name === "desktop") {
+    await page.setViewportSize({ width: 640, height: 720 });
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(overflow).toBeLessThanOrEqual(1);
+  }
 });

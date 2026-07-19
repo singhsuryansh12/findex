@@ -48,6 +48,26 @@ describe("workspace capability broker", () => {
     expect(payload.result.netWorthCents).toBeGreaterThan(0);
   });
 
+  it("brokers least-privilege portfolio and cash-flow data", async () => {
+    const session = await sessionCookie();
+    const artifactId = crypto.randomUUID();
+    const grants = ["ledger.portfolio", "ledger.cashflow"] as const;
+    const signed = signedCapability(session.sessionId, artifactId, [...grants]);
+    const portfolio = await capabilityPost(new Request("http://localhost/api/workspace/capability", {
+      method: "POST", headers: { "content-type": "application/json", cookie: session.pair },
+      body: JSON.stringify({ artifactId, ...signed, capability: "ledger.portfolio", input: {} }),
+    }));
+    expect(portfolio.status).toBe(200);
+    await expect(portfolio.json()).resolves.toMatchObject({ ok: true, result: { investedCents: 14_545_000 } });
+
+    const cashflow = await capabilityPost(new Request("http://localhost/api/workspace/capability", {
+      method: "POST", headers: { "content-type": "application/json", cookie: session.pair },
+      body: JSON.stringify({ artifactId, ...signed, capability: "ledger.cashflow", input: { days: "60" } }),
+    }));
+    expect(cashflow.status).toBe(200);
+    await expect(cashflow.json()).resolves.toMatchObject({ ok: true, result: { days: 60, monthlyTakeHomeCents: 656_000 } });
+  });
+
   it("blocks an ungranted capability and artifact-token reuse", async () => {
     const session = await sessionCookie();
     const artifactId = crypto.randomUUID();

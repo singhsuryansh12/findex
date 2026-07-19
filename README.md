@@ -1,6 +1,6 @@
 # FinDex — Generative Financial OS
 
-FinDex is a predictive, AI-native personal finance dashboard. It anticipates the next 30 days of cashflow, answers questions from a deterministic demo ledger, and builds or revises arbitrary finance-native React workspaces from natural-language prompts.
+FinDex is a Brain-first, AI-native personal finance demo. Its Financial Brain connects a deterministic spending ledger, U.S. portfolio, income, and forward cash flow so a user can ask a question or test a decision before opening a detailed view.
 
 The public demo is intentionally anonymous and single-user. It never asks for bank credentials, moves money, executes trades, or represents model output as individualized financial advice.
 
@@ -8,11 +8,11 @@ The public demo is intentionally anonymous and single-user. It never asks for ba
 
 ## Product flows
 
-1. **Deterministic ledger** — 12 months of reconciled transactions, recurring income and liabilities, and integer-cent calculations.
-2. **Predictive cashflow** — a tested 30-day projection and reserve-protected safe-to-spend amount.
-3. **Financial Brain** — grounded read-only ledger answers plus a natural-language workspace planner.
-4. **Generative workspace** — GPT-5.6 Sol assesses complexity, asks one focused clarification round when necessary, writes a multi-file React application, validates it, reviews it independently, and publishes an immutable version.
-5. **Saved library** — multiple projects, revisions, version history, restore, rename, duplicate, deletion, and generated-tool state in IndexedDB.
+1. **Financial Brain** — the default `/demo/brain` destination, with grounded inline insight cards, purchase decisions, and a natural-language workspace planner.
+2. **Spending** — searchable, filterable activity plus distinct recurring list/calendar views at `/demo/spending`.
+3. **Portfolio and net worth** — four reconciled synthetic U.S. investment accounts, holdings, allocation, history, contributions, and dated IRS references at `/demo/portfolio`.
+4. **Income and cash flow** — 30/60/90-day projections, a reserve-protected safe-to-spend amount, transparent assumptions, and account runway at `/demo/cash-flow`.
+5. **Generative tools** — GPT-5.6 Sol builds, validates, versions, and publishes isolated finance-native React workspaces inside the Brain’s **My tools** drawer.
 
 The frozen ledger prompt remains:
 
@@ -88,7 +88,7 @@ A low-effort strict preflight selects the initial tier. The server raises the ti
 
 Generated applications can request only capabilities granted by their structured plan:
 
-- demo-ledger snapshot, transactions, recurring obligations, and forecast;
+- demo-ledger snapshot, transactions, recurring obligations, forecast, portfolio, and cash flow;
 - Twelve Data symbol search, quotes, and time series;
 - cited OpenAI web research;
 - bounded Sol analysis over supplied context;
@@ -145,6 +145,7 @@ All credentials are server-only; none uses a `NEXT_PUBLIC_` prefix.
 - `assistant_delta`
 - `build_progress`
 - `tool_result`
+- `insight_card`
 - `clarification_required`
 - `workspace_published`
 - `workspace_failed`
@@ -165,7 +166,7 @@ Regenerate the stable demo ledger with:
 npm run seed -- --seed findex-2026 --as-of 2026-07-19
 ```
 
-Money is signed integer cents and dates are ISO date-only values. The seed verifies balance reconciliation, references, unique transactions, at least 12 monthly buckets and 450 posted transactions, balanced transfers, calendar-month dining coverage, and future cash liabilities. Transfers affect balances but are excluded from spending/income totals.
+Money is signed integer cents and dates are ISO date-only values. Schema v2 verifies balance reconciliation, references, unique transactions, investment-account/holding totals, 10,000 allocation basis points, the portfolio-history endpoint, complete net worth, payroll/after-tax contribution treatment, balanced transfers, calendar-month dining coverage, and future cash liabilities. Transfers affect balances but are excluded from spending/income totals.
 
 ## Verification
 
@@ -179,7 +180,7 @@ npm run test:local-sandbox
 npm run verify:local
 ```
 
-The regular suite covers finance invariants, adaptive effort floors, multi-file policy and bundling, adversarial APIs, signed grants, broker authorization, missing-provider states, IndexedDB versions/state, explicit no-fallback behavior, desktop/mobile layout, iframe isolation, interaction, and reload persistence.
+The regular suite covers finance reconciliation and purchase classification, adaptive effort floors, multi-file policy and bundling, signed grants, new portfolio/cash-flow capabilities, missing-provider states, IndexedDB versions/state, explicit no-fallback behavior, routed desktop/mobile journeys, axe accessibility scans, responsive reflow, iframe isolation, interaction, and reload persistence.
 
 The opt-in live corpus contains more than 40 diverse, ambiguous, out-of-scope, and adversarial prompts. It plans all prompts and builds a configurable sample (three by default):
 

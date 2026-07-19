@@ -1,15 +1,18 @@
 import OpenAI from "openai";
 import type { Responses } from "openai/resources/responses/responses";
-import { brainRequestSchema, type BrainEvent } from "@/lib/brain/contracts";
+import { brainRequestSchema, type BrainEvent, type BrainInsightCard } from "@/lib/brain/contracts";
 import { previousCalendarMonth } from "@/lib/finance/dates";
 import {
   compareSpendingPeriods,
   demoData,
+  evaluatePurchaseScenario,
   formatMoneyPrecise,
+  getCashFlowForecast,
   getFinancialSnapshot,
   getForecast,
   getLastMonthSpending,
   getPreviousMonthPair,
+  getPortfolioSnapshot,
   getSpendingSummary,
 } from "@/lib/finance/engine";
 import { complexityPolicy, enforceComplexityFloor } from "@/lib/workspaces/complexity";
@@ -68,6 +71,33 @@ const financeTools: Responses.FunctionTool[] = [
     description: "Return deterministic net worth, cash, spending, recurring, and monthly metrics.",
     parameters: { type: "object", additionalProperties: false, properties: {}, required: [] },
   },
+  {
+    type: "function", name: "get_portfolio_snapshot", strict: true,
+    description: "Return the deterministic demo investment accounts, allocation, contribution plans, and portfolio history.",
+    parameters: { type: "object", additionalProperties: false, properties: {}, required: [] },
+  },
+  {
+    type: "function", name: "get_income_cashflow", strict: true,
+    description: "Return the deterministic 30, 60, or 90 day income and cash-flow projection.",
+    parameters: {
+      type: "object", additionalProperties: false,
+      properties: { days: { type: "integer", enum: [30, 60, 90] } },
+      required: ["days"],
+    },
+  },
+  {
+    type: "function", name: "evaluate_purchase_scenario", strict: true,
+    description: "Compare a proposed purchase with Jordan's deterministic 90-day cash-flow forecast.",
+    parameters: {
+      type: "object", additionalProperties: false,
+      properties: {
+        purchase_date: { type: "string" },
+        upfront_cost_cents: { type: "integer", minimum: 0 },
+        monthly_cost_cents: { type: "integer", minimum: 0 },
+      },
+      required: ["purchase_date", "upfront_cost_cents", "monthly_cost_cents"],
+    },
+  },
 ];
 
 function emit(controller: ReadableStreamDefaultController<Uint8Array>, event: BrainEvent) {
@@ -125,7 +155,94 @@ function executeFinanceTool(name: string, rawArguments: string) {
     return { result, provenance: `31 daily points · ${result.asOfDate}–${result.throughDate}` };
   }
   if (name === "get_financial_snapshot") return { result: getFinancialSnapshot(), provenance: `Reconciled ledger · as of ${demoData.metadata.asOfDate}` };
+  if (name === "get_portfolio_snapshot") return { result: getPortfolioSnapshot(), provenance: `Synthetic holdings · as of ${demoData.metadata.asOfDate}` };
+  if (name === "get_income_cashflow") {
+    const days = [30, 60, 90].includes(Number(args.days)) ? Number(args.days) as 30 | 60 | 90 : 90;
+    return { result: getCashFlowForecast({ days }), provenance: `${days}-day deterministic income and cash-flow model` };
+  }
+  if (name === "evaluate_purchase_scenario") {
+    const result = evaluatePurchaseScenario({
+      date: String(args.purchase_date),
+      upfrontCostCents: Number(args.upfront_cost_cents),
+      monthlyCostCents: Number(args.monthly_cost_cents),
+    });
+    return { result, provenance: `90-day purchase scenario · ${demoData.metadata.asOfDate} demo ledger` };
+  }
   return { result: { error: "Unsupported tool." }, provenance: "No tool result" };
+}
+
+function insightFor(name: string, result: unknown, provenance: string): BrainInsightCard | null {
+  if (name === "get_spending_summary") {
+    const spending = result as ReturnType<typeof getSpendingSummary>;
+    return {
+      kind: "spending",
+      title: `${spending.categoryName} spending, explained`,
+      conclusion: `You spent ${formatMoneyPrecise(spending.amountCents)} across ${spending.count} transactions in the selected period.`,
+      metrics: [
+        { label: "Total", value: formatMoneyPrecise(spending.amountCents) },
+        { label: "Transactions", value: String(spending.count) },
+        { label: "Top merchant", value: spending.topMerchants[0]?.name ?? "None" },
+      ],
+      provenance,
+      assumptions: [`Period: ${spending.startDate} through ${spending.endDate}`, "Transfers and income are excluded"],
+      relatedHref: "/demo/spending",
+      relatedLabel: "Review transactions",
+    };
+  }
+  if (name === "get_portfolio_snapshot") {
+    const portfolio = result as ReturnType<typeof getPortfolioSnapshot>;
+    const largestDrift = [...portfolio.allocation].sort((a, b) => Math.abs(b.driftBasisPoints) - Math.abs(a.driftBasisPoints))[0];
+    return {
+      kind: "portfolio",
+      title: "Your portfolio is broadly diversified",
+      conclusion: `${largestDrift?.label ?? "Allocation"} is ${Math.abs((largestDrift?.driftBasisPoints ?? 0) / 100).toFixed(1)} percentage points ${Number(largestDrift?.driftBasisPoints) >= 0 ? "above" : "below"} Jordan's demo target.`,
+      metrics: [
+        { label: "Invested", value: formatMoneyPrecise(portfolio.investedCents), tone: "positive" },
+        { label: "12-month contributions", value: formatMoneyPrecise(portfolio.twelveMonthContributionsCents) },
+        { label: "Market movement", value: formatMoneyPrecise(portfolio.twelveMonthMarketMovementCents) },
+      ],
+      provenance,
+      assumptions: ["Deterministic synthetic holdings", "Target allocation is a demo preference, not advice"],
+      relatedHref: "/demo/portfolio",
+      relatedLabel: "Explore portfolio",
+    };
+  }
+  if (name === "get_income_cashflow" || name === "get_cashflow_forecast") {
+    const forecast = name === "get_income_cashflow" ? result as ReturnType<typeof getCashFlowForecast> : getCashFlowForecast({ days: 30 });
+    return {
+      kind: "cashflow",
+      title: "Your near-term cash flow is accounted for",
+      conclusion: `Known commitments preserve ${formatMoneyPrecise(forecast.safeToSpendNowCents)} as safe to spend today.`,
+      metrics: [
+        { label: "Take-home / month", value: formatMoneyPrecise(forecast.monthlyTakeHomeCents) },
+        { label: "Expected monthly surplus", value: formatMoneyPrecise(forecast.expectedMonthlySurplusCents), tone: forecast.expectedMonthlySurplusCents >= 0 ? "positive" : "warning" },
+        { label: "Lowest checking", value: formatMoneyPrecise(forecast.lowestBalanceCents) },
+      ],
+      provenance,
+      assumptions: ["Known recurring commitments", "Flexible spending uses the trailing three complete months"],
+      relatedHref: "/demo/cash-flow",
+      relatedLabel: "Open cash flow",
+    };
+  }
+  if (name === "evaluate_purchase_scenario") {
+    const scenario = result as ReturnType<typeof evaluatePurchaseScenario>;
+    return {
+      kind: "decision",
+      title: scenario.status === "covered" ? "This purchase is covered" : scenario.status === "tight" ? "This purchase would make cash flow tight" : "This purchase is not covered",
+      conclusion: scenario.explanation,
+      status: scenario.status,
+      metrics: [
+        { label: "Base lowest checking", value: formatMoneyPrecise(scenario.lowestBalanceBeforeCents) },
+        { label: "Scenario lowest checking", value: formatMoneyPrecise(scenario.lowestBalanceAfterCents), tone: scenario.status === "covered" ? "positive" : "warning" },
+        { label: "Safe to spend after", value: formatMoneyPrecise(scenario.safeToSpendAfterCents) },
+      ],
+      provenance,
+      assumptions: [`${formatMoneyPrecise(scenario.scenario.upfrontCostCents)} upfront on ${scenario.scenario.date}`, `${formatMoneyPrecise(scenario.scenario.monthlyCostCents)} recurring monthly cost`, "No financing interest, insurance, tax, or resale value unless included"],
+      relatedHref: "/demo/cash-flow",
+      relatedLabel: "Inspect the forecast",
+    };
+  }
+  return null;
 }
 
 async function deterministicLedgerAnswer(message: string, controller: ReadableStreamDefaultController<Uint8Array>) {
@@ -134,13 +251,25 @@ async function deterministicLedgerAnswer(message: string, controller: ReadableSt
     const summary = getLastMonthSpending("dining");
     const { first, second } = getPreviousMonthPair();
     const comparison = compareSpendingPeriods("dining", first.start, first.end, second.start, second.end);
-    emit(controller, { type: "tool_result", tool: "get_spending_summary", summary: formatMoneyPrecise(summary.amountCents), provenance: `${summary.count} Dining transactions · Jun 1–30` });
+    const provenance = `${summary.count} Dining transactions · Jun 1–30`;
+    emit(controller, { type: "tool_result", tool: "get_spending_summary", summary: formatMoneyPrecise(summary.amountCents), provenance });
+    emit(controller, { type: "insight_card", card: insightFor("get_spending_summary", summary, provenance)! });
     await emitText(controller, `You spent ${formatMoneyPrecise(summary.amountCents)} dining out last month across ${summary.count} transactions. That was ${formatMoneyPrecise(Math.abs(comparison.deltaCents))} ${comparison.deltaCents >= 0 ? "more" : "less"} than May.`);
+    return true;
+  }
+  if ((lower.includes("where did") || lower.includes("spending")) && lower.includes("last month")) {
+    const summary = getLastMonthSpending();
+    const provenance = `${summary.count} spending transactions · Jun 1–30`;
+    emit(controller, { type: "tool_result", tool: "get_spending_summary", summary: formatMoneyPrecise(summary.amountCents), provenance });
+    emit(controller, { type: "insight_card", card: insightFor("get_spending_summary", summary, provenance)! });
+    await emitText(controller, `You spent ${formatMoneyPrecise(summary.amountCents)} last month across ${summary.count} transactions. ${summary.topMerchants[0]?.name ?? "Your top merchant"} was the largest merchant total.`);
     return true;
   }
   if (lower.includes("safe to spend") || lower.includes("cashflow") || lower.includes("cash flow")) {
     const forecast = getForecast();
-    emit(controller, { type: "tool_result", tool: "get_cashflow_forecast", summary: formatMoneyPrecise(forecast.safeToSpendNowCents), provenance: `31 daily points · ${forecast.asOfDate}–${forecast.throughDate}` });
+    const provenance = `31 daily points · ${forecast.asOfDate}–${forecast.throughDate}`;
+    emit(controller, { type: "tool_result", tool: "get_cashflow_forecast", summary: formatMoneyPrecise(forecast.safeToSpendNowCents), provenance });
+    emit(controller, { type: "insight_card", card: insightFor("get_cashflow_forecast", forecast, provenance)! });
     await emitText(controller, `Your protected safe-to-spend amount is ${formatMoneyPrecise(forecast.safeToSpendNowCents)}. It preserves your ${formatMoneyPrecise(forecast.reserveFloorCents)} reserve after known income and liabilities.`);
     return true;
   }
@@ -148,7 +277,34 @@ async function deterministicLedgerAnswer(message: string, controller: ReadableSt
     const obligations = demoData.recurringRules.filter((rule) => rule.active && rule.amountCents < 0);
     const total = obligations.reduce((sum, rule) => sum + Math.abs(rule.amountCents), 0);
     emit(controller, { type: "tool_result", tool: "list_recurring_obligations", summary: formatMoneyPrecise(total), provenance: `${obligations.length} active recurring obligations` });
+    emit(controller, { type: "insight_card", card: {
+      kind: "recurring", title: "Your recurring money is visible", conclusion: `${obligations.length} active obligations total ${formatMoneyPrecise(total)} in modeled monthly commitments.`,
+      metrics: [{ label: "Monthly commitments", value: formatMoneyPrecise(total) }, { label: "Active items", value: String(obligations.length) }, { label: "Subscriptions", value: "5" }],
+      provenance: `${obligations.length} active recurring obligations`, assumptions: ["Active deterministic recurring rules", "Investment contributions are shown separately"], relatedHref: "/demo/spending", relatedLabel: "Review recurring activity",
+    } });
     await emitText(controller, `You have ${obligations.length} active recurring obligations totaling ${formatMoneyPrecise(total)} in modeled monthly commitments.`);
+    return true;
+  }
+  if (lower.includes("portfolio") && (lower.includes("balance") || lower.includes("allocation") || lower.includes("how is"))) {
+    const result = getPortfolioSnapshot();
+    const provenance = `Synthetic holdings · as of ${demoData.metadata.asOfDate}`;
+    emit(controller, { type: "tool_result", tool: "get_portfolio_snapshot", summary: formatMoneyPrecise(result.investedCents), provenance });
+    emit(controller, { type: "insight_card", card: insightFor("get_portfolio_snapshot", result, provenance)! });
+    await emitText(controller, `You have ${formatMoneyPrecise(result.investedCents)} invested across four demo accounts. The allocation is close to Jordan's saved 60/20/15/5 target.`);
+    return true;
+  }
+  if (lower.includes("afford") || lower.includes("car")) {
+    const amounts = [...message.matchAll(/\$([\d,]+(?:\.\d{1,2})?)/g)].map((match) => Math.round(Number(match[1]!.replaceAll(",", "")) * 100));
+    const isoDate = message.match(/\b20\d{2}-\d{2}-\d{2}\b/)?.[0];
+    if (amounts.length < 2 || !isoDate) {
+      await emitText(controller, "Tell me the purchase date, upfront amount, and monthly payment so I can compare the decision with your 90-day cash flow.");
+      return true;
+    }
+    const result = evaluatePurchaseScenario({ date: isoDate, upfrontCostCents: amounts[0]!, monthlyCostCents: amounts[1]! });
+    const provenance = `90-day purchase scenario · ${demoData.metadata.asOfDate} demo ledger`;
+    emit(controller, { type: "tool_result", tool: "evaluate_purchase_scenario", summary: result.status, provenance });
+    emit(controller, { type: "insight_card", card: insightFor("evaluate_purchase_scenario", result, provenance)! });
+    await emitText(controller, result.explanation);
     return true;
   }
   return false;
@@ -180,6 +336,8 @@ async function answerFinancialQuestion(
   const outputs = calls.map((call) => {
     const execution = executeFinanceTool(call.name, call.arguments);
     emit(controller, { type: "tool_result", tool: call.name, summary: JSON.stringify(execution.result).slice(0, 180), provenance: execution.provenance });
+    const card = insightFor(call.name, execution.result, execution.provenance);
+    if (card) emit(controller, { type: "insight_card", card });
     return { type: "function_call_output" as const, call_id: call.call_id, output: JSON.stringify(execution.result) };
   });
   const stream = await client.responses.create({

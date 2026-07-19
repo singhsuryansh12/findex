@@ -29,6 +29,8 @@ export const capabilityNameSchema = z.enum([
   "ledger.transactions",
   "ledger.recurring",
   "ledger.forecast",
+  "ledger.portfolio",
+  "ledger.cashflow",
   "market.search",
   "market.quote",
   "market.timeSeries",
@@ -41,7 +43,7 @@ export type CapabilityName = z.infer<typeof capabilityNameSchema>;
 
 export const capabilityGrantSchema = z.object({
   artifactId: z.string().uuid(),
-  grants: z.array(capabilityNameSchema).max(11),
+  grants: z.array(capabilityNameSchema).max(13),
   expiresAt: z.number().int().positive(),
 });
 export type CapabilityGrant = z.infer<typeof capabilityGrantSchema>;
@@ -79,7 +81,7 @@ export const workspaceBuildPlanSchema = z.object({
     stateSchemaVersion: z.number().int().min(1).max(100),
     description: z.string().max(240),
   }),
-  capabilities: z.array(capabilityNameSchema).max(11),
+  capabilities: z.array(capabilityNameSchema).max(13),
   disclosures: z.array(z.string().min(1).max(240)).max(8),
   acceptanceCriteria: z.array(z.string().min(1).max(240)).min(1).max(20),
   clarificationQuestions: z.array(z.string().min(3).max(240)).max(3),

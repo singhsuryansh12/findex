@@ -2,8 +2,14 @@ import { describe, expect, it } from "vitest";
 import { previousCalendarMonth } from "@/lib/finance/dates";
 import {
   demoData,
+  evaluatePurchaseScenario,
+  getCashFlowForecast,
+  getFilteredTransactions,
+  getFinancialSnapshot,
   getForecast,
   getLastMonthSpending,
+  getPortfolioSnapshot,
+  getRecurringActivity,
   getSpendingSummary,
   isSpending,
   recurringRuleOccursOn,
@@ -15,6 +21,7 @@ describe("deterministic finance core", () => {
   it("keeps the frozen fixture deterministic and referentially sound", () => {
     const report = validateDemoDataset(demoData);
     expect(report.errors).toEqual([]);
+    expect(demoData.schemaVersion).toBe(2);
     expect(demoData.metadata.seed).toBe("findex-2026");
     expect(demoData.metadata.asOfDate).toBe("2026-07-19");
     expect(demoData.transactions).toHaveLength(576);
@@ -54,6 +61,40 @@ describe("deterministic finance core", () => {
     expect(transfers.length).toBeGreaterThan(0);
     expect(summary.amountCents).toBe(manual);
   });
+
+  it("reconciles every investment account, holding, allocation, and net-worth total", () => {
+    const portfolio = getPortfolioSnapshot();
+    expect(portfolio.investedCents).toBe(14_545_000);
+    expect(portfolio.holdings.reduce((sum, holding) => sum + holding.marketValueCents, 0)).toBe(portfolio.investedCents);
+    for (const account of portfolio.accounts) {
+      expect(account.holdings.reduce((sum, holding) => sum + holding.marketValueCents, 0)).toBe(account.currentValueCents);
+    }
+    expect(portfolio.allocation.reduce((sum, item) => sum + item.basisPoints, 0)).toBe(10_000);
+    expect(portfolio.allocation.map(({ valueCents }) => valueCents)).toEqual([8_882_500, 2_909_000, 1_797_300, 956_200]);
+    expect(portfolio.history.at(-1)?.valueCents).toBe(portfolio.investedCents);
+    expect(portfolio.netWorthCents).toBe(18_055_772);
+    expect(demoData.metadata.expectedNetWorthCents).toBe(18_055_772);
+    expect(getFinancialSnapshot().netWorthCents).toBe(18_055_772);
+  });
+
+  it("keeps dated 2026 legal limits separate from Jordan's contribution plan", () => {
+    const portfolio = getPortfolioSnapshot();
+    expect(Object.fromEntries(portfolio.taxLimits.map((limit) => [limit.id, limit.limitCents]))).toEqual({
+      "401k": 2_450_000,
+      ira: 750_000,
+      hsa_self: 440_000,
+    });
+    expect(portfolio.contributions.reduce((sum, contribution) => sum + contribution.annualPlanCents, 0)).toBe(2_440_000);
+    expect(portfolio.taxLimits.every((limit) => limit.year === 2026 && limit.sourceUrl.startsWith("https://www.irs.gov/"))).toBe(true);
+  });
+
+  it("filters activity deterministically from one result set", () => {
+    const dining = getFilteredTransactions({ startDate: "2026-06-01", endDate: "2026-06-30", categoryId: "dining" });
+    expect(dining).toHaveLength(8);
+    expect(dining.reduce((sum, transaction) => sum + Math.abs(transaction.amountCents), 0)).toBe(36_621);
+    expect(getFilteredTransactions({ search: "sweetgreen", type: "expense" }).every((transaction) => transaction.merchant === "Sweetgreen")).toBe(true);
+    expect(getRecurringActivity().filter((item) => item.group === "Investment").every((item) => item.nextDate! > demoData.metadata.asOfDate)).toBe(true);
+  });
 });
 
 describe("forecast recurrence and protection", () => {
@@ -84,5 +125,26 @@ describe("forecast recurrence and protection", () => {
     const lowest = Math.min(...forecast.points.map((point) => point.projectedBalanceCents));
     expect(forecast.lowestBalanceCents).toBe(lowest);
     expect(forecast.safeToSpendNowCents).toBe(Math.max(0, lowest - forecast.reserveFloorCents));
+  });
+
+  it("does not deduct payroll investing or internal transfers from monthly net cash flow", () => {
+    const forecast = getCashFlowForecast({ days: 90 });
+    const month = forecast.months[0]!;
+    expect(forecast.monthlyTakeHomeCents).toBe(656_000);
+    expect(month.investmentCents).toBe(55_000);
+    expect(month.internalTransferCents).toBe(100_000);
+    expect(month.netCents).toBe(month.incomeCents - month.committedCents - month.flexibleCents - month.investmentCents);
+    expect(month.netCents).not.toBe(month.incomeCents - month.committedCents - month.flexibleCents - month.investmentCents - month.internalTransferCents);
+  });
+
+  it("classifies the fixed car scenario from the base forecast deterministically", () => {
+    const input = { date: "2026-08-15", upfrontCostCents: 1_500_000, monthlyCostCents: 65_000 };
+    const first = evaluatePurchaseScenario(input);
+    expect(evaluatePurchaseScenario(input)).toEqual(first);
+    expect(first.status).toBe("not_covered");
+    expect(first.safeToSpendBeforeCents).toBe(730_916);
+    expect(first.safeToSpendAfterCents).toBe(0);
+    expect(first.lowestBalanceAfterCents).toBeLessThan(first.reserveFloorCents);
+    expect(first.lowestBalanceAfterCents).toBeLessThan(first.lowestBalanceBeforeCents);
   });
 });

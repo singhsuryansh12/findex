@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { CapabilityName } from "./contracts";
 
 export const emptyCapabilityInputSchema = z.object({}).strict();
+export const cashFlowInputSchema = z.object({ days: z.enum(["30", "60", "90"]).default("90") }).strict();
 export const transactionInputSchema = z.object({
   categoryId: z.string().max(40).nullable().default(null),
   limit: z.number().int().min(1).max(100).default(50),
@@ -37,6 +38,8 @@ const schemas: Record<CapabilityName, z.ZodType> = {
   "ledger.transactions": transactionInputSchema,
   "ledger.recurring": emptyCapabilityInputSchema,
   "ledger.forecast": emptyCapabilityInputSchema,
+  "ledger.portfolio": emptyCapabilityInputSchema,
+  "ledger.cashflow": cashFlowInputSchema,
   "market.search": marketSearchInputSchema,
   "market.quote": symbolInputSchema,
   "market.timeSeries": timeSeriesInputSchema,

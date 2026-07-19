@@ -2,7 +2,19 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { format, getDaysInMonth, parseISO, subMonths } from "date-fns";
-import type { Account, Category, DemoDataset, Merchant, RecurringRule, Transaction } from "../lib/finance/types";
+import type {
+  Account,
+  Category,
+  DemoDataset,
+  Holding,
+  InvestmentAccount,
+  InvestmentContribution,
+  Merchant,
+  PortfolioHistoryPoint,
+  RecurringRule,
+  TaxLimitReference,
+  Transaction,
+} from "../lib/finance/types";
 import { assertValidDemoDataset } from "../lib/finance/integrity";
 
 const args = process.argv.slice(2);
@@ -100,6 +112,52 @@ const accounts: Account[] = [
   { id: "credit", name: "Gold card", institution: "Amex", type: "credit", mask: "9008", openingBalanceCents: -85000, currentBalanceCents: 0 },
 ];
 
+const investmentAccounts: InvestmentAccount[] = [
+  { id: "fidelity-401k", name: "Northstar 401(k)", institution: "Fidelity", type: "401k", taxTreatment: "tax_deferred", currentValueCents: 8_642_000, description: "Employer retirement plan" },
+  { id: "vanguard-roth", name: "Roth IRA", institution: "Vanguard", type: "roth_ira", taxTreatment: "roth", currentValueCents: 2_836_000, description: "After-tax retirement account" },
+  { id: "schwab-taxable", name: "Individual brokerage", institution: "Schwab", type: "brokerage", taxTreatment: "taxable", currentValueCents: 2_174_000, description: "Flexible long-term investing" },
+  { id: "fidelity-hsa", name: "Health savings account", institution: "Fidelity", type: "hsa", taxTreatment: "hsa", currentValueCents: 893_000, description: "Invested health savings" },
+];
+
+const holdings: Holding[] = [
+  { id: "401k-fxaix", accountId: "fidelity-401k", symbol: "FXAIX", name: "Fidelity 500 Index", assetClass: "us_equity", marketValueCents: 5_185_200 },
+  { id: "401k-ftihx", accountId: "fidelity-401k", symbol: "FTIHX", name: "Fidelity Total International Index", assetClass: "international_equity", marketValueCents: 1_728_400 },
+  { id: "401k-fxnax", accountId: "fidelity-401k", symbol: "FXNAX", name: "Fidelity U.S. Bond Index", assetClass: "bonds", marketValueCents: 1_296_300 },
+  { id: "401k-cash", accountId: "fidelity-401k", symbol: "SPAXX", name: "Government money market", assetClass: "cash", marketValueCents: 432_100 },
+  { id: "roth-vti", accountId: "vanguard-roth", symbol: "VTI", name: "Vanguard Total Stock Market ETF", assetClass: "us_equity", marketValueCents: 1_701_600 },
+  { id: "roth-vxus", accountId: "vanguard-roth", symbol: "VXUS", name: "Vanguard Total International Stock ETF", assetClass: "international_equity", marketValueCents: 567_200 },
+  { id: "roth-bnd", accountId: "vanguard-roth", symbol: "BND", name: "Vanguard Total Bond Market ETF", assetClass: "bonds", marketValueCents: 283_600 },
+  { id: "roth-qqqm", accountId: "vanguard-roth", symbol: "QQQM", name: "Invesco NASDAQ 100 ETF", assetClass: "us_equity", marketValueCents: 283_600 },
+  { id: "taxable-vti", accountId: "schwab-taxable", symbol: "VTI", name: "Vanguard Total Stock Market ETF", assetClass: "us_equity", marketValueCents: 1_087_000 },
+  { id: "taxable-vxus", accountId: "schwab-taxable", symbol: "VXUS", name: "Vanguard Total International Stock ETF", assetClass: "international_equity", marketValueCents: 434_800 },
+  { id: "taxable-bnd", accountId: "schwab-taxable", symbol: "BND", name: "Vanguard Total Bond Market ETF", assetClass: "bonds", marketValueCents: 217_400 },
+  { id: "taxable-sgov", accountId: "schwab-taxable", symbol: "SGOV", name: "iShares 0-3 Month Treasury Bond ETF", assetClass: "cash", marketValueCents: 434_800 },
+  { id: "hsa-fzrox", accountId: "fidelity-hsa", symbol: "FZROX", name: "Fidelity ZERO Total Market Index", assetClass: "us_equity", marketValueCents: 625_100 },
+  { id: "hsa-fzilx", accountId: "fidelity-hsa", symbol: "FZILX", name: "Fidelity ZERO International Index", assetClass: "international_equity", marketValueCents: 178_600 },
+  { id: "hsa-cash", accountId: "fidelity-hsa", symbol: "CASH", name: "HSA cash reserve", assetClass: "cash", marketValueCents: 89_300 },
+];
+
+const portfolioHistory: PortfolioHistoryPoint[] = [
+  ["2025-08", 11_200_000, 0], ["2025-09", 11_376_000, 150_000], ["2025-10", 11_551_000, 300_000],
+  ["2025-11", 11_804_000, 450_000], ["2025-12", 11_972_000, 600_000], ["2026-01", 12_225_000, 760_000],
+  ["2026-02", 12_371_000, 920_000], ["2026-03", 12_586_000, 1_080_000], ["2026-04", 12_781_000, 1_240_000],
+  ["2026-05", 13_205_000, 1_420_000], ["2026-06", 13_852_000, 1_600_000], ["2026-07", 14_545_000, 1_780_000],
+].map(([month, valueCents, cumulativeContributionsCents]) => ({ month: String(month), valueCents: Number(valueCents), cumulativeContributionsCents: Number(cumulativeContributionsCents) }));
+
+const investmentContributions: InvestmentContribution[] = [
+  { id: "employee-401k", accountId: "fidelity-401k", name: "Employee 401(k)", annualPlanCents: 1_200_000, cadence: "semi_monthly", amountCents: 50_000, source: "payroll" },
+  { id: "employer-match", accountId: "fidelity-401k", name: "Employer match", annualPlanCents: 400_000, cadence: "semi_monthly", amountCents: 16_667, source: "employer" },
+  { id: "roth-contribution", accountId: "vanguard-roth", name: "Roth IRA auto-invest", annualPlanCents: 360_000, cadence: "monthly", amountCents: 30_000, source: "checking" },
+  { id: "hsa-contribution", accountId: "fidelity-hsa", name: "HSA payroll contribution", annualPlanCents: 180_000, cadence: "monthly", amountCents: 15_000, source: "payroll" },
+  { id: "taxable-contribution", accountId: "schwab-taxable", name: "Brokerage auto-invest", annualPlanCents: 300_000, cadence: "monthly", amountCents: 25_000, source: "checking" },
+];
+
+const taxLimitReferences: TaxLimitReference[] = [
+  { id: "401k", year: 2026, limitCents: 2_450_000, label: "401(k) employee deferral limit", sourceUrl: "https://www.irs.gov/retirement-plans/plan-participant-employee/retirement-topics-401k-and-profit-sharing-plan-contribution-limits" },
+  { id: "ira", year: 2026, limitCents: 750_000, label: "Traditional and Roth IRA combined limit", sourceUrl: "https://www.irs.gov/retirement-plans/plan-participant-employee/retirement-topics-ira-contribution-limits" },
+  { id: "hsa_self", year: 2026, limitCents: 440_000, label: "HSA self-only contribution limit", sourceUrl: "https://www.irs.gov/irb/2025-21_IRB" },
+];
+
 const recurringRules: RecurringRule[] = [
   { id: "salary", name: "Northstar paycheck", merchantId: "employer", categoryId: "income", accountId: "checking", amountCents: 328000, cadence: "semi_monthly", daysOfMonth: [1, 15], cashImpact: true, active: true },
   { id: "rent", name: "Rent", merchantId: "landlord", categoryId: "housing", accountId: "checking", amountCents: -265000, cadence: "monthly", dayOfMonth: 3, cashImpact: true, active: true },
@@ -195,9 +253,11 @@ const previousMonth = format(subMonths(asOf, 1), "yyyy-MM");
 const expectedDiningLastMonthCents = transactions
   .filter((transaction) => transaction.postedOn.startsWith(previousMonth) && transaction.categoryId === "dining")
   .reduce((sum, transaction) => sum + Math.abs(transaction.amountCents), 0);
+const expectedNetWorthCents = accounts.reduce((sum, account) => sum + account.currentBalanceCents, 0)
+  + investmentAccounts.reduce((sum, account) => sum + account.currentValueCents, 0);
 
 const dataset: DemoDataset = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   metadata: {
     seed,
     asOfDate,
@@ -205,6 +265,7 @@ const dataset: DemoDataset = {
     currency: "USD",
     timezone: "America/New_York",
     expectedDiningLastMonthCents,
+    expectedNetWorthCents,
   },
   persona: {
     id: "demo-jordan",
@@ -215,8 +276,15 @@ const dataset: DemoDataset = {
     location: "Brooklyn, NY",
     age: 30,
     reserveFloorCents: 150000,
+    grossAnnualIncomeCents: 10_000_000,
+    monthlyTakeHomeCents: 656_000,
   },
   accounts,
+  investmentAccounts,
+  holdings,
+  portfolioHistory,
+  investmentContributions,
+  taxLimitReferences,
   categories,
   merchants,
   recurringRules,

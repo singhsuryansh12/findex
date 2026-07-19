@@ -6,7 +6,7 @@
 | --- | --- |
 | `app/` | Next.js pages, global styling, and server API route entry points |
 | `components/brain/` | Financial Brain conversation and streamed build progress |
-| `components/dashboard/` | Demo dashboard and financial overview |
+| `components/dashboard/` | Brain-first routed shell plus Spending, Portfolio, and Cash Flow views |
 | `components/workspaces/` | Workspace library, artifact presentation, and isolated runtime host |
 | `lib/finance/` | Deterministic ledger, forecasts, dates, types, and integrity rules |
 | `lib/brain/` | Public Brain request and SSE event contracts |
@@ -61,6 +61,8 @@ sequenceDiagram
 - `WorkspaceArtifactV2` is an immutable, content-addressed publication containing lineage, source, bundle, manifest, validation, review, and provenance.
 - `CapabilityGrant` is represented by a signed, session- and artifact-bound token; the token never enters the iframe.
 - `WorkspaceValidationReport` records every host validation plus the independent Sol review.
+- `DemoDataset` schema v2 and pure finance selectors are the only source for core-page and grounded Brain numeric claims.
+- Typed `insight_card` events carry a conclusion, metrics, assumptions, provenance, and a related routed view.
 
 ## Persistence and versioning
 
