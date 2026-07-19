@@ -81,6 +81,29 @@ describe("workspace builder preflight parity", () => {
     expect(create.mock.calls[0]?.[0]).toMatchObject({ tool_choice: "required", parallel_tool_calls: false });
   });
 
+  it("retries one explicit transient provider failure without changing model or reasoning", async () => {
+    vi.spyOn(console, "info").mockImplementation(() => undefined);
+    vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const create = vi.fn()
+      .mockRejectedValueOnce(Object.assign(new Error("temporary provider failure"), { status: 500, code: "server_error" }))
+      .mockResolvedValueOnce(toolResponse("resp_write", "write_file", { path: "src/App.tsx", content: goodStateSource }))
+      .mockResolvedValueOnce(toolResponse("resp_check", "run_check", { check: "policy_typecheck_and_bundle" }))
+      .mockResolvedValueOnce(toolResponse("resp_finish", "finish_workspace", { summary: "Validated FIRE planner" }));
+    const client = { responses: { create } } as unknown as OpenAI;
+
+    await expect(buildWorkspaceDraft({
+      client,
+      plan: firePlan(),
+      assessment: { level: "standard", riskFlags: [], rationale: "Editable retirement assumptions" },
+      active: null,
+      requestId: "transient-build-regression",
+    })).resolves.toMatchObject({ model: "gpt-5.6-terra", effort: "medium" });
+
+    expect(create).toHaveBeenCalledTimes(4);
+    expect(create.mock.calls[0]?.[0]).toMatchObject({ model: "gpt-5.6-terra", reasoning: { effort: "medium" } });
+    expect(create.mock.calls[1]?.[0]).toMatchObject({ model: "gpt-5.6-terra", reasoning: { effort: "medium" } });
+  });
+
   it("returns the actionable SDK compiler diagnostic for the exact one-argument regression", async () => {
     const result = await quickCheckWorkspace([{ path: "src/App.tsx", content: badStateSource }, styles]);
     expect(result.passed).toBe(false);

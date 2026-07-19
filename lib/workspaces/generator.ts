@@ -163,13 +163,15 @@ Run policy_typecheck_and_bundle after editing, fix every reported issue, rerun i
 Plan:\n${JSON.stringify(plan)}${diagnostics.length ? `\nRepair diagnostics:\n${diagnostics.join("\n")}` : ""}`;
 }
 
-async function createBuilderResponse(client: OpenAI, options: {
+type BuilderResponseOptions = {
   policy: ModelPolicy;
   instructions: string;
   input: string | Responses.ResponseInput;
   previousResponseId?: string;
   signal: AbortSignal;
-}) {
+};
+
+async function createBuilderResponse(client: OpenAI, options: BuilderResponseOptions) {
   return client.responses.create({
     model: options.policy.model,
     reasoning: { effort: options.policy.effort },
@@ -191,9 +193,31 @@ async function runBuilderPass(options: {
   policy: ModelPolicy;
   diagnostics: string[];
   signal: AbortSignal;
+  requestId: string;
+  repair: boolean;
 }) {
+  let transientRetryUsed = false;
+  const requestBuilderResponse = async (request: BuilderResponseOptions) => {
+    try {
+      return await createBuilderResponse(options.client, request);
+    } catch (rawError) {
+      const error = normalizeModelError(rawError, "workspace build");
+      if (error.code !== "MODEL_TRANSIENT" || transientRetryUsed) throw error;
+      transientRetryUsed = true;
+      console.warn(JSON.stringify({
+        event: "findex_model_retry",
+        requestId: options.requestId,
+        stage: options.repair ? "repair" : "building",
+        model: options.policy.model,
+        effort: options.policy.effort,
+        reason: error.code,
+        attempt: 2,
+      }));
+      return createBuilderResponse(options.client, request);
+    }
+  };
   let usage = zeroUsage();
-  let response = await createBuilderResponse(options.client, {
+  let response = await requestBuilderResponse({
     policy: options.policy,
     instructions: builderInstructions(options.plan, options.active, options.diagnostics),
     input: `Current editable files:\n${JSON.stringify(filesForModel(options.files))}`,
@@ -210,7 +234,7 @@ async function runBuilderPass(options: {
       const error = normalizeModelError(rawError, "workspace build");
       if (error.code === "PLAN_TOKEN_LIMIT" && !continuationUsed) {
         continuationUsed = true;
-        response = await createBuilderResponse(options.client, {
+        response = await requestBuilderResponse({
           policy: options.policy,
           instructions: builderInstructions(options.plan, options.active, options.diagnostics),
           input: "Continue from the previous response. Finish the requested workspace using the available file tools, run the check, and call finish_workspace.",
@@ -236,7 +260,7 @@ async function runBuilderPass(options: {
       if (call.name === "finish_workspace" && !Object.hasOwn(result, "error")) finished = true;
     }
     if (!finished) {
-      response = await createBuilderResponse(options.client, {
+      response = await requestBuilderResponse({
         policy: options.policy,
         instructions: builderInstructions(options.plan, options.active, options.diagnostics),
         input: outputs,
@@ -276,7 +300,7 @@ export async function buildWorkspaceDraft(options: {
   try {
     const result = await runBuilderPass({
       client: options.client, plan: options.plan, active: options.active, files, policy,
-      diagnostics: options.diagnostics ?? [], signal,
+      diagnostics: options.diagnostics ?? [], signal, requestId: options.requestId, repair: Boolean(options.repair),
     });
     const trace = traceFor({
       stage: options.repair ? "repair" : "building", model: policy.model, effort: policy.effort,
