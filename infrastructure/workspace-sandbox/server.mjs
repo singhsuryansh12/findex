@@ -2,7 +2,7 @@ import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { extname, join } from "node:path";
 
-const html = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/workspace.css"></head><body><div id="root"></div><script type="module" src="/workspace.js"></script></body></html>`;
+const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Findex workspace verification</title><link rel="stylesheet" href="/workspace.css"></head><body><div id="root"></div><script type="module" src="/workspace.js"></script></body></html>`;
 const types = { ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8" };
 
 const port = Number(process.env.WORKSPACE_PREVIEW_PORT ?? 4173);

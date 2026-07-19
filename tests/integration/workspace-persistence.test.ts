@@ -2,12 +2,15 @@ import "fake-indexeddb/auto";
 import { describe, expect, it } from "vitest";
 import type { WorkspaceArtifactV2 } from "@/lib/workspaces/contracts";
 import {
+  clearActiveBrainRun,
   deleteWorkspaceProject,
+  getActiveBrainRun,
   getWorkspaceArtifact,
   listWorkspaceProjects,
   listWorkspaceVersions,
   readWorkspaceState,
   renameWorkspaceProject,
+  saveActiveBrainRun,
   saveWorkspaceArtifact,
   writeWorkspaceState,
 } from "@/lib/workspaces/persistence";
@@ -72,5 +75,16 @@ describe("browser workspace library", () => {
 
   it("rejects generated state values over 64 KB", async () => {
     await expect(writeWorkspaceState(crypto.randomUUID(), "too-big", "x".repeat(70_000))).rejects.toThrow("64 KB");
+  });
+
+  it("persists only the resumable Brain run cursor and clears it at terminal state", async () => {
+    const active = { runId: "run-test", accessToken: "signed-access-token", lastEventIndex: 4 };
+    await saveActiveBrainRun(active);
+    await expect(getActiveBrainRun()).resolves.toEqual(active);
+    await saveActiveBrainRun({ ...active, lastEventIndex: 5 });
+    await clearActiveBrainRun("another-run");
+    await expect(getActiveBrainRun()).resolves.toMatchObject({ runId: "run-test", lastEventIndex: 5 });
+    await clearActiveBrainRun("run-test");
+    await expect(getActiveBrainRun()).resolves.toBeUndefined();
   });
 });

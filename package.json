@@ -14,16 +14,17 @@
     "test:unit": "vitest run tests/unit",
     "test:integration": "vitest run tests/integration",
     "test:watch": "vitest",
-    "test:e2e": "playwright test",
+    "test:e2e": "npm run build && playwright test",
     "screenshots": "tsx scripts/capture-screenshots.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --ignore-pattern .next --ignore-pattern .vercel --ignore-pattern coverage",
     "validate": "npm run typecheck && npm run test && npm run lint && npm run build",
-    "verify:local": "npm run validate && npm run test:local-sandbox && npm run test:e2e",
+    "verify:local": "npm run validate && npm run test:local-sandbox && playwright test",
     "sandbox:snapshot": "tsx scripts/create-workspace-snapshot.ts",
     "test:gen-eval": "vitest run tests/evaluations/generative-eval.test.ts",
     "test:local-sandbox": "RUN_LOCAL_SANDBOX_EVAL=1 vitest run tests/integration/local-sandbox.test.ts",
-    "test:live-providers": "vitest run tests/evaluations/live-providers.test.ts"
+    "test:live-providers": "vitest run tests/evaluations/live-providers.test.ts",
+    "verify:live-fire-local": "tsx scripts/verify-live-fire-local.ts"
   },
   "dependencies": {
     "@babel/parser": "^8.0.4",
@@ -38,6 +39,7 @@
     "react": "19.2.6",
     "react-dom": "19.2.6",
     "recharts": "^3.9.2",
+    "workflow": "4.6.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {

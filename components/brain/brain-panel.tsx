@@ -1,14 +1,19 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
+import { FormEvent, KeyboardEvent as ReactKeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, ArrowUp, CarFront, Database, LoaderCircle, RotateCw, Sparkles } from "lucide-react";
+import { ArrowRight, ArrowUp, CarFront, Database, LoaderCircle, RotateCw, Sparkles, Square } from "lucide-react";
 import type { BrainEvent, BrainInsightCard } from "@/lib/brain/contracts";
 import type { WorkspaceArtifactV2, WorkspaceProgressPhase } from "@/lib/workspaces/contracts";
+import { clearActiveBrainRun, getActiveBrainRun, saveActiveBrainRun, type ActiveBrainRun } from "@/lib/workspaces/persistence";
 
 type Message = { id: string; role: "user" | "assistant"; content: string; provenance?: string; insight?: BrainInsightCard };
 type PendingClarification = { token: string; questions: string[]; title: string };
 type RetryRequest = { message: string; token: string | null; clarificationAnswers: string[] };
+type RunStatus = {
+  status: "pending" | "running" | "completed" | "failed" | "cancelled";
+  returnValue: { status: "completed"; artifact: WorkspaceArtifactV2 } | { status: "failed"; message: string } | null;
+};
 
 const suggestions = [
   "Can I afford a car next month?",
@@ -16,18 +21,43 @@ const suggestions = [
   "How is my portfolio allocation balanced?",
   "What bills and subscriptions are coming up?",
 ];
+
 const phaseLabels: Record<WorkspaceProgressPhase, string> = {
-  assessing: "Assessing request complexity",
-  planning: "Designing your workspace",
-  clarifying: "Waiting for your requirements",
-  scaffolding: "Preparing a blank workspace",
-  coding: "Sol is building the application",
-  checking: "Typechecking, testing, and policy scanning",
-  browser_testing: "Verifying interactions and responsive behavior",
-  reviewing: "Running an independent Sol review",
-  repairing: "Repairing validation findings",
-  publishing: "Saving a verified version",
+  assessing: "Findex is assessing your request",
+  planning: "Findex is planning your workspace",
+  clarifying: "Findex is waiting for your requirements",
+  scaffolding: "Findex is preparing the workspace",
+  coding: "Findex is building the application",
+  checking: "Findex is checking the build",
+  browser_testing: "Findex is verifying interactions",
+  reviewing: "Findex is independently reviewing the workspace",
+  repairing: "Findex is repairing measured findings",
+  publishing: "Findex is publishing a verified version",
 };
+
+async function readEventStream(response: Response, onEvent: (event: BrainEvent, index: number | null) => void | Promise<void>) {
+  if (!response.ok || !response.body) {
+    const error = await response.json().catch(() => null) as { error?: string } | null;
+    throw new Error(error?.error || "The Financial Brain is temporarily unavailable.");
+  }
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const frames = buffer.split("\n\n");
+    buffer = frames.pop() ?? "";
+    for (const frame of frames) {
+      const data = frame.split("\n").find((line) => line.startsWith("data: "));
+      if (!data) continue;
+      const id = frame.split("\n").find((line) => line.startsWith("id: "));
+      const index = id ? Number(id.slice(4)) : null;
+      await onEvent(JSON.parse(data.slice(6)) as BrainEvent, Number.isSafeInteger(index) ? index : null);
+    }
+  }
+}
 
 export function BrainPanel({
   onWorkspace,
@@ -49,18 +79,167 @@ export function BrainPanel({
   const [busy, setBusy] = useState(false);
   const [phase, setPhase] = useState<WorkspaceProgressPhase | null>(null);
   const [phaseDetail, setPhaseDetail] = useState("");
+  const [phaseHistory, setPhaseHistory] = useState<WorkspaceProgressPhase[]>([]);
   const [pending, setPending] = useState<PendingClarification | null>(null);
   const [answers, setAnswers] = useState<string[]>([]);
   const [retryRequest, setRetryRequest] = useState<RetryRequest | null>(null);
   const [purchaseOpen, setPurchaseOpen] = useState(false);
   const [purchase, setPurchase] = useState({ date: "2026-08-15", upfront: "15000", monthly: "650" });
+  const [activeRun, setActiveRun] = useState<ActiveBrainRun | null>(null);
+  const [reconnecting, setReconnecting] = useState(false);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const messagesRef = useRef<HTMLDivElement>(null);
   const initialHandled = useRef<string | null>(null);
+  const resumeAttempted = useRef(false);
+  const runStartedAt = useRef(0);
+  const requestAbort = useRef<AbortController | null>(null);
+  const streamAbort = useRef<AbortController | null>(null);
+  const connectRunRef = useRef<((run: ActiveBrainRun, assistantId: string) => Promise<void>) | null>(null);
+  const publishedArtifacts = useRef(new Set<string>());
+  const activeRetry = useRef<RetryRequest | null>(null);
+  const terminalRun = useRef<string | null>(null);
+  const activeAssistantId = useRef<string | null>(null);
 
-  const send = useCallback(async (
-    message: string,
-    options?: { token?: string | null; clarificationAnswers?: string[] },
-  ) => {
+  const setAssistantContent = useCallback((assistantId: string, content: string, append = false) => {
+    setMessages((current) => current.map((item) => item.id === assistantId
+      ? { ...item, content: append ? item.content + content : content }
+      : item));
+  }, []);
+
+  const finishRun = useCallback(async (runId: string) => {
+    terminalRun.current = runId;
+    streamAbort.current?.abort();
+    await clearActiveBrainRun(runId).catch(() => undefined);
+    setActiveRun(null);
+    setReconnecting(false);
+    setBusy(false);
+    setPhase(null);
+    setPhaseDetail("");
+    activeAssistantId.current = null;
+  }, []);
+
+  const handleRunEvent = useCallback(async (event: BrainEvent, assistantId: string, runId: string) => {
+    if (event.type === "build_progress") {
+      setPhase(event.phase);
+      setPhaseDetail(event.detail);
+      setPhaseHistory((current) => current.includes(event.phase) ? current : [...current, event.phase]);
+      return;
+    }
+    if (event.type === "workspace_published") {
+      if (!publishedArtifacts.current.has(event.artifact.id)) {
+        publishedArtifacts.current.add(event.artifact.id);
+        await onWorkspace(event.artifact);
+      }
+      const assumptionSummary = event.artifact.plan.assumptions.length
+        ? ` Assumptions: ${event.artifact.plan.assumptions.slice(0, 3).join("; ")}.`
+        : " No unstated assumptions remain.";
+      setAssistantContent(assistantId, `${event.artifact.title} passed ${event.artifact.validation.checks.length} checks and Findex’s independent review. It is saved as version ${event.artifact.version}.${assumptionSummary}`);
+      setRetryRequest(null);
+      await finishRun(runId);
+      return;
+    }
+    if (event.type === "workspace_failed" || event.type === "error") {
+      setAssistantContent(assistantId, event.message);
+      if (event.recoverable && activeRetry.current) setRetryRequest(activeRetry.current);
+      await finishRun(runId);
+    }
+  }, [finishRun, onWorkspace, setAssistantContent]);
+
+  const recoverRunStatus = useCallback(async (run: ActiveBrainRun, assistantId: string) => {
+    const response = await fetch(`/api/brain/runs/${encodeURIComponent(run.runId)}`, {
+      headers: { authorization: `Bearer ${run.accessToken}` },
+      cache: "no-store",
+    });
+    if (!response.ok) throw new Error("Findex could not recover this build run.");
+    const status = await response.json() as RunStatus;
+    if (status.status === "completed" && status.returnValue?.status === "completed") {
+      await handleRunEvent({ type: "workspace_published", artifact: status.returnValue.artifact }, assistantId, run.runId);
+      return true;
+    }
+    if (status.status === "completed" && status.returnValue?.status === "failed") {
+      await handleRunEvent({ type: "workspace_failed", message: status.returnValue.message, recoverable: true }, assistantId, run.runId);
+      return true;
+    }
+    if (status.status === "failed") {
+      await handleRunEvent({ type: "workspace_failed", message: "Findex couldn't finish this workspace; nothing was published.", recoverable: true }, assistantId, run.runId);
+      return true;
+    }
+    if (status.status === "cancelled") {
+      setAssistantContent(assistantId, "Findex stopped the build. Your previously published workspace is unchanged.");
+      await finishRun(run.runId);
+      return true;
+    }
+    return false;
+  }, [finishRun, handleRunEvent, setAssistantContent]);
+
+  const connectToRun = useCallback(async (run: ActiveBrainRun, assistantId: string) => {
+    if (terminalRun.current === run.runId) return;
+    streamAbort.current?.abort();
+    const abort = new AbortController();
+    streamAbort.current = abort;
+    setActiveRun(run);
+    setBusy(true);
+    setReconnecting(true);
+    if (!runStartedAt.current) runStartedAt.current = Date.now();
+    let cursor = run.lastEventIndex;
+    try {
+      const response = await fetch(`/api/brain/runs/${encodeURIComponent(run.runId)}/events?startIndex=${cursor + 1}`, {
+        headers: { authorization: `Bearer ${run.accessToken}` },
+        cache: "no-store",
+        signal: abort.signal,
+      });
+      setReconnecting(false);
+      await readEventStream(response, async (event, index) => {
+        if (index !== null && index <= cursor) return;
+        await handleRunEvent(event, assistantId, run.runId);
+        if (index !== null && terminalRun.current !== run.runId) {
+          cursor = index;
+          const updated = { ...run, lastEventIndex: cursor };
+          setActiveRun(updated);
+          await saveActiveBrainRun(updated);
+        }
+      });
+      if (terminalRun.current === run.runId) return;
+      const terminal = await recoverRunStatus({ ...run, lastEventIndex: cursor }, assistantId);
+      if (!terminal) {
+        setReconnecting(true);
+        window.setTimeout(() => void connectRunRef.current?.({ ...run, lastEventIndex: cursor }, assistantId), 1_500);
+      }
+    } catch {
+      if (abort.signal.aborted || terminalRun.current === run.runId) return;
+      setReconnecting(true);
+      try {
+        if (await recoverRunStatus({ ...run, lastEventIndex: cursor }, assistantId)) return;
+      } catch {
+        // The indexed stream remains the source of truth; retry without starting a new run.
+      }
+      window.setTimeout(() => void connectRunRef.current?.({ ...run, lastEventIndex: cursor }, assistantId), 1_500);
+    }
+  }, [handleRunEvent, recoverRunStatus]);
+
+  useEffect(() => { connectRunRef.current = connectToRun; }, [connectToRun]);
+
+  const handleImmediateEvent = useCallback(async (event: BrainEvent, assistantId: string, retry: RetryRequest) => {
+    if (event.type === "build_progress") {
+      setPhase(event.phase);
+      setPhaseDetail(event.detail);
+      setPhaseHistory((current) => current.includes(event.phase) ? current : [...current, event.phase]);
+    }
+    if (event.type === "assistant_delta") setAssistantContent(assistantId, event.delta, true);
+    if (event.type === "tool_result") setMessages((current) => current.map((item) => item.id === assistantId ? { ...item, provenance: event.provenance } : item));
+    if (event.type === "insight_card") setMessages((current) => current.map((item) => item.id === assistantId ? { ...item, insight: event.card } : item));
+    if (event.type === "clarification_required") {
+      setAssistantContent(assistantId, `Before I build ${event.planTitle}, I need one focused round of clarification:\n\n${event.questions.map((question, index) => `${index + 1}. ${question}`).join("\n")}`);
+      setPending({ token: event.token, questions: event.questions, title: event.planTitle });
+      setAnswers(event.questions.map(() => ""));
+    }
+    if (event.type === "workspace_failed" || event.type === "error") {
+      setAssistantContent(assistantId, event.message);
+      if (event.recoverable) setRetryRequest(retry);
+    }
+  }, [setAssistantContent]);
+
+  const send = useCallback(async (message: string, options?: { token?: string | null; clarificationAnswers?: string[] }) => {
     const cleaned = message.trim().slice(0, 1_000);
     if (!cleaned || busy) return;
     const userMessage: Message = { id: crypto.randomUUID(), role: "user", content: cleaned };
@@ -68,13 +247,23 @@ export function BrainPanel({
     const prior = messages.filter((item) => item.id !== "intro").slice(-12);
     const token = options?.token ?? pending?.token ?? null;
     const clarificationAnswers = options?.clarificationAnswers ?? (pending ? [cleaned] : []);
+    const retry = { message: cleaned, token, clarificationAnswers };
+    activeRetry.current = retry;
+    terminalRun.current = null;
+    activeAssistantId.current = assistantId;
+    runStartedAt.current = Date.now();
+    setElapsedSeconds(0);
+    setPhaseHistory([]);
     setMessages((current) => [...current, userMessage, { id: assistantId, role: "assistant", content: "" }]);
     setInput("");
     setBusy(true);
     setPhase("assessing");
-    setPhaseDetail("Understanding the request");
+    setPhaseDetail("Findex is understanding the request");
     setRetryRequest(null);
     if (token) setPending(null);
+    let startedRun: ActiveBrainRun | null = null;
+    const requestController = new AbortController();
+    requestAbort.current = requestController;
 
     try {
       const response = await fetch("/api/brain", {
@@ -96,82 +285,109 @@ export function BrainPanel({
           clarificationToken: token,
           clarificationAnswers,
         }),
+        signal: requestController.signal,
       });
-      if (!response.ok || !response.body) {
-        const error = await response.json().catch(() => null) as { error?: string } | null;
-        throw new Error(error?.error || "The Financial Brain is temporarily unavailable.");
-      }
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const frames = buffer.split("\n\n");
-        buffer = frames.pop() ?? "";
-        for (const frame of frames) {
-          const line = frame.split("\n").find((candidate) => candidate.startsWith("data: "));
-          if (!line) continue;
-          const event = JSON.parse(line.slice(6)) as BrainEvent;
-          if (event.type === "build_progress") {
-            setPhase(event.phase);
-            setPhaseDetail(event.detail);
-          }
-          if (event.type === "assistant_delta") {
-            setMessages((current) => current.map((item) => item.id === assistantId ? { ...item, content: item.content + event.delta } : item));
-          }
-          if (event.type === "tool_result") {
-            setMessages((current) => current.map((item) => item.id === assistantId ? { ...item, provenance: event.provenance } : item));
-          }
-          if (event.type === "insight_card") {
-            setMessages((current) => current.map((item) => item.id === assistantId ? { ...item, insight: event.card } : item));
-          }
-          if (event.type === "clarification_required") {
-            const content = `Before I build ${event.planTitle}, I need one focused round of clarification:\n\n${event.questions.map((question, index) => `${index + 1}. ${question}`).join("\n")}`;
-            setMessages((current) => current.map((item) => item.id === assistantId ? { ...item, content } : item));
-            setPending({ token: event.token, questions: event.questions, title: event.planTitle });
-            setAnswers(event.questions.map(() => ""));
-          }
-          if (event.type === "workspace_published") {
-            setRetryRequest(null);
-            await onWorkspace(event.artifact);
-          }
-          if (event.type === "workspace_failed" || event.type === "error") {
-            setMessages((current) => current.map((item) => item.id === assistantId ? { ...item, content: item.content || event.message } : item));
-            if (event.recoverable) setRetryRequest({ message: cleaned, token, clarificationAnswers });
-          }
+      await readEventStream(response, async (event) => {
+        if (event.type === "workspace_started") {
+          startedRun = { runId: event.runId, accessToken: event.accessToken, lastEventIndex: -1 };
+          await saveActiveBrainRun(startedRun);
+          setActiveRun(startedRun);
+          return;
         }
+        await handleImmediateEvent(event, assistantId, retry);
+      });
+      if (startedRun) {
+        if (requestAbort.current === requestController) requestAbort.current = null;
+        await connectToRun(startedRun, assistantId);
+        return;
       }
     } catch (error) {
-      setMessages((current) => current.map((item) => item.id === assistantId ? {
-        ...item,
-        content: item.content || (error instanceof Error ? error.message : "I couldn’t complete that request."),
-      } : item));
-      setRetryRequest({ message: cleaned, token, clarificationAnswers });
-    } finally {
-      setPhase(null);
-      setPhaseDetail("");
-      setBusy(false);
+      if (!requestController.signal.aborted) {
+        setAssistantContent(assistantId, error instanceof Error ? error.message : "Findex couldn’t complete that request.");
+        setRetryRequest(retry);
+      }
     }
-  }, [activeWorkspace, busy, messages, onWorkspace, pending]);
+    if (requestAbort.current === requestController) requestAbort.current = null;
+    setPhase(null);
+    setPhaseDetail("");
+    setBusy(false);
+  }, [activeWorkspace, busy, connectToRun, handleImmediateEvent, messages, pending, setAssistantContent]);
+
+  const stopRun = useCallback(async () => {
+    if (!busy) return;
+    requestAbort.current?.abort();
+    streamAbort.current?.abort();
+    try {
+      if (activeRun) await fetch(`/api/brain/runs/${encodeURIComponent(activeRun.runId)}/cancel`, {
+        method: "POST",
+        headers: { authorization: `Bearer ${activeRun.accessToken}` },
+      });
+    } finally {
+      const assistantId = activeAssistantId.current ?? (activeRun ? `run:${activeRun.runId}` : null);
+      setMessages((current) => current.map((item) => item.id === assistantId
+        ? { ...item, content: "Findex stopped the build. Your previously published workspace is unchanged." }
+        : item));
+      if (activeRun) await finishRun(activeRun.runId);
+      else {
+        setBusy(false);
+        setPhase(null);
+        setPhaseDetail("");
+        setReconnecting(false);
+        activeAssistantId.current = null;
+      }
+    }
+  }, [activeRun, busy, finishRun]);
+
+  useEffect(() => {
+    if (resumeAttempted.current) return;
+    resumeAttempted.current = true;
+    void getActiveBrainRun().then((run) => {
+      if (!run) return;
+      const assistantId = `run:${run.runId}`;
+      activeAssistantId.current = assistantId;
+      setMessages((current) => current.some((item) => item.id === assistantId)
+        ? current
+        : [...current, { id: assistantId, role: "assistant", content: "Findex is reconnecting to your workspace build…" }]);
+      runStartedAt.current = Date.now();
+      setPhase("coding");
+      setPhaseDetail("Findex is reconnecting to the existing build");
+      void connectRunRef.current?.(run, assistantId);
+    }).catch(() => undefined);
+    return () => {
+      requestAbort.current?.abort();
+      streamAbort.current?.abort();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!busy) return;
+    const timer = window.setInterval(() => setElapsedSeconds(Math.max(0, Math.floor((Date.now() - runStartedAt.current) / 1_000))), 1_000);
+    return () => window.clearInterval(timer);
+  }, [busy]);
 
   useEffect(() => {
     const container = messagesRef.current;
     if (container) container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
   }, [messages, phase, pending]);
+
   useEffect(() => {
     if (initialPrompt && initialHandled.current !== initialPrompt && !busy) {
       initialHandled.current = initialPrompt;
-      onPromptConsumed();
-      if (initialPrompt.startsWith("Can I afford")) {
-        setPurchaseOpen(true);
-        return;
-      }
-      void send(initialPrompt);
+      const timer = window.setTimeout(() => {
+        onPromptConsumed();
+        if (initialPrompt.startsWith("Can I afford")) setPurchaseOpen(true);
+        else void send(initialPrompt);
+      }, 0);
+      return () => window.clearTimeout(timer);
     }
   }, [initialPrompt, busy, onPromptConsumed, send]);
+
   const submit = (event: FormEvent) => { event.preventDefault(); void send(input); };
+  const onComposerKeyDown = (event: ReactKeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key !== "Enter" || event.shiftKey || event.nativeEvent.isComposing) return;
+    event.preventDefault();
+    event.currentTarget.form?.requestSubmit();
+  };
   const submitClarification = (event: FormEvent) => {
     event.preventDefault();
     if (!pending || answers.some((answer) => !answer.trim())) return;
@@ -188,6 +404,7 @@ export function BrainPanel({
   };
 
   const isPristine = messages.length === 1 && messages[0]?.id === "intro";
+  const visiblePhases = phaseHistory.slice(-4);
 
   return (
     <section className={`brain-panel${isPristine ? " is-pristine" : ""}`} aria-label="Financial Brain">
@@ -202,23 +419,24 @@ export function BrainPanel({
             {message.insight && (
               <article className={`brain-insight-card ${message.insight.status ?? ""}`} aria-label={message.insight.title}>
                 <div className="brain-insight-kicker">{message.insight.kind === "decision" ? "Decision check" : "Grounded insight"}</div>
-                <h3>{message.insight.title}</h3>
-                <p>{message.insight.conclusion}</p>
-                <div className="brain-insight-metrics">
-                  {message.insight.metrics.map((metric) => <div key={metric.label}><span>{metric.label}</span><strong className={metric.tone}>{metric.value}</strong></div>)}
-                </div>
+                <h3>{message.insight.title}</h3><p>{message.insight.conclusion}</p>
+                <div className="brain-insight-metrics">{message.insight.metrics.map((metric) => <div key={metric.label}><span>{metric.label}</span><strong className={metric.tone}>{metric.value}</strong></div>)}</div>
                 <details><summary>Calculation notes</summary><ul>{message.insight.assumptions.map((assumption) => <li key={assumption}>{assumption}</li>)}</ul></details>
                 <Link href={message.insight.relatedHref}>{message.insight.relatedLabel}<ArrowRight size={13} /></Link>
               </article>
             )}
           </div>
         ))}
-        {phase && <div className="brain-stage"><LoaderCircle className="spin" size={12} /><span>{phaseLabels[phase]}<small>{phaseDetail}</small></span></div>}
+        {phase && (
+          <div className="brain-progress" role="status" aria-live="polite">
+            <div className="brain-progress-current"><LoaderCircle className="spin" size={14} /><span><strong>{phaseLabels[phase]}</strong><small>{reconnecting ? "Reconnecting to the same build" : phaseDetail}</small></span><time>{Math.floor(elapsedSeconds / 60)}:{String(elapsedSeconds % 60).padStart(2, "0")}</time></div>
+            {visiblePhases.length > 1 && <ol className="brain-phase-timeline">{visiblePhases.map((item) => <li className={item === phase ? "active" : "complete"} key={item}>{phaseLabels[item]}</li>)}</ol>}
+            {busy && <button className="brain-stop" type="button" onClick={() => void stopRun()}><Square size={9} />Stop</button>}
+          </div>
+        )}
         {pending && !busy && (
           <form className="clarification-card" onSubmit={submitClarification}>
-            {pending.questions.map((question, index) => (
-              <label key={question}><span>{question}</span><textarea aria-label={`Answer ${index + 1}`} value={answers[index] ?? ""} onChange={(event) => setAnswers((current) => current.map((answer, answerIndex) => answerIndex === index ? event.target.value.slice(0, 1_000) : answer))} /></label>
-            ))}
+            {pending.questions.map((question, index) => <label key={question}><span>{question}</span><textarea aria-label={`Answer ${index + 1}`} value={answers[index] ?? ""} onChange={(event) => setAnswers((current) => current.map((answer, answerIndex) => answerIndex === index ? event.target.value.slice(0, 1_000) : answer))} /></label>)}
             <button type="submit" disabled={answers.some((answer) => !answer.trim())}>Build workspace</button>
           </form>
         )}
@@ -237,8 +455,8 @@ export function BrainPanel({
         </form>
       )}
       <form className="brain-composer" onSubmit={submit}>
-        <textarea className="brain-input" value={input} onChange={(event) => setInput(event.target.value.slice(0, 1_000))} placeholder={pending ? "Answer the questions above…" : activeWorkspace ? "Ask a question or describe a revision…" : "Ask about your money, or describe a tool…"} aria-label="Message the Financial Brain" />
-        <div className="composer-footer"><span className="composer-hint">{input.length}/1000 · Demo data · Educational, not advice</span><button className="send-button" disabled={busy || !input.trim()} aria-label="Send message"><ArrowUp size={14} /></button></div>
+        <textarea className="brain-input" value={input} onChange={(event) => setInput(event.target.value.slice(0, 1_000))} onKeyDown={onComposerKeyDown} placeholder={pending ? "Answer the questions above…" : activeWorkspace ? "Ask a question or describe a revision…" : "Ask about your money, or describe a tool…"} aria-label="Message the Financial Brain" aria-describedby="brain-composer-hint" />
+        <div className="composer-footer"><span className="composer-hint" id="brain-composer-hint">Enter to send · Shift+Enter for a new line · {input.length}/1000 · Educational, not advice</span><button className="send-button" disabled={busy || !input.trim()} aria-label="Send message"><ArrowUp size={14} /></button></div>
       </form>
     </section>
   );

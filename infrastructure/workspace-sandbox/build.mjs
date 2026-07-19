@@ -23,7 +23,11 @@ await build({
     name: "workspace-sdk",
     setup(api) {
       api.onResolve({ filter: /^@findex\/workspace-sdk$/ }, () => ({ path: "workspace-sdk", namespace: "findex" }));
-      api.onLoad({ filter: /.*/, namespace: "findex" }, () => ({ contents: sdk, loader: "tsx" }));
+      api.onLoad({ filter: /.*/, namespace: "findex" }, () => ({
+        contents: sdk,
+        loader: "tsx",
+        resolveDir: process.cwd(),
+      }));
     },
   }],
 });

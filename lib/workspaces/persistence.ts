@@ -1,9 +1,10 @@
 import { workspaceArtifactSchema, type WorkspaceArtifactV2, type WorkspaceProject } from "./contracts";
 
 const DB_NAME = "findex-generative-workspaces";
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 type StateRecord = { id: string; projectId: string; key: string; value: unknown; updatedAt: string };
+export type ActiveBrainRun = { runId: string; accessToken: string; lastEventIndex: number };
 
 function requestResult<T>(request: IDBRequest<T>) {
   return new Promise<T>((resolve, reject) => {
@@ -34,8 +35,42 @@ async function openDatabase() {
       const store = database.createObjectStore("state", { keyPath: "id" });
       store.createIndex("projectId", "projectId", { unique: false });
     }
+    if (!database.objectStoreNames.contains("brainRuns")) database.createObjectStore("brainRuns");
   };
   return requestResult(request);
+}
+
+export async function getActiveBrainRun() {
+  const database = await openDatabase();
+  try {
+    return await requestResult(database.transaction("brainRuns").objectStore("brainRuns").get("active")) as ActiveBrainRun | undefined;
+  } finally {
+    database.close();
+  }
+}
+
+export async function saveActiveBrainRun(run: ActiveBrainRun) {
+  const database = await openDatabase();
+  try {
+    const transaction = database.transaction("brainRuns", "readwrite");
+    transaction.objectStore("brainRuns").put(run, "active");
+    await transactionDone(transaction);
+  } finally {
+    database.close();
+  }
+}
+
+export async function clearActiveBrainRun(runId?: string) {
+  const database = await openDatabase();
+  try {
+    const transaction = database.transaction("brainRuns", "readwrite");
+    const store = transaction.objectStore("brainRuns");
+    const active = await requestResult(store.get("active")) as ActiveBrainRun | undefined;
+    if (!runId || active?.runId === runId) store.delete("active");
+    await transactionDone(transaction);
+  } finally {
+    database.close();
+  }
 }
 
 export async function listWorkspaceProjects() {

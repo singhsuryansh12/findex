@@ -44,7 +44,7 @@ describe("workspace capability broker", () => {
     }));
     expect(response.status).toBe(200);
     const payload = await response.json() as { ok: boolean; source: string; result: { netWorthCents: number } };
-    expect(payload).toMatchObject({ ok: true, source: "FinDex demo ledger" });
+    expect(payload).toMatchObject({ ok: true, source: "Findex demo ledger" });
     expect(payload.result.netWorthCents).toBeGreaterThan(0);
   });
 

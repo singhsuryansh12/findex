@@ -11,6 +11,7 @@ const eslintConfig = defineConfig([
     ".next/**",
     "out/**",
     "build/**",
+    "app/.well-known/workflow/**",
     "infrastructure/workspace-sandbox/dist/**",
     "infrastructure/workspace-sandbox/test-results/**",
     "next-env.d.ts",

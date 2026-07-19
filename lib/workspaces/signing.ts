@@ -16,6 +16,13 @@ type ClarificationTokenPayload = {
   expiresAt: number;
 };
 
+type RunTokenPayload = {
+  type: "run";
+  sessionId: string;
+  runId: string;
+  expiresAt: number;
+};
+
 function secret() {
   const configured = process.env.DEMO_SESSION_SECRET;
   if (configured) {
@@ -26,7 +33,7 @@ function secret() {
   return "local-findex-workspace-signing-secret";
 }
 
-function encode(payload: CapabilityTokenPayload | ClarificationTokenPayload) {
+function encode(payload: CapabilityTokenPayload | ClarificationTokenPayload | RunTokenPayload) {
   const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
   const signature = createHmac("sha256", secret()).update(body).digest("base64url");
   return `${body}.${signature}`;
@@ -58,7 +65,7 @@ export function verifyArtifactSignature(
   return left.length === right.length && timingSafeEqual(left, right);
 }
 
-function decode(token: string): CapabilityTokenPayload | ClarificationTokenPayload | null {
+function decode(token: string): CapabilityTokenPayload | ClarificationTokenPayload | RunTokenPayload | null {
   const [body, provided] = token.split(".");
   if (!body || !provided) return null;
   const expected = createHmac("sha256", secret()).update(body).digest("base64url");
@@ -66,7 +73,7 @@ function decode(token: string): CapabilityTokenPayload | ClarificationTokenPaylo
   const right = Buffer.from(provided);
   if (left.length !== right.length || !timingSafeEqual(left, right)) return null;
   try {
-    const parsed = JSON.parse(Buffer.from(body, "base64url").toString("utf8")) as CapabilityTokenPayload | ClarificationTokenPayload;
+    const parsed = JSON.parse(Buffer.from(body, "base64url").toString("utf8")) as CapabilityTokenPayload | ClarificationTokenPayload | RunTokenPayload;
     if (!parsed.expiresAt || parsed.expiresAt <= Date.now()) return null;
     return parsed;
   } catch {
@@ -98,4 +105,13 @@ export function signClarificationToken(sessionId: string, originalPrompt: string
 export function verifyClarificationToken(token: string, sessionId: string) {
   const payload = decode(token);
   return payload?.type === "clarification" && payload.sessionId === sessionId ? payload : null;
+}
+
+export function signRunAccessToken(sessionId: string, runId: string) {
+  return encode({ type: "run", sessionId, runId, expiresAt: Date.now() + 30 * 60 * 1_000 });
+}
+
+export function verifyRunAccessToken(token: string, sessionId: string, runId: string) {
+  const payload = decode(token);
+  return payload?.type === "run" && payload.sessionId === sessionId && payload.runId === runId ? payload : null;
 }

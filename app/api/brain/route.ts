@@ -1,6 +1,8 @@
 import OpenAI from "openai";
 import type { Responses } from "openai/resources/responses/responses";
+import { start } from "workflow/api";
 import { brainRequestSchema, type BrainEvent, type BrainInsightCard } from "@/lib/brain/contracts";
+import { classifyBrainIntent } from "@/lib/brain/routing";
 import { previousCalendarMonth } from "@/lib/finance/dates";
 import {
   compareSpendingPeriods,
@@ -15,13 +17,15 @@ import {
   getPortfolioSnapshot,
   getSpendingSummary,
 } from "@/lib/finance/engine";
-import { complexityPolicy, enforceComplexityFloor } from "@/lib/workspaces/complexity";
+import { calibrateInitialComplexity, enforceComplexityFloor } from "@/lib/workspaces/complexity";
 import type { WorkspaceBuildPlan } from "@/lib/workspaces/contracts";
-import { generateWorkspace } from "@/lib/workspaces/generator";
-import { assessBuildComplexity, planWorkspace, workspaceModel } from "@/lib/workspaces/planner";
+import { FINDEX_MODELS, independentSignal, planningPolicy, stageDeadlines } from "@/lib/workspaces/model-policy";
+import { logModelTrace, normalizeModelError, requireCompletedResponse, traceFor, usageOf, WorkspaceModelError } from "@/lib/workspaces/openai-response";
+import { assessBuildComplexity, planWorkspace } from "@/lib/workspaces/planner";
 import { sessionFor } from "@/lib/workspaces/session";
-import { signClarificationToken, verifyClarificationToken } from "@/lib/workspaces/signing";
+import { signClarificationToken, signRunAccessToken, verifyClarificationToken } from "@/lib/workspaces/signing";
 import { consumeBrainTurn, consumeWorkspaceBuild, type BrainQuotaState } from "@/lib/workspaces/quotas";
+import { financialWorkspaceWorkflow } from "@/workflows/financial-workspace";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -32,7 +36,7 @@ const quota = new Map<string, BrainQuotaState>();
 const financeTools: Responses.FunctionTool[] = [
   {
     type: "function", name: "get_spending_summary", strict: true,
-    description: "Calculate a spending total and transaction count for an exact period and optional FinDex category.",
+    description: "Calculate a spending total and transaction count for an exact period and optional Findex category.",
     parameters: {
       type: "object", additionalProperties: false,
       properties: {
@@ -318,20 +322,31 @@ async function answerFinancialQuestion(
 ) {
   const previous = previousCalendarMonth(demoData.metadata.asOfDate);
   const categories = demoData.categories.map((category) => `${category.id}=${category.name}`).join(", ");
-  const first = await client.responses.create({
-    model: workspaceModel(),
+  let transientRetriesRemaining = 1;
+  const withTransientRetry = async <T,>(operation: () => Promise<T>) => {
+    try {
+      return await operation();
+    } catch (error) {
+      if (normalizeModelError(error).code !== "MODEL_TRANSIENT" || transientRetriesRemaining === 0) throw error;
+      transientRetriesRemaining -= 1;
+      return operation();
+    }
+  };
+  const first = await withTransientRetry(() => client.responses.create({
+    model: FINDEX_MODELS.terra,
     reasoning: { effort: "low" },
-    instructions: `Answer from FinDex's mocked USD ledger as of ${demoData.metadata.asOfDate}. Previous calendar month is ${previous.startDate} through ${previous.endDate}. Categories: ${categories}. Use a function for every numeric claim. Never invent transactions or calculate monetary totals yourself. Be concise and educational, not financial advice.`,
+    instructions: `Answer from Findex's mocked USD ledger as of ${demoData.metadata.asOfDate}. Previous calendar month is ${previous.startDate} through ${previous.endDate}. Categories: ${categories}. Use a function for every numeric claim. Never invent transactions or calculate monetary totals yourself. Be concise and educational, not financial advice.`,
     input: [...body.history.slice(-12), { role: "user" as const, content: body.message }],
     tools: financeTools,
     tool_choice: "required",
     parallel_tool_calls: false,
     max_output_tokens: 1_200,
-  }, { signal });
+  }, { signal, maxRetries: 0 }));
+  requireCompletedResponse(first, "the financial answer");
   const calls = first.output.filter((item): item is Responses.ResponseFunctionToolCall => item.type === "function_call");
   if (!calls.length) {
     await emitText(controller, first.output_text || "I couldn’t ground that answer in the demo ledger.");
-    return;
+    return usageOf(first);
   }
   const outputs = calls.map((call) => {
     const execution = executeFinanceTool(call.name, call.arguments);
@@ -340,18 +355,23 @@ async function answerFinancialQuestion(
     if (card) emit(controller, { type: "insight_card", card });
     return { type: "function_call_output" as const, call_id: call.call_id, output: JSON.stringify(execution.result) };
   });
-  const stream = await client.responses.create({
-    model: workspaceModel(),
+  const stream = await withTransientRetry(() => client.responses.create({
+    model: FINDEX_MODELS.terra,
     reasoning: { effort: "low" },
     previous_response_id: first.id,
     input: outputs,
     tools: financeTools,
     max_output_tokens: 1_200,
     stream: true,
-  }, { signal });
+  }, { signal, maxRetries: 0 }));
+  let finalResponse: Responses.Response | null = null;
   for await (const event of stream) {
     if (event.type === "response.output_text.delta") emit(controller, { type: "assistant_delta", delta: event.delta });
+    if (event.type === "response.completed" || event.type === "response.incomplete" || event.type === "response.failed") finalResponse = event.response;
   }
+  if (!finalResponse) throw new WorkspaceModelError("MODEL_FAILED", "Findex could not complete the financial answer.");
+  requireCompletedResponse(finalResponse, "the financial answer");
+  return addUsage(usageOf(first), usageOf(finalResponse));
 }
 
 function currentQuota(sessionId: string) {
@@ -379,13 +399,50 @@ async function orchestrate(
   state: ReturnType<typeof currentQuota>,
   controller: ReadableStreamDefaultController<Uint8Array>,
   signal: AbortSignal,
+  requestId: string,
 ) {
   if (!process.env.OPENAI_API_KEY) {
     if (await deterministicLedgerAnswer(body.message, controller)) return;
-    emit(controller, { type: "workspace_failed", message: "Generative workspaces require OPENAI_API_KEY. No canned or unrelated workspace was substituted.", recoverable: true });
+    emit(controller, {
+      type: "workspace_failed",
+      code: "BUILD_UNAVAILABLE",
+      message: "Findex couldn't start a workspace build because secure generation is unavailable. Nothing was published.",
+      recoverable: true,
+    });
     return;
   }
-  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, maxRetries: 0 });
+  if (classifyBrainIntent(body.message, {
+    hasActiveWorkspace: Boolean(body.activeWorkspace),
+    hasClarificationToken: Boolean(body.clarificationToken),
+  }) === "financial_question") {
+    const startedAt = Date.now();
+    try {
+      const usage = await answerFinancialQuestion(client, body, controller, independentSignal(stageDeadlines.financialAnswerMs, signal));
+      logModelTrace(requestId, traceFor({
+        stage: "financial_answer", model: FINDEX_MODELS.terra, effort: "low", attempt: 1,
+        durationMs: Date.now() - startedAt, usage, outcome: "completed",
+      }));
+    } catch (rawError) {
+      const error = normalizeModelError(rawError, "financial answer");
+      const outcome = error.code === "PLAN_REFUSED" ? "refused"
+        : error.code === "PLAN_TIMEOUT" ? "timed_out"
+          : error.code === "PLAN_TOKEN_LIMIT" ? "incomplete" : "failed";
+      logModelTrace(requestId, traceFor({
+        stage: "financial_answer", model: FINDEX_MODELS.terra, effort: "low", attempt: 1,
+        durationMs: Date.now() - startedAt, usage: error.metadata.usage, outcome,
+        responseId: error.metadata.responseId, incompleteReason: error.metadata.incompleteReason,
+      }));
+      emit(controller, {
+        type: "error",
+        message: error.code === "PLAN_REFUSED"
+          ? "Findex couldn't answer that request safely."
+          : "Findex couldn't answer that right now. Please try again.",
+        recoverable: error.code !== "PLAN_REFUSED",
+      });
+    }
+    return;
+  }
   let prompt = body.message;
   let clarificationRoundComplete = false;
   if (body.clarificationToken) {
@@ -398,56 +455,31 @@ async function orchestrate(
     clarificationRoundComplete = true;
   }
 
-  emit(controller, { type: "build_progress", phase: "assessing", detail: "Sol is assessing scope, risk, and implementation complexity" });
+  emit(controller, { type: "build_progress", phase: "assessing", detail: "Findex is assessing scope, risk, and implementation complexity" });
   const assessmentStartedAt = Date.now();
-  const assessed = await assessBuildComplexity(client, prompt, body.activeWorkspace, body.clarificationAnswers, signal);
+  const assessed = await assessBuildComplexity(client, prompt, body.activeWorkspace, body.clarificationAnswers, signal, requestId);
   const assessmentMs = Date.now() - assessmentStartedAt;
-  let assessment = assessed.assessment;
-  let effort = complexityPolicy[assessment.level].effort;
-  let tierSignal = AbortSignal.any([signal, AbortSignal.timeout(complexityPolicy[assessment.level].budgetMs)]);
-  let planningMs = 0;
-  emit(controller, { type: "build_progress", phase: "planning", detail: `Sol is planning with ${effort} reasoning`, complexity: assessment.level });
-  let planningStartedAt = Date.now();
-  let planned = await planWorkspace(client, {
+  let assessment = calibrateInitialComplexity(assessed.assessment, prompt, Boolean(body.activeWorkspace));
+  const initialPlanningPolicy = planningPolicy(assessment.level);
+  emit(controller, { type: "build_progress", phase: "planning", detail: "Findex is planning your workspace", complexity: assessment.level });
+  const planningStartedAt = Date.now();
+  const planned = await planWorkspace(client, {
     prompt,
     active: body.activeWorkspace,
     clarificationAnswers: body.clarificationAnswers,
     clarificationRoundComplete,
-    effort,
+    effort: initialPlanningPolicy.effort,
     assessment,
-    signal: tierSignal,
+    signal,
+    requestId,
   });
-  planningMs += Date.now() - planningStartedAt;
-  for (let escalation = 0; escalation < 2; escalation += 1) {
-    const floored = enforceComplexityFloor(assessment, planned.plan);
-    if (floored.level === assessment.level) {
-      assessment = floored;
-      break;
-    }
-    assessment = floored;
-    effort = complexityPolicy[assessment.level].effort;
-    tierSignal = AbortSignal.any([signal, AbortSignal.timeout(complexityPolicy[assessment.level].budgetMs)]);
-    emit(controller, { type: "build_progress", phase: "planning", detail: `Declared capabilities raised planning to ${effort} reasoning`, complexity: assessment.level });
-    planningStartedAt = Date.now();
-    const replanned = await planWorkspace(client, {
-      prompt,
-      active: body.activeWorkspace,
-      clarificationAnswers: body.clarificationAnswers,
-      clarificationRoundComplete,
-      effort,
-      assessment,
-      signal: tierSignal,
-    });
-    planningMs += Date.now() - planningStartedAt;
-    planned = { plan: replanned.plan, usage: addUsage(planned.usage, replanned.usage) };
-  }
+  const planningMs = Date.now() - planningStartedAt;
   assessment = enforceComplexityFloor(assessment, planned.plan);
-  effort = complexityPolicy[assessment.level].effort;
 
   const plan: WorkspaceBuildPlan = planned.plan;
   if (plan.intent === "answer") {
-    if (plan.capabilities.some((capability) => capability.startsWith("ledger."))) await answerFinancialQuestion(client, body, controller, signal);
-    else await emitText(controller, plan.response || "FinDex builds finance-native browser workspaces and answers questions grounded in the demo ledger.");
+    if (plan.capabilities.some((capability) => capability.startsWith("ledger."))) await answerFinancialQuestion(client, body, controller, independentSignal(stageDeadlines.financialAnswerMs, signal));
+    else await emitText(controller, plan.response || "Findex builds finance-native browser workspaces and answers questions grounded in the demo ledger.");
     return;
   }
   if (plan.intent === "clarify" && !clarificationRoundComplete) {
@@ -468,8 +500,8 @@ async function orchestrate(
     emit(controller, { type: "workspace_failed", message: "This demo session has reached its daily limit of ten workspace builds and revisions.", recoverable: false });
     return;
   }
-  const artifact = await generateWorkspace({
-    client,
+  const run = await start(financialWorkspaceWorkflow, [{
+    requestId,
     prompt,
     plan,
     assessment,
@@ -477,36 +509,41 @@ async function orchestrate(
     sessionId,
     initialUsage: addUsage(assessed.usage, planned.usage),
     initialTimings: { assessmentMs, planningMs },
-    onProgress: (phase, detail) => emit(controller, { type: "build_progress", phase, detail, complexity: assessment.level }),
-    signal: tierSignal,
-  });
-  emit(controller, { type: "workspace_published", artifact });
-  const assumptionSummary = artifact.plan.assumptions.length
-    ? ` Remaining assumptions: ${artifact.plan.assumptions.slice(0, 3).join("; ")}.`
-    : " No unstated assumptions remain.";
-  await emitText(controller, `${artifact.title} passed ${artifact.validation.checks.length} checks and an independent Sol review. It is saved as version ${artifact.version}; continue prompting to revise it.${assumptionSummary}`);
+    initialTraces: [...assessed.traces, ...planned.traces],
+    deadlineAt: Date.now() + stageDeadlines.workflowMs,
+  }]);
+  const accessToken = signRunAccessToken(sessionId, run.runId);
+  console.info(JSON.stringify({ event: "findex_workflow_started", requestId, runId: run.runId, complexity: assessment.level }));
+  emit(controller, { type: "workspace_started", runId: run.runId, accessToken });
 }
 
 export async function POST(request: Request) {
   const parsed = brainRequestSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return Response.json({ error: "Invalid Brain request.", issues: parsed.error.issues }, { status: 400 });
   const session = sessionFor(request);
+  const requestId = crypto.randomUUID();
   const state = currentQuota(session.id);
   if (!consumeBrainTurn(state)) return Response.json({ error: "This demo session has reached its daily 25-turn limit." }, { status: 429 });
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
-      const signal = AbortSignal.any([request.signal, AbortSignal.timeout(295_000)]);
+      const signal = independentSignal(stageDeadlines.brainRequestMs, request.signal);
       try {
-        await orchestrate(parsed.data, session.id, state, controller, signal);
+        await orchestrate(parsed.data, session.id, state, controller, signal, requestId);
       } catch (error) {
-        const timedOut = error instanceof Error && ["TimeoutError", "AbortError"].includes(error.name);
+        const modelError = error instanceof WorkspaceModelError ? error : normalizeModelError(error, "request");
+        console.warn(JSON.stringify({ event: "findex_brain_failed", requestId, code: modelError.code }));
         emit(controller, {
           type: "workspace_failed",
-          message: timedOut
-            ? "The build timed out. The previously published workspace is unchanged and you can retry safely."
-            : error instanceof Error ? error.message : "The request failed. The previously published workspace is unchanged.",
-          recoverable: true,
+          message: modelError.code === "PLAN_TIMEOUT"
+            ? "Findex couldn't finish planning in time; nothing was published. Your previous workspace is unchanged."
+            : modelError.code === "PLAN_REFUSED"
+              ? "Findex couldn't plan that request safely; nothing was published."
+              : modelError.code === "PLAN_TOKEN_LIMIT"
+                ? "Findex couldn't finish planning within the available response capacity; nothing was published."
+                : "Findex couldn't finish planning; nothing was published. Your previous workspace is unchanged.",
+          recoverable: modelError.code !== "PLAN_REFUSED",
+          code: modelError.code,
         });
       } finally {
         controller.close();

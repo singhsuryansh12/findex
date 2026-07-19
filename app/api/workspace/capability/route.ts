@@ -13,7 +13,7 @@ import {
   transactionInputSchema,
 } from "@/lib/workspaces/capability-inputs";
 import { capabilityNameSchema } from "@/lib/workspaces/contracts";
-import { workspaceModel } from "@/lib/workspaces/planner";
+import { FINDEX_MODELS } from "@/lib/workspaces/model-policy";
 import { normalizeTwelveQuote, normalizeTwelveSearch, normalizeTwelveTimeSeries } from "@/lib/workspaces/providers";
 import { sessionFor } from "@/lib/workspaces/session";
 import { verifyArtifactSignature, verifyCapabilityToken } from "@/lib/workspaces/signing";
@@ -94,30 +94,30 @@ async function executeCapability(capability: z.infer<typeof capabilityNameSchema
   const ledgerFreshAt = `${demoData.metadata.asOfDate}T00:00:00.000Z`;
   if (capability === "ledger.snapshot") {
     emptyCapabilityInputSchema.parse(input);
-    return { result: getFinancialSnapshot(), source: "FinDex demo ledger", freshAt: ledgerFreshAt };
+    return { result: getFinancialSnapshot(), source: "Findex demo ledger", freshAt: ledgerFreshAt };
   }
   if (capability === "ledger.forecast") {
     emptyCapabilityInputSchema.parse(input);
-    return { result: getForecast(), source: "FinDex deterministic forecast", freshAt: ledgerFreshAt };
+    return { result: getForecast(), source: "Findex deterministic forecast", freshAt: ledgerFreshAt };
   }
   if (capability === "ledger.portfolio") {
     emptyCapabilityInputSchema.parse(input);
-    return { result: getPortfolioSnapshot(), source: "FinDex deterministic demo portfolio", freshAt: ledgerFreshAt };
+    return { result: getPortfolioSnapshot(), source: "Findex deterministic demo portfolio", freshAt: ledgerFreshAt };
   }
   if (capability === "ledger.cashflow") {
     const parsed = cashFlowInputSchema.parse(input);
-    return { result: getCashFlowForecast({ days: Number(parsed.days) as 30 | 60 | 90 }), source: "FinDex deterministic cash-flow model", freshAt: ledgerFreshAt };
+    return { result: getCashFlowForecast({ days: Number(parsed.days) as 30 | 60 | 90 }), source: "Findex deterministic cash-flow model", freshAt: ledgerFreshAt };
   }
   if (capability === "ledger.recurring") {
     emptyCapabilityInputSchema.parse(input);
     const result = demoData.recurringRules.filter((rule) => rule.active && rule.amountCents < 0)
       .map(({ name, amountCents, cadence, dayOfMonth, daysOfMonth, monthOfYear }) => ({ name, amountCents, cadence, dayOfMonth, daysOfMonth, monthOfYear }));
-    return { result, source: "FinDex demo ledger", freshAt: ledgerFreshAt };
+    return { result, source: "Findex demo ledger", freshAt: ledgerFreshAt };
   }
   if (capability === "ledger.transactions") {
     const parsed = transactionInputSchema.parse(input);
     const result = getFilteredTransactions(parsed.categoryId ?? undefined, parsed.limit);
-    return { result, source: `FinDex demo ledger · ${result.length} transactions`, freshAt: ledgerFreshAt };
+    return { result, source: `Findex demo ledger · ${result.length} transactions`, freshAt: ledgerFreshAt };
   }
   if (capability === "market.search") {
     const parsed = marketSearchInputSchema.parse(input);
@@ -145,9 +145,9 @@ async function executeCapability(capability: z.infer<typeof capabilityNameSchema
     if (!process.env.OPENAI_API_KEY) throw new Error("Cited research is unavailable because OPENAI_API_KEY is not configured.");
     const key = `research:${JSON.stringify(parsed)}`;
     const response = await cached(key, 30 * 60_000, async () => {
-      const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, maxRetries: 0 });
       return client.responses.create({
-        model: workspaceModel(),
+        model: FINDEX_MODELS.terra,
         reasoning: { effort: "low" },
         input: `Research this financial question. Clearly distinguish sourced facts from inference, include dates, and do not provide individualized financial advice:\n${parsed.query}`,
         tools: [{
@@ -157,7 +157,7 @@ async function executeCapability(capability: z.infer<typeof capabilityNameSchema
         }],
         include: ["web_search_call.action.sources"],
         max_output_tokens: 2_000,
-      });
+      }, { signal: AbortSignal.timeout(60_000), maxRetries: 0 });
     });
     return {
       result: { text: response.value.output_text, citations: [...collectCitations(response.value.output).values()] },
@@ -170,15 +170,15 @@ async function executeCapability(capability: z.infer<typeof capabilityNameSchema
     const serialized = JSON.stringify(parsed.context) ?? "null";
     if (serialized.length > 20_000) throw new Error("AI analysis context is limited to 20 KB.");
     if (!process.env.OPENAI_API_KEY) throw new Error("AI analysis is unavailable because OPENAI_API_KEY is not configured.");
-    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, maxRetries: 0 });
     const response = await client.responses.create({
-      model: workspaceModel(),
+      model: FINDEX_MODELS.terra,
       reasoning: { effort: parsed.depth === "standard" ? "medium" : "low" },
       instructions: "Analyze the supplied financial scenario using only the supplied context. State assumptions and uncertainty. Never claim to execute transactions or provide individualized financial advice.",
       input: `Task:\n${parsed.task}\n\nContext:\n${serialized}`,
       max_output_tokens: 1_500,
-    });
-    return { result: { text: response.output_text }, source: `${workspaceModel()} brokered analysis`, freshAt };
+    }, { signal: AbortSignal.timeout(60_000), maxRetries: 0 });
+    return { result: { text: response.output_text }, source: "Findex AI analysis", freshAt };
   }
   throw new Error(`${capability} is handled locally by the trusted workspace host.`);
 }

@@ -11,7 +11,7 @@ export function WorkspaceArtifactCard({ artifact, onRetry }: { artifact: Workspa
         <div>
           <div className="generated-badge"><Sparkles size={11} />Generated workspace · v{artifact.version}</div>
           <h2 className="panel-title">{artifact.title}</h2>
-          <div className="panel-subtitle">{artifact.provenance}</div>
+          <div className="panel-subtitle">Built, checked, and reviewed by Findex</div>
         </div>
         <div className="validation-row" aria-label="Artifact validation summary">
           <span><CheckCircle2 size={11} />{artifact.validation.checks.length} checks</span>
@@ -28,11 +28,21 @@ export function WorkspaceArtifactCard({ artifact, onRetry }: { artifact: Workspa
       </div>
       <div className="generated-preview"><WorkspaceSandbox key={artifact.id} artifact={artifact} /></div>
       <details className="source-details">
-        <summary><Code2 size={11} />View plan and {artifact.files.length} generated source files · {artifact.model}</summary>
+        <summary><Code2 size={11} />View technical provenance, plan, and {artifact.files.length} generated source files</summary>
         <div className="workspace-plan-summary">
+          <strong>Technical provenance</strong><p>{artifact.provenance}</p>
           <strong>Goal</strong><p>{artifact.plan.goal}</p>
           <strong>Complexity assessment</strong><p>{artifact.complexity.rationale}</p>
           <strong>Assumptions</strong><ul>{artifact.plan.assumptions.map((assumption) => <li key={assumption}>{assumption}</li>)}</ul>
+          {artifact.stageTraces?.length ? <>
+            <strong>Stage traces</strong>
+            <div className="workspace-trace-table-wrap"><table className="workspace-trace-table">
+              <thead><tr><th>Stage</th><th>Model</th><th>Effort</th><th>Attempt</th><th>Outcome</th><th>Duration</th><th>Tokens</th></tr></thead>
+              <tbody>{artifact.stageTraces.map((trace) => <tr key={`${trace.stage}-${trace.attempt}`}>
+                <td>{trace.stage}</td><td>{trace.model}</td><td>{trace.effort}</td><td>{trace.attempt}</td><td>{trace.outcome}</td><td>{(trace.durationMs / 1000).toFixed(1)}s</td><td>{trace.tokenUsage.totalTokens.toLocaleString("en-US")}</td>
+              </tr>)}</tbody>
+            </table></div>
+          </> : null}
         </div>
         {artifact.files.map((file) => <pre className="source-code" key={file.path}><b>{file.path}</b>{"\n\n"}<code>{file.content}</code></pre>)}
       </details>

@@ -47,3 +47,4 @@ next-env.d.ts
 /infrastructure/workspace-sandbox/dist/
 /infrastructure/workspace-sandbox/node_modules/
 /infrastructure/workspace-sandbox/test-results/
+/.swc

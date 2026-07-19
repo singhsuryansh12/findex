@@ -4,7 +4,7 @@ import { complexityPolicy, enforceComplexityFloor, nextEffort, normalizePlanForA
 import type { ActiveWorkspaceContext, WorkspaceBuildPlan, WorkspaceFile } from "@/lib/workspaces/contracts";
 import { validateWorkspaceFiles } from "@/lib/workspaces/policy";
 import { parseCapabilityInput } from "@/lib/workspaces/capability-inputs";
-import { signArtifactSignature, signCapabilityToken, signClarificationToken, verifyArtifactSignature, verifyCapabilityToken, verifyClarificationToken } from "@/lib/workspaces/signing";
+import { signArtifactSignature, signCapabilityToken, signClarificationToken, signRunAccessToken, verifyArtifactSignature, verifyCapabilityToken, verifyClarificationToken, verifyRunAccessToken } from "@/lib/workspaces/signing";
 
 const files: WorkspaceFile[] = [
   {
@@ -46,9 +46,9 @@ function plan(capabilities: WorkspaceBuildPlan["capabilities"], persistent = fal
 
 describe("adaptive reasoning policy", () => {
   it("maps simple, standard, and complex builds to calibrated effort and budgets", () => {
-    expect(complexityPolicy.simple).toMatchObject({ effort: "low", budgetMs: 90_000 });
-    expect(complexityPolicy.standard).toMatchObject({ effort: "medium", budgetMs: 160_000 });
-    expect(complexityPolicy.complex).toMatchObject({ effort: "high", budgetMs: 240_000 });
+    expect(complexityPolicy.simple).toMatchObject({ effort: "medium", budgetMs: 180_000, repairAttempts: 1 });
+    expect(complexityPolicy.standard).toMatchObject({ effort: "medium", budgetMs: 240_000, repairAttempts: 1 });
+    expect(complexityPolicy.complex).toMatchObject({ effort: "medium", budgetMs: 240_000, repairAttempts: 1 });
     expect(nextEffort("low")).toBe("medium");
     expect(nextEffort("medium")).toBe("high");
   });
@@ -57,8 +57,15 @@ describe("adaptive reasoning policy", () => {
     const base = { level: "simple" as const, riskFlags: [], rationale: "One screen" };
     expect(enforceComplexityFloor(base, plan(["ledger.snapshot"])).level).toBe("standard");
     expect(enforceComplexityFloor(base, plan(["market.quote"]))).toMatchObject({ level: "complex", riskFlags: ["live_data"] });
-    expect(enforceComplexityFloor(base, plan(["workspace.state"], true)).level).toBe("complex");
+    expect(enforceComplexityFloor(base, plan(["workspace.state"], true))).toMatchObject({ level: "standard", riskFlags: ["persistence"] });
     expect(enforceComplexityFloor(base, { ...plan([]), goal: "Model capital gains tax scenarios" }).level).toBe("complex");
+    expect(enforceComplexityFloor(base, {
+      ...plan([], true),
+      goal: "Build a calculator without trading or money movement",
+      interactions: ["Do not request credentials or account access"],
+      acceptanceCriteria: ["Contains no account access, trading, credentials, or money movement"],
+      disclosures: ["No trading or money movement"],
+    })).toMatchObject({ level: "standard", riskFlags: ["persistence"] });
   });
 
   it("forces active prompts to revise in place and preserves the persisted state schema", () => {
@@ -132,6 +139,13 @@ describe("signed workspace grants", () => {
     const token = signClarificationToken("session-a", "Build a planner", projectId);
     expect(verifyClarificationToken(token, "session-a")).toMatchObject({ originalPrompt: "Build a planner", activeProjectId: projectId });
     expect(verifyClarificationToken(token, "session-b")).toBeNull();
+  });
+
+  it("binds durable build access to the exact run and anonymous session", () => {
+    const token = signRunAccessToken("session-a", "run-a");
+    expect(verifyRunAccessToken(token, "session-a", "run-a")).toMatchObject({ type: "run", runId: "run-a" });
+    expect(verifyRunAccessToken(token, "session-a", "run-b")).toBeNull();
+    expect(verifyRunAccessToken(token, "session-b", "run-a")).toBeNull();
   });
 });
 
