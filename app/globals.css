@@ -971,6 +971,56 @@ button {
   margin: 4px 2px 14px;
 }
 
+.brain-stage span {
+  display: grid;
+  gap: 2px;
+}
+
+.brain-stage small {
+  color: rgba(255,255,255,.38);
+  font-size: 8px;
+  font-weight: 400;
+}
+
+.clarification-card {
+  border: 1px solid rgba(112, 185, 147, .25);
+  background: rgba(89, 157, 122, .1);
+  border-radius: 16px;
+  padding: 12px;
+  display: grid;
+  gap: 11px;
+  margin-bottom: 14px;
+}
+
+.clarification-card label {
+  display: grid;
+  gap: 6px;
+  color: rgba(255,255,255,.78);
+  font-size: 9px;
+  line-height: 1.4;
+}
+
+.clarification-card textarea {
+  min-height: 52px;
+  resize: vertical;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 10px;
+  padding: 8px;
+  color: white;
+  background: rgba(0,0,0,.12);
+  font-size: 10px;
+}
+
+.clarification-card button {
+  border: 0;
+  border-radius: 10px;
+  background: #dceae3;
+  color: var(--ink);
+  padding: 9px 12px;
+  font-size: 9px;
+  font-weight: 720;
+}
+
 .spin {
   animation: spin 1s linear infinite;
 }
@@ -1064,6 +1114,110 @@ button {
 .generated-section {
   margin-top: 16px;
   scroll-margin-top: 24px;
+  display: grid;
+  gap: 12px;
+}
+
+.workspace-library {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xl);
+  background: rgba(255,255,252,.72);
+  padding: 16px 18px;
+}
+
+.workspace-library-main {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+}
+
+.workspace-library h2 {
+  font-size: 16px;
+  margin: 3px 0 0;
+}
+
+.workspace-library-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.workspace-library-actions button,
+.workspace-library-actions select,
+.workspace-rename button,
+.workspace-rename input {
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: white;
+  color: var(--ink-soft);
+  padding: 7px 9px;
+  font-size: 9px;
+}
+
+.workspace-library-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.workspace-library-actions button.danger {
+  color: #994c3e;
+}
+
+.workspace-rename {
+  display: flex;
+  gap: 6px;
+  margin-top: 5px;
+}
+
+.workspace-storage-warning {
+  margin-top: 10px;
+  color: #8c5d33;
+  background: #f5ead9;
+  padding: 8px 10px;
+  border-radius: 9px;
+  font-size: 9px;
+}
+
+.workspace-history {
+  border-top: 1px solid var(--line);
+  margin-top: 12px;
+  padding-top: 10px;
+}
+
+.workspace-history summary {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 9px;
+}
+
+.workspace-history > div {
+  display: grid;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.workspace-history button {
+  border: 0;
+  border-radius: 9px;
+  padding: 8px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f4f3ee;
+  color: var(--ink-soft);
+  font-size: 9px;
+}
+
+.workspace-history button b,
+.workspace-history button:not(:disabled) > svg {
+  color: var(--emerald);
 }
 
 .generated-card {
@@ -1115,6 +1269,67 @@ button {
 .generated-preview {
   min-height: 420px;
   background: #fbfaf6;
+}
+
+.workspace-frame-wrap,
+.workspace-frame {
+  display: block;
+  width: 100%;
+  border: 0;
+}
+
+.workspace-frame {
+  min-height: 430px;
+  background: #fbfaf6;
+  transition: height .18s ease;
+}
+
+.workspace-runtime-error {
+  padding: 10px 14px;
+  background: #f8e4df;
+  color: #8e493e;
+  font-size: 10px;
+  border-bottom: 1px solid #ebc9c0;
+}
+
+.workspace-integrity-status {
+  min-height: 430px;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-size: 12px;
+  background: #fbfaf6;
+}
+
+.workspace-disclosures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px 14px;
+  padding: 9px 22px;
+  border-bottom: 1px solid var(--line);
+  background: #f6f6f1;
+  color: var(--muted);
+  font-size: 8px;
+}
+
+.workspace-disclosures span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.workspace-plan-summary {
+  padding: 16px 22px;
+  border-top: 1px solid var(--line);
+  color: var(--ink-soft);
+  font-size: 10px;
+}
+
+.workspace-plan-summary p,
+.workspace-plan-summary ul {
+  margin: 5px 0 12px;
+  color: var(--muted);
+  line-height: 1.55;
 }
 
 .generated-loading {
@@ -1376,7 +1591,8 @@ button {
     color: white;
   }
   .generated-header,
-  .empty-generated {
+  .empty-generated,
+  .workspace-library-main {
     align-items: flex-start;
     flex-direction: column;
   }

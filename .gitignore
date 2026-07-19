@@ -44,3 +44,6 @@ next-env.d.ts
 /work/
 /test-results/
 /playwright-report/
+/infrastructure/workspace-sandbox/dist/
+/infrastructure/workspace-sandbox/node_modules/
+/infrastructure/workspace-sandbox/test-results/

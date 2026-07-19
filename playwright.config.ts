@@ -15,7 +15,7 @@ export default defineConfig({
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
-    env: { ENABLE_LIVE_WIDGETS: "false" },
+    env: { OPENAI_API_KEY: "", WORKSPACE_EXECUTION_MODE: "disabled" },
   },
   projects: [
     { name: "desktop", use: { ...devices["Desktop Chrome"] } },
