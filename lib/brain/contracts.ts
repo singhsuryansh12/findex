@@ -29,6 +29,7 @@ export type BrainInsightCard = {
 
 export type BrainEvent =
   | { type: "assistant_delta"; delta: string }
+  | { type: "workspace_started"; runId: string; accessToken: string }
   | {
     type: "build_progress";
     phase: WorkspaceProgressPhase;
@@ -39,5 +40,5 @@ export type BrainEvent =
   | { type: "insight_card"; card: BrainInsightCard }
   | { type: "clarification_required"; questions: string[]; token: string; planTitle: string }
   | { type: "workspace_published"; artifact: WorkspaceArtifactV2 }
-  | { type: "workspace_failed"; message: string; recoverable: boolean }
+  | { type: "workspace_failed"; message: string; recoverable: boolean; code?: string }
   | { type: "error"; message: string; recoverable: boolean };

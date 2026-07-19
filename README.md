@@ -1,10 +1,10 @@
-# FinDex — Generative Financial OS
+# Findex — Generative Financial OS
 
-FinDex is a Brain-first, AI-native personal finance demo. Its Financial Brain connects a deterministic spending ledger, U.S. portfolio, income, and forward cash flow so a user can ask a question or test a decision before opening a detailed view.
+Findex is a Brain-first, AI-native personal finance demo. Its Financial Brain connects a deterministic spending ledger, U.S. portfolio, income, and forward cash flow so a user can ask a question or test a decision before opening a detailed view.
 
 The public demo is intentionally anonymous and single-user. It never asks for bank credentials, moves money, executes trades, or represents model output as individualized financial advice.
 
-![FinDex social preview](public/findex-og.png)
+![Findex social preview](public/findex-og.png)
 
 ## Product flows
 
@@ -12,38 +12,43 @@ The public demo is intentionally anonymous and single-user. It never asks for ba
 2. **Spending** — searchable, filterable activity plus distinct recurring list/calendar views at `/demo/spending`.
 3. **Portfolio and net worth** — four reconciled synthetic U.S. investment accounts, holdings, allocation, history, contributions, and dated IRS references at `/demo/portfolio`.
 4. **Income and cash flow** — 30/60/90-day projections, a reserve-protected safe-to-spend amount, transparent assumptions, and account runway at `/demo/cash-flow`.
-5. **Generative tools** — GPT-5.6 Sol builds, validates, versions, and publishes isolated finance-native React workspaces inside the Brain’s **My tools** drawer.
+5. **Generative tools** — Findex durably builds, validates, reviews, versions, and publishes isolated finance-native React workspaces inside the Brain’s **My tools** drawer.
 
 The frozen ledger prompt remains:
 
 > How much did I spend on dining out last month?
 
-FinDex answers **$366.21 across 8 Dining transactions, June 1–30, 2026**, with provenance and a deterministic comparison to May.
+Findex answers **$366.21 across 8 Dining transactions, June 1–30, 2026**, with provenance and a deterministic comparison to May.
 
 ## Architecture
 
 ```mermaid
 flowchart LR
     U["Natural-language prompt"] --> B["/api/brain · SSE"]
-    B --> C["Sol complexity preflight"]
-    C --> P["Sol structured workspace plan"]
+    B --> I{"Question or workspace?"}
+    I -->|Question| F["Terra · low reasoning · grounded tools"]
+    I -->|Workspace| C
+    C["Terra complexity preflight"]
+    C --> P["Adaptive structured workspace plan"]
     P --> Q{"Clarification needed?"}
     Q -->|Yes, once| U
-    Q -->|No| G["Sol controlled file-tool loop"]
+    Q -->|No| W["Vercel Workflow · resumable run"]
+    W --> G["Terra or Sol controlled file-tool loop"]
     G --> S["Local validator or Vercel Sandbox"]
     S --> V["Policy · TypeScript · tests · bundle"]
-    V --> R["Independent Sol review + repair"]
+    V --> R["Independent review + one targeted repair"]
     R --> A["Immutable WorkspaceArtifactV2"]
     A --> I["CSP-locked opaque iframe"]
     I <--> K["Validated capability broker"]
     A --> D["IndexedDB project/version library"]
 ```
 
-There is no widget-kind enum, prompt keyword classifier, FIRE scaffold, generated-source fallback, or browser-side compiler. A failed build leaves the last published version unchanged and reports the real diagnostic.
+There is no widget-kind enum, FIRE scaffold, generated-source fallback, or browser-side compiler. A narrow host-owned intent router keeps ordinary questions out of the paid workspace planner but never chooses a calculator kind. A failed build leaves the last published version unchanged and reports the real diagnostic.
 
 Detailed design references:
 
 - [Architecture and repository boundaries](docs/ARCHITECTURE.md)
+- [Financial Brain build policy and operations](docs/FINANCIAL_BRAIN_BUILDS.md)
 - [Generated workspace security](docs/SECURITY.md)
 - [Testing and release verification](docs/TESTING.md)
 - [Demo and release runbook](docs/DEMO_RUNBOOK.md)
@@ -63,21 +68,15 @@ tests/{unit,integration,e2e,evaluations}/
 docs/                             Architecture, security, testing, and runbooks
 ```
 
-## Adaptive GPT-5.6 Sol policy
+## Adaptive GPT-5.6 policy
 
-Every AI stage uses the enforced `gpt-5.6-sol` model:
+Terra is the default for Q&A, complexity assessment, standard planning, and ordinary builds. Sol handles complex planning/building, every independent review, and the single targeted repair. Planning allows at most two paid attempts; building allows the initial pass plus one repair. Independent deadlines keep every Function step below 300 seconds, while Vercel Workflow gives the full run a 20-minute ceiling and resumable indexed progress. The exact routing, retry, deadline, and failure matrix lives in [Financial Brain workspace builds](docs/FINANCIAL_BRAIN_BUILDS.md).
 
-| Complexity | Typical request | Reasoning | Budget | Repairs |
-| --- | --- | --- | --- | --- |
-| Simple | One view, hypothetical inputs, straightforward math | low | 90s | 1 |
-| Standard | Multiple calculations/charts, ledger data, export | medium | 160s | 2 |
-| Complex | Live data, runtime AI, persistence, migrations, multi-view/tax/portfolio logic | high | 240s | 2 |
-
-A low-effort strict preflight selects the initial tier. The server raises the tier from declared capabilities and persistence requirements, so prompt text cannot lower safeguards. A failed validation raises the next repair one effort tier, capped at high. Model, effort, rationale, escalations, token usage, validation, and timings are recorded in every artifact.
+The server raises build policy from declared capabilities and persistence requirements without paying for a redundant re-plan. Model, effort, attempt, response state, token usage, validation, and timings are recorded in each artifact’s collapsed technical provenance.
 
 ## Security boundary
 
-- Sol can only list, read, write, exactly patch, or delete bounded `src/**/*.ts`, `tsx`, and CSS files, run a trusted check, and finish. It has no arbitrary shell tool.
+- The builder can only list, read, write, exactly patch, or delete bounded `src/**/*.ts`, `tsx`, and CSS files, run a trusted check, and finish. It has no arbitrary shell tool.
 - Imports are limited to pinned React, ReactDOM, Recharts, Lucide, date-fns, relative source, and `@findex/workspace-sdk`.
 - Static validation rejects path escapes, dynamic imports, network APIs, browser storage, parent/document/window access, unsafe HTML, nested frames, scripts, forms, runtime evaluation, external CSS URLs, source over 256 KB, and bundles over 2 MB.
 - Hosted checks use a pinned Vercel Sandbox snapshot with `networkPolicy: "deny-all"`. OpenAI and provider credentials never enter generated files or the sandbox.
@@ -91,7 +90,7 @@ Generated applications can request only capabilities granted by their structured
 - demo-ledger snapshot, transactions, recurring obligations, forecast, portfolio, and cash flow;
 - Twelve Data symbol search, quotes, and time series;
 - cited OpenAI web research;
-- bounded Sol analysis over supplied context;
+- bounded Findex AI analysis over supplied context;
 - namespaced IndexedDB state and controlled JSON/CSV export.
 
 Provider failures remain explicit and timestamped. Mock values are never substituted or labeled as live data. Quotes cache for 60 seconds, time series for 15 minutes, and research for 30 minutes. The anonymous demo limits capability calls, expensive AI/research actions, and builds per session.
@@ -130,12 +129,11 @@ All credentials are server-only; none uses a `NEXT_PUBLIC_` prefix.
 
 | Variable | Purpose |
 | --- | --- |
-| `OPENAI_API_KEY` | Sol planning, generation, review, grounded answers, runtime AI, and cited research |
-| `OPENAI_BUILD_MODEL` | Documented enforced value `gpt-5.6-sol`; non-Sol values are ignored |
+| `OPENAI_API_KEY` | Adaptive planning, generation, review, grounded answers, runtime AI, and cited research |
 | `TWELVE_DATA_API_KEY` | Server-side symbol, quote, and time-series data |
 | `WORKSPACE_EXECUTION_MODE` | `auto`, `local`, `vercel`, or `disabled`; auto selects Vercel in production |
 | `VERCEL_SANDBOX_SNAPSHOT_ID` | Pinned hosted validation/build image |
-| `DEMO_SESSION_SECRET` | HMAC signing for anonymous sessions, clarification tokens, and artifact grants |
+| `DEMO_SESSION_SECRET` | HMAC signing for anonymous sessions, clarification/run access tokens, and artifact grants |
 | `DEMO_AS_OF`, `DEMO_SEED` | Deterministic ledger regeneration inputs |
 
 ## Brain and artifact interfaces
@@ -147,10 +145,13 @@ All credentials are server-only; none uses a `NEXT_PUBLIC_` prefix.
 - `tool_result`
 - `insight_card`
 - `clarification_required`
+- `workspace_started`
 - `workspace_published`
 - `workspace_failed`
 
-`WorkspaceArtifactV2` contains project/version lineage, prompt, plan, multi-file source, compiled JS/CSS and content hash, a server signature, manifest, capability grants, state schema, validation/review results, Sol model and effort provenance, per-phase timings, token usage, repair count, and a signed broker token.
+`workspace_started` supplies a signed, session-bound run handle. IndexedDB stores only that run ID, access token, and last consumed event index. The UI resumes from `GET /api/brain/runs/[runId]/events`, recovers terminal output from `GET /api/brain/runs/[runId]`, and cancels with `POST /api/brain/runs/[runId]/cancel`.
+
+`WorkspaceArtifactV2` contains project/version lineage, prompt, plan, multi-file source, compiled JS/CSS and content hash, a server signature, manifest, capability grants, state schema, validation/review results, adaptive model/effort stage traces, per-phase timings, token usage, repair count, and a signed broker token.
 
 `POST /api/workspace/capability` revalidates the session, artifact ID, signed grant, exact capability, rate limit, and capability-specific Zod input before touching ledger, market, web-search, or AI services.
 

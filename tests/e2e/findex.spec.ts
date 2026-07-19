@@ -1,6 +1,51 @@
 import { expect, test } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { bundleWorkspace } from "@/lib/workspaces/bundle";
+import type { WorkspaceArtifactV2 } from "@/lib/workspaces/contracts";
+
+async function mockBrain(page: import("@playwright/test").Page) {
+  await page.route("**/api/brain", async (route) => {
+    if (route.request().method() !== "POST") return route.fallback();
+    const body = route.request().postDataJSON() as { message?: string };
+    const message = body.message?.toLowerCase() ?? "";
+    const events = message.includes("dining")
+      ? [
+          { type: "tool_result", tool: "get_spending_summary", summary: "$366.21", provenance: "8 Dining transactions · Jun 1–30" },
+          {
+            type: "insight_card",
+            card: {
+              kind: "spending", title: "Dining spending, explained", conclusion: "You spent $366.21 across 8 transactions in the selected period.",
+              metrics: [{ label: "Total", value: "$366.21" }, { label: "Transactions", value: "8" }, { label: "Top merchant", value: "Sweetgreen" }],
+              provenance: "8 Dining transactions · Jun 1–30", assumptions: ["Period: Jun 1–30", "Transfers and income are excluded"],
+              relatedHref: "/demo/spending", relatedLabel: "Review transactions",
+            },
+          },
+          { type: "assistant_delta", delta: "You spent $366.21 dining out last month across 8 transactions." },
+        ]
+      : message.includes("afford a car")
+        ? [
+            { type: "tool_result", tool: "evaluate_purchase_scenario", summary: "not_covered", provenance: "90-day purchase scenario · demo ledger" },
+            {
+              type: "insight_card",
+              card: {
+                kind: "decision", status: "not_covered", title: "This purchase is not covered", conclusion: "The modeled purchase would breach the protected checking buffer.",
+                metrics: [{ label: "Base lowest checking", value: "$8,809" }, { label: "Scenario lowest checking", value: "-$6,191", tone: "warning" }, { label: "Safe to spend after", value: "$0" }],
+                provenance: "90-day purchase scenario · demo ledger", assumptions: ["$15,000 upfront", "$650 recurring monthly cost"],
+                relatedHref: "/demo/cash-flow", relatedLabel: "Inspect the forecast",
+              },
+            },
+            { type: "assistant_delta", delta: "This purchase is not covered by the modeled cash-flow buffer." },
+          ]
+        : [
+            { type: "workspace_failed", code: "BUILD_UNAVAILABLE", message: "Findex couldn't start a workspace build because secure generation is unavailable. Nothing was published.", recoverable: true },
+          ];
+    await route.fulfill({
+      status: 200,
+      headers: { "content-type": "text/event-stream; charset=utf-8", "cache-control": "no-store" },
+      body: events.map((event) => `data: ${JSON.stringify(event)}\n\n`).join(""),
+    });
+  });
+}
 
 async function enterDemo(page: import("@playwright/test").Page) {
   await page.goto("/");
@@ -20,7 +65,7 @@ export default function App(){const [amount,setAmount]=useState(50000);return <m
     },
     { path: "src/styles.css", content: "body{font-family:system-ui}main{padding:24px}label{display:grid;gap:8px}output{display:block;font-size:24px;font-weight:700;margin-top:14px}" },
   ]);
-  await page.evaluate(async ({ javascript, css, sha256 }) => {
+  const seeded = await page.evaluate(async ({ javascript, css, sha256 }) => {
     const projectId = crypto.randomUUID();
     const firstId = crypto.randomUUID();
     const secondId = crypto.randomUUID();
@@ -43,8 +88,8 @@ export default function App(){const [amount,setAmount]=useState(50000);return <m
         tokenUsage: { inputTokens: 10, outputTokens: 10, totalTokens: 20 }, timings: { assessmentMs: 50, planningMs: 100, codingMs: 300, validationMs: 300, reviewMs: 250, totalMs: 1000 }, durationMs: 1000, repairCount: 0, generatedAt: new Date().toISOString(), provenance: "Test verified workspace", capabilityToken: "x".repeat(32), artifactSignature: "x".repeat(43),
       };
     }
-    const request = indexedDB.open("findex-generative-workspaces", 2);
-    await new Promise<void>((resolve, reject) => {
+    const request = indexedDB.open("findex-generative-workspaces", 3);
+    return new Promise<Record<string, unknown>>((resolve, reject) => {
       request.onupgradeneeded = () => {
         const db = request.result;
         if (!db.objectStoreNames.contains("projects")) db.createObjectStore("projects", { keyPath: "id" });
@@ -58,12 +103,18 @@ export default function App(){const [amount,setAmount]=useState(50000);return <m
         transaction.objectStore("projects").put({ id: projectId, name: "Adaptive purchase lab", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), activeVersionId: secondId });
         transaction.objectStore("artifacts").put(artifact(firstId, 1, null));
         transaction.objectStore("artifacts").put(artifact(secondId, 2, firstId));
-        transaction.oncomplete = () => { db.close(); localStorage.setItem("findex-active-workspace-v2", projectId); resolve(); };
+        transaction.oncomplete = () => {
+          const active = artifact(secondId, 2, firstId);
+          db.close();
+          localStorage.setItem("findex-active-workspace-v2", projectId);
+          resolve(active);
+        };
         transaction.onerror = () => reject(transaction.error);
       };
     });
   }, { javascript: compiled.javascript, css: compiled.css, sha256: compiled.sha256 });
   await page.reload();
+  return seeded as WorkspaceArtifactV2;
 }
 
 test("demo login lands on a calm Brain-first home", async ({ page }, testInfo) => {
@@ -158,6 +209,7 @@ test("cash-flow horizons update details without double-counting payroll", async 
 });
 
 test("Financial Brain streams the exact grounded dining answer", async ({ page }) => {
+  await mockBrain(page);
   await enterDemo(page);
   const input = page.getByLabel("Message the Financial Brain");
   await input.fill("How much did I spend on dining out last month?");
@@ -166,7 +218,25 @@ test("Financial Brain streams the exact grounded dining answer", async ({ page }
   await expect(page.locator(".provenance-chip").last()).toContainText("8 Dining transactions · Jun 1–30");
 });
 
+test("Financial Brain sends with Enter while preserving Shift+Enter and IME composition", async ({ page }) => {
+  await mockBrain(page);
+  await enterDemo(page);
+  const input = page.getByLabel("Message the Financial Brain");
+  const userMessages = page.locator(".message.user");
+  await input.fill("line one");
+  await input.press("Shift+Enter");
+  await expect(input).toHaveValue("line one\n");
+  await input.dispatchEvent("keydown", { key: "Enter", code: "Enter", isComposing: true });
+  await expect(userMessages).toHaveCount(0);
+  await input.fill("How much did I spend on dining out last month?");
+  await input.press("Enter");
+  await expect(userMessages).toHaveCount(1);
+  await expect(page.locator(".message.assistant").last()).toContainText("$366.21");
+  await expect(page.locator("body")).not.toContainText(/\bSol\b/);
+});
+
 test("a car scenario compares the base forecast with a not-covered result", async ({ page }) => {
+  await mockBrain(page);
   await enterDemo(page);
   await page.getByRole("button", { name: "Can I afford a car next month?" }).click();
   await page.getByLabel("Purchase date").fill("2026-08-15");
@@ -180,11 +250,12 @@ test("a car scenario compares the base forecast with a not-covered result", asyn
   await expect(card.getByRole("link", { name: "Inspect the forecast" })).toHaveAttribute("href", "/demo/cash-flow");
 });
 
-test("unconfigured generation fails explicitly without publishing an unrelated fallback", async ({ page }) => {
+test("unavailable generation fails explicitly without publishing an unrelated fallback", async ({ page }) => {
+  await mockBrain(page);
   await enterDemo(page);
   await page.getByLabel("Message the Financial Brain").fill("Build a cash versus EMI planner for a major purchase");
   await page.getByRole("button", { name: "Send message" }).click();
-  await expect(page.locator(".message.assistant").last()).toContainText("OPENAI_API_KEY");
+  await expect(page.locator(".message.assistant").last()).toContainText("Findex couldn't start a workspace build");
   await expect(page.locator(".generated-card")).toHaveCount(0);
   await expect(page.getByText("FIRE runway")).toHaveCount(0);
 });
@@ -212,6 +283,116 @@ test("saved workspace versions render in a locked interactive iframe and survive
   await expect(page.getByRole("heading", { name: "Major purchase planner" })).toBeVisible();
   await page.reload();
   await expect(page.getByRole("heading", { name: "Major purchase planner" })).toBeVisible();
+});
+
+test("an active workspace run reconnects after reload and recovers a missed publication", async ({ page }) => {
+  await enterDemo(page);
+  const prior = await seedWorkspace(page);
+  const published: WorkspaceArtifactV2 = {
+    ...prior,
+    id: crypto.randomUUID(),
+    version: 3,
+    parentVersionId: prior.id,
+    title: "Recovered purchase lab",
+    prompt: "Build a recovered purchase lab",
+    plan: { ...prior.plan, title: "Recovered purchase lab" },
+    model: "gpt-5.6-terra",
+    generatedAt: new Date().toISOString(),
+  };
+  let eventCalls = 0;
+  let terminal = false;
+  const eventUrls: string[] = [];
+
+  await page.route(/\/api\/brain$/, async (route) => route.fulfill({
+    status: 200,
+    headers: { "content-type": "text/event-stream; charset=utf-8" },
+    body: `data: ${JSON.stringify({ type: "workspace_started", runId: "run-reload", accessToken: "signed-run-token" })}\n\n`,
+  }));
+  await page.route(/\/api\/brain\/runs\/run-reload\/events/, async (route) => {
+    eventCalls += 1;
+    eventUrls.push(route.request().url());
+    const event = { type: "build_progress", phase: "coding", detail: "Findex is building the application" };
+    await route.fulfill({
+      status: 200,
+      headers: { "content-type": "text/event-stream; charset=utf-8" },
+      body: `id: 0\ndata: ${JSON.stringify(event)}\n\n`,
+    });
+  });
+  await page.route(/\/api\/brain\/runs\/run-reload$/, async (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify(terminal
+      ? { status: "completed", returnValue: { status: "completed", artifact: published } }
+      : { status: "running", returnValue: null }),
+  }));
+
+  const input = page.getByLabel("Message the Financial Brain");
+  await input.fill("Build a recovered purchase lab");
+  await input.press("Enter");
+  await expect(page.getByRole("status")).toContainText("Findex is building the application");
+  await expect.poll(() => page.evaluate(async () => {
+    const request = indexedDB.open("findex-generative-workspaces", 3);
+    return new Promise<number | null>((resolve, reject) => {
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        const db = request.result;
+        const get = db.transaction("brainRuns").objectStore("brainRuns").get("active");
+        get.onerror = () => reject(get.error);
+        get.onsuccess = () => { const value = get.result as { lastEventIndex?: number } | undefined; db.close(); resolve(value?.lastEventIndex ?? null); };
+      };
+    });
+  })).toBe(0);
+
+  terminal = true;
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "Recovered purchase lab" }).first()).toBeVisible();
+  await expect(page.locator(".message.assistant").last()).toContainText("saved as version 3");
+  expect(eventCalls).toBeGreaterThanOrEqual(2);
+  expect(eventUrls.at(-1)).toContain("startIndex=1");
+  await expect.poll(() => page.evaluate(async () => {
+    const request = indexedDB.open("findex-generative-workspaces", 3);
+    return new Promise<boolean>((resolve, reject) => {
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        const db = request.result;
+        const get = db.transaction("brainRuns").objectStore("brainRuns").get("active");
+        get.onerror = () => reject(get.error);
+        get.onsuccess = () => { const missing = get.result === undefined; db.close(); resolve(missing); };
+      };
+    });
+  })).toBe(true);
+});
+
+test("stopping a durable build cancels the run and preserves the published workspace", async ({ page }) => {
+  await enterDemo(page);
+  await seedWorkspace(page);
+  let cancellations = 0;
+  await page.route(/\/api\/brain$/, async (route) => route.fulfill({
+    status: 200,
+    headers: { "content-type": "text/event-stream; charset=utf-8" },
+    body: `data: ${JSON.stringify({ type: "workspace_started", runId: "run-cancel", accessToken: "signed-run-token" })}\n\n`,
+  }));
+  await page.route(/\/api\/brain\/runs\/run-cancel\/events/, async (route) => route.fulfill({
+    status: 200,
+    headers: { "content-type": "text/event-stream; charset=utf-8" },
+    body: `id: 0\ndata: ${JSON.stringify({ type: "build_progress", phase: "checking", detail: "Findex is checking the build" })}\n\n`,
+  }));
+  await page.route(/\/api\/brain\/runs\/run-cancel$/, async (route) => route.fulfill({
+    status: 200, contentType: "application/json", body: JSON.stringify({ status: "running", returnValue: null }),
+  }));
+  await page.route(/\/api\/brain\/runs\/run-cancel\/cancel$/, async (route) => {
+    cancellations += 1;
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ status: "cancelled" }) });
+  });
+
+  const input = page.getByLabel("Message the Financial Brain");
+  await input.fill("Build another purchase lab");
+  await input.press("Enter");
+  await expect(page.getByRole("button", { name: "Stop" })).toBeVisible();
+  await page.getByRole("button", { name: "Stop" }).click();
+  await expect(page.locator(".message.assistant").last()).toContainText("previously published workspace is unchanged");
+  await expect(page.getByRole("heading", { name: "Adaptive purchase lab" }).first()).toBeVisible();
+  expect(cancellations).toBe(1);
 });
 
 test("layout has no horizontal document overflow at 390px", async ({ page }, testInfo) => {

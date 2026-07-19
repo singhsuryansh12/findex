@@ -10,6 +10,7 @@ import { Sandbox } from "@vercel/sandbox";
 import { bundleWorkspace, type WorkspaceBundle } from "./bundle";
 import type { BuildComplexityLevel, WorkspaceBuildPlan, WorkspaceFile, WorkspaceValidationReport } from "./contracts";
 import { validateWorkspaceFiles } from "./policy";
+import { commandValidationFailure, WorkspaceValidationError } from "./validation-errors";
 
 const exec = promisify(execFile);
 const sandboxTemplateRoot = join(process.cwd(), "infrastructure", "workspace-sandbox");
@@ -34,6 +35,61 @@ export type SandboxValidation = {
   screenshots?: { desktop: string; mobile: string };
 };
 
+async function materializeWorkspaceSource(root: string, files: WorkspaceFile[]) {
+  for (const file of files) {
+    const destination = join(root, file.path);
+    await mkdir(dirname(destination), { recursive: true });
+    await writeFile(destination, file.content, "utf8");
+  }
+}
+
+async function runLocalScript(options: {
+  root: string;
+  script: "typecheck" | "bundle" | "test";
+  timeoutMs: number;
+  budgetMs: number;
+  environment: NodeJS.ProcessEnv;
+  signal?: AbortSignal;
+}) {
+  try {
+    return await exec("npm", ["run", options.script], {
+      cwd: options.root,
+      env: options.environment,
+      timeout: Math.min(options.timeoutMs, options.budgetMs),
+      maxBuffer: 4 * 1024 * 1024,
+      signal: options.signal,
+    });
+  } catch (error) {
+    throw new WorkspaceValidationError(commandValidationFailure({
+      script: options.script,
+      error,
+      workspaceRoot: options.root,
+    }), `Workspace ${options.script} validation failed.`);
+  }
+}
+
+async function strictTypecheckWorkspace(files: WorkspaceFile[], signal?: AbortSignal) {
+  const root = await mkdtemp(join(tmpdir(), "findex-workspace-preflight-"));
+  try {
+    await materializeWorkspaceSource(root, files);
+    await mkdir(join(root, "src"), { recursive: true });
+    await writeFile(join(root, "package.json"), await readFile(join(sandboxTemplateRoot, "package.json"), "utf8"), "utf8");
+    await writeFile(join(root, "src", "workspace-sdk.d.ts"), await readFile(join(sandboxTemplateRoot, "src/workspace-sdk.d.ts"), "utf8"), "utf8");
+    await writeFile(join(root, "tsconfig.json"), await readFile(join(sandboxTemplateRoot, "tsconfig.json"), "utf8"), "utf8");
+    await symlink(join(process.cwd(), "node_modules"), join(root, "node_modules"), "dir");
+    await runLocalScript({
+      root,
+      script: "typecheck",
+      timeoutMs: 45_000,
+      budgetMs: 45_000,
+      environment: { ...process.env },
+      signal,
+    });
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+}
+
 async function validateLocally(
   files: WorkspaceFile[],
   plan: WorkspaceBuildPlan,
@@ -41,14 +97,15 @@ async function validateLocally(
   signal?: AbortSignal,
 ): Promise<SandboxValidation> {
   const policy = validateWorkspaceFiles(files);
-  if (!policy.passed) throw new Error(policy.issues.join("\n"));
+  if (!policy.passed) throw new WorkspaceValidationError({
+    code: "WORKSPACE_POLICY_FAILED",
+    diagnostics: policy.issues,
+    actionable: true,
+    platformTransient: false,
+  }, "Workspace source policy validation failed.");
   const root = await mkdtemp(join(tmpdir(), "findex-workspace-"));
   try {
-    for (const file of files) {
-      const destination = join(root, file.path);
-      await mkdir(dirname(destination), { recursive: true });
-      await writeFile(destination, file.content, "utf8");
-    }
+    await materializeWorkspaceSource(root, files);
     for (const relativePath of localValidationFiles) {
       const destination = join(root, relativePath);
       await mkdir(dirname(destination), { recursive: true });
@@ -57,16 +114,9 @@ async function validateLocally(
     await writeFile(join(root, "workspace-plan.json"), JSON.stringify(plan), "utf8");
     await symlink(join(process.cwd(), "node_modules"), join(root, "node_modules"), "dir");
     const environment = { ...process.env, WORKSPACE_PREVIEW_PORT: String(randomInt(42_000, 52_000)) };
-    const run = (script: string, timeout: number) => exec("npm", ["run", script], {
-      cwd: root,
-      env: environment,
-      timeout: Math.min(timeout, budgetMs),
-      maxBuffer: 4 * 1024 * 1024,
-      signal,
-    });
-    await run("typecheck", 45_000);
-    await run("bundle", 60_000);
-    await run("test", 90_000);
+    await runLocalScript({ root, script: "typecheck", timeoutMs: 45_000, budgetMs, environment, signal });
+    await runLocalScript({ root, script: "bundle", timeoutMs: 60_000, budgetMs, environment, signal });
+    await runLocalScript({ root, script: "test", timeoutMs: 90_000, budgetMs, environment, signal });
     const [desktop, mobile] = await Promise.all([
       readFile(join(root, "test-results", "workspace-desktop.png")),
       readFile(join(root, "test-results", "workspace-mobile.png")),
@@ -94,7 +144,14 @@ async function commandResult(sandbox: Sandbox, command: string, args: string[], 
   const result = await sandbox.runCommand(command, args, { timeoutMs, signal });
   const stdout = await result.stdout();
   const stderr = await result.stderr();
-  if (result.exitCode !== 0) throw new Error(`${command} ${args.join(" ")} failed:\n${stdout}\n${stderr}`.trim());
+  if (result.exitCode !== 0) {
+    const script = args.at(-1);
+    const supportedScript = script === "typecheck" || script === "bundle" || script === "test" ? script : "test";
+    throw new WorkspaceValidationError(commandValidationFailure({
+      script: supportedScript,
+      error: Object.assign(new Error(`${command} ${args.join(" ")} failed.`), { stdout, stderr }),
+    }), `Workspace ${supportedScript} validation failed.`);
+  }
   return stdout;
 }
 
@@ -107,7 +164,12 @@ async function validateInVercel(
   const snapshotId = process.env.VERCEL_SANDBOX_SNAPSHOT_ID;
   if (!snapshotId) throw new Error("VERCEL_SANDBOX_SNAPSHOT_ID is required for hosted workspace generation.");
   const policy = validateWorkspaceFiles(files);
-  if (!policy.passed) throw new Error(policy.issues.join("\n"));
+  if (!policy.passed) throw new WorkspaceValidationError({
+    code: "WORKSPACE_POLICY_FAILED",
+    diagnostics: policy.issues,
+    actionable: true,
+    platformTransient: false,
+  }, "Workspace source policy validation failed.");
   const sandbox = await Sandbox.create({
     source: { type: "snapshot", snapshotId },
     timeout: Math.min(budgetMs, 250_000),
@@ -156,13 +218,13 @@ export function workspaceExecutionMode() {
 
 export async function validateAndBundleWorkspace(
   files: WorkspaceFile[],
-  complexity: BuildComplexityLevel,
+  _complexity: BuildComplexityLevel,
   plan: WorkspaceBuildPlan,
   signal?: AbortSignal,
 ) {
   const mode = workspaceExecutionMode();
   if (mode === "disabled") throw new Error("Live workspace generation is disabled. No fallback workspace was substituted.");
-  const budgetMs = complexity === "simple" ? 90_000 : complexity === "standard" ? 160_000 : 240_000;
+  const budgetMs = 210_000;
   return mode === "vercel" ? validateInVercel(files, plan, budgetMs, signal) : validateLocally(files, plan, budgetMs, signal);
 }
 
@@ -170,9 +232,11 @@ export async function quickCheckWorkspace(files: WorkspaceFile[]) {
   const policy = validateWorkspaceFiles(files);
   if (!policy.passed) return { passed: false, diagnostics: policy.issues };
   try {
+    await strictTypecheckWorkspace(files, AbortSignal.timeout(45_000));
     const bundle = await bundleWorkspace(files);
-    return { passed: true, diagnostics: [`Bundle passed (${bundle.bytes.toLocaleString()} bytes).`] };
+    return { passed: true, diagnostics: [`Strict TypeScript and bundle checks passed (${bundle.bytes.toLocaleString()} bytes).`] };
   } catch (error) {
-    return { passed: false, diagnostics: [error instanceof Error ? error.message : "Bundle failed."] };
+    if (error instanceof WorkspaceValidationError) return { passed: false, diagnostics: error.diagnostics, code: error.code };
+    return { passed: false, diagnostics: [error instanceof Error ? error.message : "Workspace preflight failed."], code: "WORKSPACE_VALIDATION_FAILED" };
   }
 }

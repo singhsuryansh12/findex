@@ -12,6 +12,7 @@ export const buildRiskFlagSchema = z.enum([
   "persistence",
   "state_migration",
   "multi_view",
+  "rich_interaction",
   "sensitive_math",
   "export",
   "security",
@@ -137,6 +138,23 @@ export const workspaceTokenUsageSchema = z.object({
   outputTokens: z.number().int().nonnegative(),
   totalTokens: z.number().int().nonnegative(),
 });
+export type WorkspaceTokenUsage = z.infer<typeof workspaceTokenUsageSchema>;
+
+export const findexModelSchema = z.enum(["gpt-5.6-terra", "gpt-5.6-sol"]);
+export type FindexModel = z.infer<typeof findexModelSchema>;
+
+export const modelStageTraceSchema = z.object({
+  stage: z.enum(["assessment", "planning", "building", "validation", "review", "repair", "publishing", "financial_answer"]),
+  model: findexModelSchema,
+  effort: reasoningEffortSchema,
+  attempt: z.number().int().min(1).max(4),
+  durationMs: z.number().int().nonnegative(),
+  tokenUsage: workspaceTokenUsageSchema,
+  outcome: z.enum(["completed", "incomplete", "refused", "timed_out", "invalid", "failed", "cancelled"]),
+  responseId: z.string().max(160).optional(),
+  incompleteReason: z.string().max(80).optional(),
+});
+export type ModelStageTrace = z.infer<typeof modelStageTraceSchema>;
 
 export const workspaceArtifactSchema = z.object({
   schemaVersion: z.literal(2),
@@ -156,11 +174,12 @@ export const workspaceArtifactSchema = z.object({
   }),
   manifest: workspaceManifestSchema,
   validation: workspaceValidationReportSchema,
-  model: z.literal("gpt-5.6-sol"),
+  model: findexModelSchema,
   effort: reasoningEffortSchema,
   complexity: buildComplexityAssessmentSchema,
   effortEscalations: z.array(reasoningEffortSchema).max(3),
   tokenUsage: workspaceTokenUsageSchema,
+  stageTraces: z.array(modelStageTraceSchema).max(24).optional(),
   timings: z.object({
     assessmentMs: z.number().int().nonnegative(),
     planningMs: z.number().int().nonnegative(),

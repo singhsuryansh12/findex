@@ -30,7 +30,8 @@ describe("Financial Brain route", () => {
   it("never substitutes FIRE or a sample when live generation is unavailable", async () => {
     const { text } = await callBrain("Build a cash vs EMI decision tool for a large purchase");
     expect(text).toContain('"type":"workspace_failed"');
-    expect(text).toContain("OPENAI_API_KEY");
+    expect(text).toContain("Findex couldn't start a workspace build");
+    expect(text).toContain('"code":"BUILD_UNAVAILABLE"');
     expect(text).not.toContain('"type":"workspace_published"');
     expect(text.toLowerCase()).not.toContain("fire runway");
     expect(text.toLowerCase()).not.toContain("verified sample");

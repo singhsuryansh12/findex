@@ -523,6 +523,95 @@ button {
   font-weight: 400;
 }
 
+.brain-progress {
+  position: relative;
+  margin: 4px 2px 14px;
+  padding: 11px 12px;
+  border: 1px solid rgba(126, 190, 156, .2);
+  border-radius: 14px;
+  background: rgba(78, 144, 109, .09);
+}
+
+.brain-progress-current {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  color: #a9d8c0;
+}
+
+.brain-progress-current > span {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.brain-progress-current strong {
+  color: rgba(255,255,255,.88);
+  font-size: 10px;
+  font-weight: 680;
+}
+
+.brain-progress-current small,
+.brain-progress-current time {
+  color: rgba(255,255,255,.42);
+  font-size: 8px;
+  font-weight: 400;
+}
+
+.brain-progress-current time {
+  font-variant-numeric: tabular-nums;
+}
+
+.brain-phase-timeline {
+  list-style: none;
+  margin: 10px 0 0 21px;
+  padding: 0 0 0 9px;
+  border-left: 1px solid rgba(255,255,255,.12);
+  display: grid;
+  gap: 5px;
+}
+
+.brain-phase-timeline li {
+  position: relative;
+  color: rgba(255,255,255,.38);
+  font-size: 8px;
+}
+
+.brain-phase-timeline li::before {
+  content: "";
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  left: -12px;
+  top: 3px;
+  border-radius: 50%;
+  background: #7ebc9b;
+}
+
+.brain-phase-timeline li.active {
+  color: #a9d8c0;
+}
+
+.brain-stop {
+  margin: 10px 0 0 21px;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 999px;
+  padding: 5px 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  color: rgba(255,255,255,.68);
+  font-size: 8px;
+  cursor: pointer;
+}
+
+.brain-stop:hover {
+  color: white;
+  border-color: rgba(255,255,255,.26);
+}
+
 .clarification-card {
   border: 1px solid rgba(112, 185, 147, .25);
   background: rgba(89, 157, 122, .1);
@@ -854,6 +943,12 @@ button {
   color: var(--muted);
   line-height: 1.55;
 }
+
+.workspace-trace-table-wrap { overflow-x: auto; margin: 8px 0 18px; }
+.workspace-trace-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.workspace-trace-table th,
+.workspace-trace-table td { padding: 7px 9px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+.workspace-trace-table th { color: var(--muted); font-weight: 700; }
 
 .source-action {
   border: 1px solid var(--line);

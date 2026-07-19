@@ -26,7 +26,7 @@ export function Landing({ forecast, onEnter }: { forecast: ForecastResult; onEnt
           <div className="landing-note"><ShieldCheck size={14} />12 months of realistic, private demo data</div>
         </div>
 
-        <div className="landing-visual" aria-label="FinDex Financial Brain preview">
+        <div className="landing-visual" aria-label="Findex Financial Brain preview">
           <div className="preview-window brain-preview-window">
             <div className="preview-toolbar"><div className="preview-dots"><span /><span /><span /></div><div className="preview-pill"><Sparkles size={10} />Financial Brain</div></div>
             <div className="landing-brain-preview">
