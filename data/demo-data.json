@@ -1,0 +1,6176 @@
+{
+  "schemaVersion": 2,
+  "metadata": {
+    "seed": "findex-2026",
+    "asOfDate": "2026-07-19",
+    "generatedAt": "2026-07-19T16:00:00.000Z",
+    "currency": "USD",
+    "timezone": "America/New_York",
+    "expectedDiningLastMonthCents": 36621,
+    "expectedNetWorthCents": 18055772
+  },
+  "persona": {
+    "id": "demo-jordan",
+    "name": "Jordan Lee",
+    "firstName": "Jordan",
+    "initials": "JL",
+    "role": "Product lead",
+    "location": "Brooklyn, NY",
+    "age": 30,
+    "reserveFloorCents": 150000,
+    "grossAnnualIncomeCents": 10000000,
+    "monthlyTakeHomeCents": 656000
+  },
+  "accounts": [
+    {
+      "id": "checking",
+      "name": "Everyday checking",
+      "institution": "Chase",
+      "type": "checking",
+      "mask": "1842",
+      "openingBalanceCents": 640000,
+      "currentBalanceCents": 1095516
+    },
+    {
+      "id": "savings",
+      "name": "High-yield savings",
+      "institution": "Marcus",
+      "type": "savings",
+      "mask": "7201",
+      "openingBalanceCents": 1420000,
+      "currentBalanceCents": 2620000
+    },
+    {
+      "id": "credit",
+      "name": "Gold card",
+      "institution": "Amex",
+      "type": "credit",
+      "mask": "9008",
+      "openingBalanceCents": -85000,
+      "currentBalanceCents": -204744
+    }
+  ],
+  "investmentAccounts": [
+    {
+      "id": "fidelity-401k",
+      "name": "Northstar 401(k)",
+      "institution": "Fidelity",
+      "type": "401k",
+      "taxTreatment": "tax_deferred",
+      "currentValueCents": 8642000,
+      "description": "Employer retirement plan"
+    },
+    {
+      "id": "vanguard-roth",
+      "name": "Roth IRA",
+      "institution": "Vanguard",
+      "type": "roth_ira",
+      "taxTreatment": "roth",
+      "currentValueCents": 2836000,
+      "description": "After-tax retirement account"
+    },
+    {
+      "id": "schwab-taxable",
+      "name": "Individual brokerage",
+      "institution": "Schwab",
+      "type": "brokerage",
+      "taxTreatment": "taxable",
+      "currentValueCents": 2174000,
+      "description": "Flexible long-term investing"
+    },
+    {
+      "id": "fidelity-hsa",
+      "name": "Health savings account",
+      "institution": "Fidelity",
+      "type": "hsa",
+      "taxTreatment": "hsa",
+      "currentValueCents": 893000,
+      "description": "Invested health savings"
+    }
+  ],
+  "holdings": [
+    {
+      "id": "401k-fxaix",
+      "accountId": "fidelity-401k",
+      "symbol": "FXAIX",
+      "name": "Fidelity 500 Index",
+      "assetClass": "us_equity",
+      "marketValueCents": 5185200
+    },
+    {
+      "id": "401k-ftihx",
+      "accountId": "fidelity-401k",
+      "symbol": "FTIHX",
+      "name": "Fidelity Total International Index",
+      "assetClass": "international_equity",
+      "marketValueCents": 1728400
+    },
+    {
+      "id": "401k-fxnax",
+      "accountId": "fidelity-401k",
+      "symbol": "FXNAX",
+      "name": "Fidelity U.S. Bond Index",
+      "assetClass": "bonds",
+      "marketValueCents": 1296300
+    },
+    {
+      "id": "401k-cash",
+      "accountId": "fidelity-401k",
+      "symbol": "SPAXX",
+      "name": "Government money market",
+      "assetClass": "cash",
+      "marketValueCents": 432100
+    },
+    {
+      "id": "roth-vti",
+      "accountId": "vanguard-roth",
+      "symbol": "VTI",
+      "name": "Vanguard Total Stock Market ETF",
+      "assetClass": "us_equity",
+      "marketValueCents": 1701600
+    },
+    {
+      "id": "roth-vxus",
+      "accountId": "vanguard-roth",
+      "symbol": "VXUS",
+      "name": "Vanguard Total International Stock ETF",
+      "assetClass": "international_equity",
+      "marketValueCents": 567200
+    },
+    {
+      "id": "roth-bnd",
+      "accountId": "vanguard-roth",
+      "symbol": "BND",
+      "name": "Vanguard Total Bond Market ETF",
+      "assetClass": "bonds",
+      "marketValueCents": 283600
+    },
+    {
+      "id": "roth-qqqm",
+      "accountId": "vanguard-roth",
+      "symbol": "QQQM",
+      "name": "Invesco NASDAQ 100 ETF",
+      "assetClass": "us_equity",
+      "marketValueCents": 283600
+    },
+    {
+      "id": "taxable-vti",
+      "accountId": "schwab-taxable",
+      "symbol": "VTI",
+      "name": "Vanguard Total Stock Market ETF",
+      "assetClass": "us_equity",
+      "marketValueCents": 1087000
+    },
+    {
+      "id": "taxable-vxus",
+      "accountId": "schwab-taxable",
+      "symbol": "VXUS",
+      "name": "Vanguard Total International Stock ETF",
+      "assetClass": "international_equity",
+      "marketValueCents": 434800
+    },
+    {
+      "id": "taxable-bnd",
+      "accountId": "schwab-taxable",
+      "symbol": "BND",
+      "name": "Vanguard Total Bond Market ETF",
+      "assetClass": "bonds",
+      "marketValueCents": 217400
+    },
+    {
+      "id": "taxable-sgov",
+      "accountId": "schwab-taxable",
+      "symbol": "SGOV",
+      "name": "iShares 0-3 Month Treasury Bond ETF",
+      "assetClass": "cash",
+      "marketValueCents": 434800
+    },
+    {
+      "id": "hsa-fzrox",
+      "accountId": "fidelity-hsa",
+      "symbol": "FZROX",
+      "name": "Fidelity ZERO Total Market Index",
+      "assetClass": "us_equity",
+      "marketValueCents": 625100
+    },
+    {
+      "id": "hsa-fzilx",
+      "accountId": "fidelity-hsa",
+      "symbol": "FZILX",
+      "name": "Fidelity ZERO International Index",
+      "assetClass": "international_equity",
+      "marketValueCents": 178600
+    },
+    {
+      "id": "hsa-cash",
+      "accountId": "fidelity-hsa",
+      "symbol": "CASH",
+      "name": "HSA cash reserve",
+      "assetClass": "cash",
+      "marketValueCents": 89300
+    }
+  ],
+  "portfolioHistory": [
+    {
+      "month": "2025-08",
+      "valueCents": 11200000,
+      "cumulativeContributionsCents": 0
+    },
+    {
+      "month": "2025-09",
+      "valueCents": 11376000,
+      "cumulativeContributionsCents": 150000
+    },
+    {
+      "month": "2025-10",
+      "valueCents": 11551000,
+      "cumulativeContributionsCents": 300000
+    },
+    {
+      "month": "2025-11",
+      "valueCents": 11804000,
+      "cumulativeContributionsCents": 450000
+    },
+    {
+      "month": "2025-12",
+      "valueCents": 11972000,
+      "cumulativeContributionsCents": 600000
+    },
+    {
+      "month": "2026-01",
+      "valueCents": 12225000,
+      "cumulativeContributionsCents": 760000
+    },
+    {
+      "month": "2026-02",
+      "valueCents": 12371000,
+      "cumulativeContributionsCents": 920000
+    },
+    {
+      "month": "2026-03",
+      "valueCents": 12586000,
+      "cumulativeContributionsCents": 1080000
+    },
+    {
+      "month": "2026-04",
+      "valueCents": 12781000,
+      "cumulativeContributionsCents": 1240000
+    },
+    {
+      "month": "2026-05",
+      "valueCents": 13205000,
+      "cumulativeContributionsCents": 1420000
+    },
+    {
+      "month": "2026-06",
+      "valueCents": 13852000,
+      "cumulativeContributionsCents": 1600000
+    },
+    {
+      "month": "2026-07",
+      "valueCents": 14545000,
+      "cumulativeContributionsCents": 1780000
+    }
+  ],
+  "investmentContributions": [
+    {
+      "id": "employee-401k",
+      "accountId": "fidelity-401k",
+      "name": "Employee 401(k)",
+      "annualPlanCents": 1200000,
+      "cadence": "semi_monthly",
+      "amountCents": 50000,
+      "source": "payroll"
+    },
+    {
+      "id": "employer-match",
+      "accountId": "fidelity-401k",
+      "name": "Employer match",
+      "annualPlanCents": 400000,
+      "cadence": "semi_monthly",
+      "amountCents": 16667,
+      "source": "employer"
+    },
+    {
+      "id": "roth-contribution",
+      "accountId": "vanguard-roth",
+      "name": "Roth IRA auto-invest",
+      "annualPlanCents": 360000,
+      "cadence": "monthly",
+      "amountCents": 30000,
+      "source": "checking"
+    },
+    {
+      "id": "hsa-contribution",
+      "accountId": "fidelity-hsa",
+      "name": "HSA payroll contribution",
+      "annualPlanCents": 180000,
+      "cadence": "monthly",
+      "amountCents": 15000,
+      "source": "payroll"
+    },
+    {
+      "id": "taxable-contribution",
+      "accountId": "schwab-taxable",
+      "name": "Brokerage auto-invest",
+      "annualPlanCents": 300000,
+      "cadence": "monthly",
+      "amountCents": 25000,
+      "source": "checking"
+    }
+  ],
+  "taxLimitReferences": [
+    {
+      "id": "401k",
+      "year": 2026,
+      "limitCents": 2450000,
+      "label": "401(k) employee deferral limit",
+      "sourceUrl": "https://www.irs.gov/retirement-plans/plan-participant-employee/retirement-topics-401k-and-profit-sharing-plan-contribution-limits"
+    },
+    {
+      "id": "ira",
+      "year": 2026,
+      "limitCents": 750000,
+      "label": "Traditional and Roth IRA combined limit",
+      "sourceUrl": "https://www.irs.gov/retirement-plans/plan-participant-employee/retirement-topics-ira-contribution-limits"
+    },
+    {
+      "id": "hsa_self",
+      "year": 2026,
+      "limitCents": 440000,
+      "label": "HSA self-only contribution limit",
+      "sourceUrl": "https://www.irs.gov/irb/2025-21_IRB"
+    }
+  ],
+  "categories": [
+    {
+      "id": "income",
+      "name": "Income",
+      "color": "#2e7d61",
+      "icon": "ArrowDownLeft"
+    },
+    {
+      "id": "housing",
+      "name": "Housing",
+      "color": "#7c6255",
+      "icon": "House"
+    },
+    {
+      "id": "dining",
+      "name": "Dining",
+      "color": "#d16b4b",
+      "icon": "Utensils"
+    },
+    {
+      "id": "groceries",
+      "name": "Groceries",
+      "color": "#7b8f4e",
+      "icon": "ShoppingBasket"
+    },
+    {
+      "id": "transport",
+      "name": "Transport",
+      "color": "#5a77a5",
+      "icon": "Car"
+    },
+    {
+      "id": "shopping",
+      "name": "Shopping",
+      "color": "#a2698a",
+      "icon": "ShoppingBag"
+    },
+    {
+      "id": "entertainment",
+      "name": "Entertainment",
+      "color": "#8669aa",
+      "icon": "Clapperboard"
+    },
+    {
+      "id": "utilities",
+      "name": "Utilities",
+      "color": "#75808c",
+      "icon": "Zap"
+    },
+    {
+      "id": "subscriptions",
+      "name": "Subscriptions",
+      "color": "#9b7653",
+      "icon": "Repeat2"
+    },
+    {
+      "id": "health",
+      "name": "Health",
+      "color": "#be6666",
+      "icon": "HeartPulse"
+    },
+    {
+      "id": "travel",
+      "name": "Travel",
+      "color": "#4e8a92",
+      "icon": "Plane"
+    },
+    {
+      "id": "misc",
+      "name": "Other",
+      "color": "#85806f",
+      "icon": "Shapes"
+    },
+    {
+      "id": "transfer",
+      "name": "Transfer",
+      "color": "#a8a49a",
+      "icon": "ArrowLeftRight"
+    }
+  ],
+  "merchants": [
+    {
+      "id": "employer",
+      "name": "Northstar Labs",
+      "categoryId": "income"
+    },
+    {
+      "id": "landlord",
+      "name": "Parkline Properties",
+      "categoryId": "housing"
+    },
+    {
+      "id": "coned",
+      "name": "Con Edison",
+      "categoryId": "utilities"
+    },
+    {
+      "id": "fios",
+      "name": "Verizon Fios",
+      "categoryId": "utilities"
+    },
+    {
+      "id": "tmobile",
+      "name": "T-Mobile",
+      "categoryId": "utilities"
+    },
+    {
+      "id": "geico",
+      "name": "GEICO",
+      "categoryId": "utilities"
+    },
+    {
+      "id": "amex-payment",
+      "name": "Card autopay",
+      "categoryId": "transfer"
+    },
+    {
+      "id": "savings-transfer",
+      "name": "Savings transfer",
+      "categoryId": "transfer"
+    },
+    {
+      "id": "netflix",
+      "name": "Netflix",
+      "categoryId": "subscriptions"
+    },
+    {
+      "id": "spotify",
+      "name": "Spotify",
+      "categoryId": "subscriptions"
+    },
+    {
+      "id": "icloud",
+      "name": "iCloud+",
+      "categoryId": "subscriptions"
+    },
+    {
+      "id": "notion",
+      "name": "Notion",
+      "categoryId": "subscriptions"
+    },
+    {
+      "id": "nyt",
+      "name": "New York Times",
+      "categoryId": "subscriptions"
+    },
+    {
+      "id": "equinox",
+      "name": "Equinox",
+      "categoryId": "health"
+    },
+    {
+      "id": "blue-bottle",
+      "name": "Blue Bottle",
+      "categoryId": "dining"
+    },
+    {
+      "id": "sweetgreen",
+      "name": "Sweetgreen",
+      "categoryId": "dining"
+    },
+    {
+      "id": "dig",
+      "name": "DIG",
+      "categoryId": "dining"
+    },
+    {
+      "id": "thai-diner",
+      "name": "Thai Diner",
+      "categoryId": "dining"
+    },
+    {
+      "id": "lilia",
+      "name": "Lilia",
+      "categoryId": "dining"
+    },
+    {
+      "id": "trader-joes",
+      "name": "Trader Joe's",
+      "categoryId": "groceries"
+    },
+    {
+      "id": "whole-foods",
+      "name": "Whole Foods",
+      "categoryId": "groceries"
+    },
+    {
+      "id": "wegmans",
+      "name": "Wegmans",
+      "categoryId": "groceries"
+    },
+    {
+      "id": "uber",
+      "name": "Uber",
+      "categoryId": "transport"
+    },
+    {
+      "id": "mta",
+      "name": "MTA",
+      "categoryId": "transport"
+    },
+    {
+      "id": "citibike",
+      "name": "Citi Bike",
+      "categoryId": "transport"
+    },
+    {
+      "id": "amazon",
+      "name": "Amazon",
+      "categoryId": "shopping"
+    },
+    {
+      "id": "uniqlo",
+      "name": "Uniqlo",
+      "categoryId": "shopping"
+    },
+    {
+      "id": "target",
+      "name": "Target",
+      "categoryId": "shopping"
+    },
+    {
+      "id": "amc",
+      "name": "AMC Theatres",
+      "categoryId": "entertainment"
+    },
+    {
+      "id": "brooklyn-museum",
+      "name": "Brooklyn Museum",
+      "categoryId": "entertainment"
+    },
+    {
+      "id": "cvs",
+      "name": "CVS Pharmacy",
+      "categoryId": "health"
+    },
+    {
+      "id": "citymd",
+      "name": "CityMD",
+      "categoryId": "health"
+    },
+    {
+      "id": "delta",
+      "name": "Delta",
+      "categoryId": "travel"
+    },
+    {
+      "id": "airbnb",
+      "name": "Airbnb",
+      "categoryId": "travel"
+    },
+    {
+      "id": "corner-store",
+      "name": "Court Street Market",
+      "categoryId": "misc"
+    },
+    {
+      "id": "laundry",
+      "name": "Brooklyn Laundry",
+      "categoryId": "misc"
+    }
+  ],
+  "recurringRules": [
+    {
+      "id": "salary",
+      "name": "Northstar paycheck",
+      "merchantId": "employer",
+      "categoryId": "income",
+      "accountId": "checking",
+      "amountCents": 328000,
+      "cadence": "semi_monthly",
+      "daysOfMonth": [
+        1,
+        15
+      ],
+      "cashImpact": true,
+      "active": true
+    },
+    {
+      "id": "rent",
+      "name": "Rent",
+      "merchantId": "landlord",
+      "categoryId": "housing",
+      "accountId": "checking",
+      "amountCents": -265000,
+      "cadence": "monthly",
+      "dayOfMonth": 3,
+      "cashImpact": true,
+      "active": true
+    },
+    {
+      "id": "electric",
+      "name": "Electric",
+      "merchantId": "coned",
+      "categoryId": "utilities",
+      "accountId": "checking",
+      "amountCents": -11800,
+      "cadence": "monthly",
+      "dayOfMonth": 10,
+      "cashImpact": true,
+      "active": true
+    },
+    {
+      "id": "internet",
+      "name": "Internet",
+      "merchantId": "fios",
+      "categoryId": "utilities",
+      "accountId": "checking",
+      "amountCents": -7900,
+      "cadence": "monthly",
+      "dayOfMonth": 12,
+      "cashImpact": true,
+      "active": true
+    },
+    {
+      "id": "phone",
+      "name": "Phone",
+      "merchantId": "tmobile",
+      "categoryId": "utilities",
+      "accountId": "checking",
+      "amountCents": -7200,
+      "cadence": "monthly",
+      "dayOfMonth": 18,
+      "cashImpact": true,
+      "active": true
+    },
+    {
+      "id": "insurance",
+      "name": "Auto insurance",
+      "merchantId": "geico",
+      "categoryId": "utilities",
+      "accountId": "checking",
+      "amountCents": -14600,
+      "cadence": "monthly",
+      "dayOfMonth": 24,
+      "cashImpact": true,
+      "active": true
+    },
+    {
+      "id": "card-autopay",
+      "name": "Credit card autopay",
+      "merchantId": "amex-payment",
+      "categoryId": "transfer",
+      "accountId": "checking",
+      "amountCents": -200000,
+      "cadence": "monthly",
+      "dayOfMonth": 20,
+      "cashImpact": true,
+      "active": true
+    },
+    {
+      "id": "netflix",
+      "name": "Netflix",
+      "merchantId": "netflix",
+      "categoryId": "subscriptions",
+      "accountId": "credit",
+      "amountCents": -2299,
+      "cadence": "monthly",
+      "dayOfMonth": 6,
+      "cashImpact": false,
+      "active": true
+    },
+    {
+      "id": "spotify",
+      "name": "Spotify",
+      "merchantId": "spotify",
+      "categoryId": "subscriptions",
+      "accountId": "credit",
+      "amountCents": -1199,
+      "cadence": "monthly",
+      "dayOfMonth": 9,
+      "cashImpact": false,
+      "active": true
+    },
+    {
+      "id": "icloud",
+      "name": "iCloud+",
+      "merchantId": "icloud",
+      "categoryId": "subscriptions",
+      "accountId": "credit",
+      "amountCents": -999,
+      "cadence": "monthly",
+      "dayOfMonth": 14,
+      "cashImpact": false,
+      "active": true
+    },
+    {
+      "id": "notion",
+      "name": "Notion",
+      "merchantId": "notion",
+      "categoryId": "subscriptions",
+      "accountId": "credit",
+      "amountCents": -1000,
+      "cadence": "monthly",
+      "dayOfMonth": 17,
+      "cashImpact": false,
+      "active": true
+    },
+    {
+      "id": "nyt",
+      "name": "New York Times",
+      "merchantId": "nyt",
+      "categoryId": "subscriptions",
+      "accountId": "credit",
+      "amountCents": -2500,
+      "cadence": "monthly",
+      "dayOfMonth": 22,
+      "cashImpact": false,
+      "active": true
+    },
+    {
+      "id": "gym",
+      "name": "Equinox",
+      "merchantId": "equinox",
+      "categoryId": "health",
+      "accountId": "credit",
+      "amountCents": -21500,
+      "cadence": "monthly",
+      "dayOfMonth": 5,
+      "cashImpact": false,
+      "active": true
+    }
+  ],
+  "transactions": [
+    {
+      "accountId": "checking",
+      "merchantId": "employer",
+      "categoryId": "income",
+      "postedOn": "2025-08-01",
+      "amountCents": 328000,
+      "recurringRuleId": "salary",
+      "id": "txn-0001",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2025-08-01",
+      "amountCents": -682,
+      "id": "txn-0032",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "thai-diner",
+      "categoryId": "dining",
+      "postedOn": "2025-08-02",
+      "amountCents": -8881,
+      "id": "txn-0025",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "whole-foods",
+      "categoryId": "groceries",
+      "postedOn": "2025-08-02",
+      "amountCents": -12055,
+      "id": "txn-0027",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "amc",
+      "categoryId": "entertainment",
+      "postedOn": "2025-08-02",
+      "amountCents": -2921,
+      "id": "txn-0045",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "landlord",
+      "categoryId": "housing",
+      "postedOn": "2025-08-03",
+      "amountCents": -265000,
+      "recurringRuleId": "rent",
+      "id": "txn-0003",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "trader-joes",
+      "categoryId": "groceries",
+      "postedOn": "2025-08-03",
+      "amountCents": -11033,
+      "id": "txn-0031",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "equinox",
+      "categoryId": "health",
+      "postedOn": "2025-08-05",
+      "amountCents": -21500,
+      "recurringRuleId": "gym",
+      "id": "txn-0013",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "netflix",
+      "categoryId": "subscriptions",
+      "postedOn": "2025-08-06",
+      "amountCents": -2299,
+      "recurringRuleId": "netflix",
+      "id": "txn-0008",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "wegmans",
+      "categoryId": "groceries",
+      "postedOn": "2025-08-07",
+      "amountCents": -7869,
+      "id": "txn-0028",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "dig",
+      "categoryId": "dining",
+      "postedOn": "2025-08-08",
+      "amountCents": -6651,
+      "id": "txn-0020",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "spotify",
+      "categoryId": "subscriptions",
+      "postedOn": "2025-08-09",
+      "amountCents": -1199,
+      "recurringRuleId": "spotify",
+      "id": "txn-0009",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "lilia",
+      "categoryId": "dining",
+      "postedOn": "2025-08-09",
+      "amountCents": -3925,
+      "id": "txn-0022",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "thai-diner",
+      "categoryId": "dining",
+      "postedOn": "2025-08-09",
+      "amountCents": -2422,
+      "id": "txn-0024",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "coned",
+      "categoryId": "utilities",
+      "postedOn": "2025-08-10",
+      "amountCents": -11800,
+      "recurringRuleId": "electric",
+      "id": "txn-0004",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "trader-joes",
+      "categoryId": "groceries",
+      "postedOn": "2025-08-11",
+      "amountCents": -5295,
+      "id": "txn-0029",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "fios",
+      "categoryId": "utilities",
+      "postedOn": "2025-08-12",
+      "amountCents": -7900,
+      "recurringRuleId": "internet",
+      "id": "txn-0005",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "icloud",
+      "categoryId": "subscriptions",
+      "postedOn": "2025-08-14",
+      "amountCents": -999,
+      "recurringRuleId": "icloud",
+      "id": "txn-0010",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "citibike",
+      "categoryId": "transport",
+      "postedOn": "2025-08-14",
+      "amountCents": -3860,
+      "id": "txn-0039",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "employer",
+      "categoryId": "income",
+      "postedOn": "2025-08-15",
+      "amountCents": 328000,
+      "recurringRuleId": "salary",
+      "id": "txn-0002",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "amazon",
+      "categoryId": "shopping",
+      "postedOn": "2025-08-15",
+      "amountCents": -14096,
+      "id": "txn-0042",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "savings-transfer",
+      "categoryId": "transfer",
+      "postedOn": "2025-08-16",
+      "amountCents": -100000,
+      "transferGroupId": "save-2025-8",
+      "id": "txn-0014",
+      "status": "posted"
+    },
+    {
+      "accountId": "savings",
+      "merchantId": "savings-transfer",
+      "categoryId": "transfer",
+      "postedOn": "2025-08-16",
+      "amountCents": 100000,
+      "transferGroupId": "save-2025-8",
+      "id": "txn-0015",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2025-08-16",
+      "amountCents": -3238,
+      "id": "txn-0040",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uniqlo",
+      "categoryId": "shopping",
+      "postedOn": "2025-08-16",
+      "amountCents": -15875,
+      "id": "txn-0041",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "notion",
+      "categoryId": "subscriptions",
+      "postedOn": "2025-08-17",
+      "amountCents": -1000,
+      "recurringRuleId": "notion",
+      "id": "txn-0011",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2025-08-17",
+      "amountCents": -1965,
+      "id": "txn-0035",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "tmobile",
+      "categoryId": "utilities",
+      "postedOn": "2025-08-18",
+      "amountCents": -7200,
+      "recurringRuleId": "phone",
+      "id": "txn-0006",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2025-08-19",
+      "amountCents": -1833,
+      "id": "txn-0036",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "citibike",
+      "categoryId": "transport",
+      "postedOn": "2025-08-19",
+      "amountCents": -4598,
+      "id": "txn-0037",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "citibike",
+      "categoryId": "transport",
+      "postedOn": "2025-08-19",
+      "amountCents": -3936,
+      "id": "txn-0038",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "amex-payment",
+      "categoryId": "transfer",
+      "postedOn": "2025-08-20",
+      "amountCents": -200000,
+      "transferGroupId": "card-2025-8",
+      "recurringRuleId": "card-autopay",
+      "id": "txn-0016",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "amex-payment",
+      "categoryId": "transfer",
+      "postedOn": "2025-08-20",
+      "amountCents": 200000,
+      "transferGroupId": "card-2025-8",
+      "recurringRuleId": "card-autopay",
+      "id": "txn-0017",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2025-08-20",
+      "amountCents": -1241,
+      "id": "txn-0033",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "amc",
+      "categoryId": "entertainment",
+      "postedOn": "2025-08-21",
+      "amountCents": -4706,
+      "id": "txn-0044",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "nyt",
+      "categoryId": "subscriptions",
+      "postedOn": "2025-08-22",
+      "amountCents": -2500,
+      "recurringRuleId": "nyt",
+      "id": "txn-0012",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "whole-foods",
+      "categoryId": "groceries",
+      "postedOn": "2025-08-23",
+      "amountCents": -13073,
+      "id": "txn-0026",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "geico",
+      "categoryId": "utilities",
+      "postedOn": "2025-08-24",
+      "amountCents": -14600,
+      "recurringRuleId": "insurance",
+      "id": "txn-0007",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "whole-foods",
+      "categoryId": "groceries",
+      "postedOn": "2025-08-24",
+      "amountCents": -9920,
+      "id": "txn-0030",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "laundry",
+      "categoryId": "misc",
+      "postedOn": "2025-08-24",
+      "amountCents": -6222,
+      "id": "txn-0047",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "corner-store",
+      "categoryId": "misc",
+      "postedOn": "2025-08-25",
+      "amountCents": -5865,
+      "id": "txn-0048",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uniqlo",
+      "categoryId": "shopping",
+      "postedOn": "2025-08-26",
+      "amountCents": -10379,
+      "id": "txn-0043",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "sweetgreen",
+      "categoryId": "dining",
+      "postedOn": "2025-08-28",
+      "amountCents": -6748,
+      "id": "txn-0018",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2025-08-28",
+      "amountCents": -786,
+      "id": "txn-0034",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "blue-bottle",
+      "categoryId": "dining",
+      "postedOn": "2025-08-29",
+      "amountCents": -9486,
+      "id": "txn-0023",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "citymd",
+      "categoryId": "health",
+      "postedOn": "2025-08-29",
+      "amountCents": -10595,
+      "id": "txn-0046",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "blue-bottle",
+      "categoryId": "dining",
+      "postedOn": "2025-08-30",
+      "amountCents": -2538,
+      "id": "txn-0019",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "sweetgreen",
+      "categoryId": "dining",
+      "postedOn": "2025-08-31",
+      "amountCents": -5333,
+      "id": "txn-0021",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "employer",
+      "categoryId": "income",
+      "postedOn": "2025-09-01",
+      "amountCents": 328000,
+      "recurringRuleId": "salary",
+      "id": "txn-0049",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "target",
+      "categoryId": "shopping",
+      "postedOn": "2025-09-01",
+      "amountCents": -8131,
+      "id": "txn-0089",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "wegmans",
+      "categoryId": "groceries",
+      "postedOn": "2025-09-02",
+      "amountCents": -4985,
+      "id": "txn-0074",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "trader-joes",
+      "categoryId": "groceries",
+      "postedOn": "2025-09-02",
+      "amountCents": -10518,
+      "id": "txn-0078",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "amc",
+      "categoryId": "entertainment",
+      "postedOn": "2025-09-02",
+      "amountCents": -6654,
+      "id": "txn-0092",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "landlord",
+      "categoryId": "housing",
+      "postedOn": "2025-09-03",
+      "amountCents": -265000,
+      "recurringRuleId": "rent",
+      "id": "txn-0051",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "thai-diner",
+      "categoryId": "dining",
+      "postedOn": "2025-09-03",
+      "amountCents": -5662,
+      "id": "txn-0066",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2025-09-03",
+      "amountCents": -3952,
+      "id": "txn-0083",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "equinox",
+      "categoryId": "health",
+      "postedOn": "2025-09-05",
+      "amountCents": -21500,
+      "recurringRuleId": "gym",
+      "id": "txn-0061",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "blue-bottle",
+      "categoryId": "dining",
+      "postedOn": "2025-09-05",
+      "amountCents": -6027,
+      "id": "txn-0067",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2025-09-05",
+      "amountCents": -4032,
+      "id": "txn-0080",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "citibike",
+      "categoryId": "transport",
+      "postedOn": "2025-09-05",
+      "amountCents": -3327,
+      "id": "txn-0087",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "netflix",
+      "categoryId": "subscriptions",
+      "postedOn": "2025-09-06",
+      "amountCents": -2299,
+      "recurringRuleId": "netflix",
+      "id": "txn-0056",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "blue-bottle",
+      "categoryId": "dining",
+      "postedOn": "2025-09-07",
+      "amountCents": -7333,
+      "id": "txn-0073",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "trader-joes",
+      "categoryId": "groceries",
+      "postedOn": "2025-09-08",
+      "amountCents": -8702,
+      "id": "txn-0075",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "wegmans",
+      "categoryId": "groceries",
+      "postedOn": "2025-09-08",
+      "amountCents": -13277,
+      "id": "txn-0079",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "spotify",
+      "categoryId": "subscriptions",
+      "postedOn": "2025-09-09",
+      "amountCents": -1199,
+      "recurringRuleId": "spotify",
+      "id": "txn-0057",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "dig",
+      "categoryId": "dining",
+      "postedOn": "2025-09-09",
+      "amountCents": -4447,
+      "id": "txn-0070",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "coned",
+      "categoryId": "utilities",
+      "postedOn": "2025-09-10",
+      "amountCents": -11800,
+      "recurringRuleId": "electric",
+      "id": "txn-0052",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "thai-diner",
+      "categoryId": "dining",
+      "postedOn": "2025-09-11",
+      "amountCents": -3471,
+      "id": "txn-0072",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "amc",
+      "categoryId": "entertainment",
+      "postedOn": "2025-09-11",
+      "amountCents": -7126,
+      "id": "txn-0093",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "delta",
+      "categoryId": "travel",
+      "postedOn": "2025-09-11",
+      "amountCents": -48006,
+      "id": "txn-0097",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "fios",
+      "categoryId": "utilities",
+      "postedOn": "2025-09-12",
+      "amountCents": -7900,
+      "recurringRuleId": "internet",
+      "id": "txn-0053",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "corner-store",
+      "categoryId": "misc",
+      "postedOn": "2025-09-13",
+      "amountCents": -1634,
+      "id": "txn-0096",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "icloud",
+      "categoryId": "subscriptions",
+      "postedOn": "2025-09-14",
+      "amountCents": -999,
+      "recurringRuleId": "icloud",
+      "id": "txn-0058",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "citibike",
+      "categoryId": "transport",
+      "postedOn": "2025-09-14",
+      "amountCents": -3260,
+      "id": "txn-0081",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2025-09-14",
+      "amountCents": -3406,
+      "id": "txn-0088",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "employer",
+      "categoryId": "income",
+      "postedOn": "2025-09-15",
+      "amountCents": 328000,
+      "recurringRuleId": "salary",
+      "id": "txn-0050",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2025-09-15",
+      "amountCents": -1871,
+      "id": "txn-0085",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "savings-transfer",
+      "categoryId": "transfer",
+      "postedOn": "2025-09-16",
+      "amountCents": -100000,
+      "transferGroupId": "save-2025-9",
+      "id": "txn-0062",
+      "status": "posted"
+    },
+    {
+      "accountId": "savings",
+      "merchantId": "savings-transfer",
+      "categoryId": "transfer",
+      "postedOn": "2025-09-16",
+      "amountCents": 100000,
+      "transferGroupId": "save-2025-9",
+      "id": "txn-0063",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2025-09-16",
+      "amountCents": -1103,
+      "id": "txn-0086",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "notion",
+      "categoryId": "subscriptions",
+      "postedOn": "2025-09-17",
+      "amountCents": -1000,
+      "recurringRuleId": "notion",
+      "id": "txn-0059",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uniqlo",
+      "categoryId": "shopping",
+      "postedOn": "2025-09-17",
+      "amountCents": -3557,
+      "id": "txn-0090",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "tmobile",
+      "categoryId": "utilities",
+      "postedOn": "2025-09-18",
+      "amountCents": -7200,
+      "recurringRuleId": "phone",
+      "id": "txn-0054",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2025-09-18",
+      "amountCents": -1808,
+      "id": "txn-0084",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "thai-diner",
+      "categoryId": "dining",
+      "postedOn": "2025-09-19",
+      "amountCents": -8186,
+      "id": "txn-0068",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "amex-payment",
+      "categoryId": "transfer",
+      "postedOn": "2025-09-20",
+      "amountCents": -200000,
+      "transferGroupId": "card-2025-9",
+      "recurringRuleId": "card-autopay",
+      "id": "txn-0064",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "amex-payment",
+      "categoryId": "transfer",
+      "postedOn": "2025-09-20",
+      "amountCents": 200000,
+      "transferGroupId": "card-2025-9",
+      "recurringRuleId": "card-autopay",
+      "id": "txn-0065",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "trader-joes",
+      "categoryId": "groceries",
+      "postedOn": "2025-09-20",
+      "amountCents": -6157,
+      "id": "txn-0077",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "target",
+      "categoryId": "shopping",
+      "postedOn": "2025-09-20",
+      "amountCents": -19923,
+      "id": "txn-0091",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "nyt",
+      "categoryId": "subscriptions",
+      "postedOn": "2025-09-22",
+      "amountCents": -2500,
+      "recurringRuleId": "nyt",
+      "id": "txn-0060",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "corner-store",
+      "categoryId": "misc",
+      "postedOn": "2025-09-23",
+      "amountCents": -5438,
+      "id": "txn-0095",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "geico",
+      "categoryId": "utilities",
+      "postedOn": "2025-09-24",
+      "amountCents": -14600,
+      "recurringRuleId": "insurance",
+      "id": "txn-0055",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2025-09-24",
+      "amountCents": -3353,
+      "id": "txn-0082",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "citymd",
+      "categoryId": "health",
+      "postedOn": "2025-09-26",
+      "amountCents": -5538,
+      "id": "txn-0094",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "thai-diner",
+      "categoryId": "dining",
+      "postedOn": "2025-09-29",
+      "amountCents": -3682,
+      "id": "txn-0069",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "lilia",
+      "categoryId": "dining",
+      "postedOn": "2025-09-29",
+      "amountCents": -8029,
+      "id": "txn-0071",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "trader-joes",
+      "categoryId": "groceries",
+      "postedOn": "2025-09-29",
+      "amountCents": -7352,
+      "id": "txn-0076",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "employer",
+      "categoryId": "income",
+      "postedOn": "2025-10-01",
+      "amountCents": 328000,
+      "recurringRuleId": "salary",
+      "id": "txn-0098",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "citibike",
+      "categoryId": "transport",
+      "postedOn": "2025-10-02",
+      "amountCents": -3876,
+      "id": "txn-0134",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "citibike",
+      "categoryId": "transport",
+      "postedOn": "2025-10-02",
+      "amountCents": -1991,
+      "id": "txn-0137",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "corner-store",
+      "categoryId": "misc",
+      "postedOn": "2025-10-02",
+      "amountCents": -6053,
+      "id": "txn-0144",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "laundry",
+      "categoryId": "misc",
+      "postedOn": "2025-10-02",
+      "amountCents": -1240,
+      "id": "txn-0145",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "landlord",
+      "categoryId": "housing",
+      "postedOn": "2025-10-03",
+      "amountCents": -265000,
+      "recurringRuleId": "rent",
+      "id": "txn-0100",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2025-10-03",
+      "amountCents": -3791,
+      "id": "txn-0130",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "equinox",
+      "categoryId": "health",
+      "postedOn": "2025-10-05",
+      "amountCents": -21500,
+      "recurringRuleId": "gym",
+      "id": "txn-0110",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "trader-joes",
+      "categoryId": "groceries",
+      "postedOn": "2025-10-05",
+      "amountCents": -6677,
+      "id": "txn-0126",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "netflix",
+      "categoryId": "subscriptions",
+      "postedOn": "2025-10-06",
+      "amountCents": -2299,
+      "recurringRuleId": "netflix",
+      "id": "txn-0105",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "blue-bottle",
+      "categoryId": "dining",
+      "postedOn": "2025-10-07",
+      "amountCents": -6867,
+      "id": "txn-0117",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uniqlo",
+      "categoryId": "shopping",
+      "postedOn": "2025-10-07",
+      "amountCents": -18650,
+      "id": "txn-0139",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "trader-joes",
+      "categoryId": "groceries",
+      "postedOn": "2025-10-08",
+      "amountCents": -10397,
+      "id": "txn-0128",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "spotify",
+      "categoryId": "subscriptions",
+      "postedOn": "2025-10-09",
+      "amountCents": -1199,
+      "recurringRuleId": "spotify",
+      "id": "txn-0106",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "coned",
+      "categoryId": "utilities",
+      "postedOn": "2025-10-10",
+      "amountCents": -11800,
+      "recurringRuleId": "electric",
+      "id": "txn-0101",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "blue-bottle",
+      "categoryId": "dining",
+      "postedOn": "2025-10-10",
+      "amountCents": -4074,
+      "id": "txn-0115",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "fios",
+      "categoryId": "utilities",
+      "postedOn": "2025-10-12",
+      "amountCents": -7900,
+      "recurringRuleId": "internet",
+      "id": "txn-0102",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "sweetgreen",
+      "categoryId": "dining",
+      "postedOn": "2025-10-13",
+      "amountCents": -9099,
+      "id": "txn-0122",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2025-10-13",
+      "amountCents": -1564,
+      "id": "txn-0131",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "amc",
+      "categoryId": "entertainment",
+      "postedOn": "2025-10-13",
+      "amountCents": -5796,
+      "id": "txn-0141",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "icloud",
+      "categoryId": "subscriptions",
+      "postedOn": "2025-10-14",
+      "amountCents": -999,
+      "recurringRuleId": "icloud",
+      "id": "txn-0107",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "citibike",
+      "categoryId": "transport",
+      "postedOn": "2025-10-14",
+      "amountCents": -720,
+      "id": "txn-0135",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "employer",
+      "categoryId": "income",
+      "postedOn": "2025-10-15",
+      "amountCents": 328000,
+      "recurringRuleId": "salary",
+      "id": "txn-0099",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2025-10-15",
+      "amountCents": -2209,
+      "id": "txn-0129",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "savings-transfer",
+      "categoryId": "transfer",
+      "postedOn": "2025-10-16",
+      "amountCents": -100000,
+      "transferGroupId": "save-2025-10",
+      "id": "txn-0111",
+      "status": "posted"
+    },
+    {
+      "accountId": "savings",
+      "merchantId": "savings-transfer",
+      "categoryId": "transfer",
+      "postedOn": "2025-10-16",
+      "amountCents": 100000,
+      "transferGroupId": "save-2025-10",
+      "id": "txn-0112",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "notion",
+      "categoryId": "subscriptions",
+      "postedOn": "2025-10-17",
+      "amountCents": -1000,
+      "recurringRuleId": "notion",
+      "id": "txn-0108",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "wegmans",
+      "categoryId": "groceries",
+      "postedOn": "2025-10-17",
+      "amountCents": -12731,
+      "id": "txn-0124",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "tmobile",
+      "categoryId": "utilities",
+      "postedOn": "2025-10-18",
+      "amountCents": -7200,
+      "recurringRuleId": "phone",
+      "id": "txn-0103",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "thai-diner",
+      "categoryId": "dining",
+      "postedOn": "2025-10-19",
+      "amountCents": -1962,
+      "id": "txn-0120",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "target",
+      "categoryId": "shopping",
+      "postedOn": "2025-10-19",
+      "amountCents": -9351,
+      "id": "txn-0138",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "amex-payment",
+      "categoryId": "transfer",
+      "postedOn": "2025-10-20",
+      "amountCents": -200000,
+      "transferGroupId": "card-2025-10",
+      "recurringRuleId": "card-autopay",
+      "id": "txn-0113",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "amex-payment",
+      "categoryId": "transfer",
+      "postedOn": "2025-10-20",
+      "amountCents": 200000,
+      "transferGroupId": "card-2025-10",
+      "recurringRuleId": "card-autopay",
+      "id": "txn-0114",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "wegmans",
+      "categoryId": "groceries",
+      "postedOn": "2025-10-20",
+      "amountCents": -6596,
+      "id": "txn-0123",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "citibike",
+      "categoryId": "transport",
+      "postedOn": "2025-10-20",
+      "amountCents": -889,
+      "id": "txn-0132",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "cvs",
+      "categoryId": "health",
+      "postedOn": "2025-10-21",
+      "amountCents": -2195,
+      "id": "txn-0143",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "nyt",
+      "categoryId": "subscriptions",
+      "postedOn": "2025-10-22",
+      "amountCents": -2500,
+      "recurringRuleId": "nyt",
+      "id": "txn-0109",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "wegmans",
+      "categoryId": "groceries",
+      "postedOn": "2025-10-22",
+      "amountCents": -7968,
+      "id": "txn-0127",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "whole-foods",
+      "categoryId": "groceries",
+      "postedOn": "2025-10-23",
+      "amountCents": -8556,
+      "id": "txn-0125",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "geico",
+      "categoryId": "utilities",
+      "postedOn": "2025-10-24",
+      "amountCents": -14600,
+      "recurringRuleId": "insurance",
+      "id": "txn-0104",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "sweetgreen",
+      "categoryId": "dining",
+      "postedOn": "2025-10-24",
+      "amountCents": -5865,
+      "id": "txn-0121",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "thai-diner",
+      "categoryId": "dining",
+      "postedOn": "2025-10-25",
+      "amountCents": -7599,
+      "id": "txn-0119",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "citibike",
+      "categoryId": "transport",
+      "postedOn": "2025-10-27",
+      "amountCents": -2556,
+      "id": "txn-0133",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2025-10-27",
+      "amountCents": -862,
+      "id": "txn-0136",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "amc",
+      "categoryId": "entertainment",
+      "postedOn": "2025-10-27",
+      "amountCents": -7088,
+      "id": "txn-0142",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "dig",
+      "categoryId": "dining",
+      "postedOn": "2025-10-28",
+      "amountCents": -5034,
+      "id": "txn-0116",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "amazon",
+      "categoryId": "shopping",
+      "postedOn": "2025-10-29",
+      "amountCents": -3913,
+      "id": "txn-0140",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "thai-diner",
+      "categoryId": "dining",
+      "postedOn": "2025-10-31",
+      "amountCents": -5436,
+      "id": "txn-0118",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "employer",
+      "categoryId": "income",
+      "postedOn": "2025-11-01",
+      "amountCents": 328000,
+      "recurringRuleId": "salary",
+      "id": "txn-0146",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "citibike",
+      "categoryId": "transport",
+      "postedOn": "2025-11-02",
+      "amountCents": -3622,
+      "id": "txn-0177",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "landlord",
+      "categoryId": "housing",
+      "postedOn": "2025-11-03",
+      "amountCents": -265000,
+      "recurringRuleId": "rent",
+      "id": "txn-0148",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "corner-store",
+      "categoryId": "misc",
+      "postedOn": "2025-11-03",
+      "amountCents": -4290,
+      "id": "txn-0193",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "trader-joes",
+      "categoryId": "groceries",
+      "postedOn": "2025-11-04",
+      "amountCents": -6662,
+      "id": "txn-0173",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "equinox",
+      "categoryId": "health",
+      "postedOn": "2025-11-05",
+      "amountCents": -21500,
+      "recurringRuleId": "gym",
+      "id": "txn-0158",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "netflix",
+      "categoryId": "subscriptions",
+      "postedOn": "2025-11-06",
+      "amountCents": -2299,
+      "recurringRuleId": "netflix",
+      "id": "txn-0153",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uniqlo",
+      "categoryId": "shopping",
+      "postedOn": "2025-11-06",
+      "amountCents": -13487,
+      "id": "txn-0186",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2025-11-07",
+      "amountCents": -3407,
+      "id": "txn-0185",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "dig",
+      "categoryId": "dining",
+      "postedOn": "2025-11-08",
+      "amountCents": -5786,
+      "id": "txn-0169",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "spotify",
+      "categoryId": "subscriptions",
+      "postedOn": "2025-11-09",
+      "amountCents": -1199,
+      "recurringRuleId": "spotify",
+      "id": "txn-0154",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2025-11-09",
+      "amountCents": -3527,
+      "id": "txn-0184",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "corner-store",
+      "categoryId": "misc",
+      "postedOn": "2025-11-09",
+      "amountCents": -2954,
+      "id": "txn-0192",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "coned",
+      "categoryId": "utilities",
+      "postedOn": "2025-11-10",
+      "amountCents": -11800,
+      "recurringRuleId": "electric",
+      "id": "txn-0149",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "blue-bottle",
+      "categoryId": "dining",
+      "postedOn": "2025-11-11",
+      "amountCents": -2472,
+      "id": "txn-0166",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "amazon",
+      "categoryId": "shopping",
+      "postedOn": "2025-11-11",
+      "amountCents": -10595,
+      "id": "txn-0187",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "fios",
+      "categoryId": "utilities",
+      "postedOn": "2025-11-12",
+      "amountCents": -7900,
+      "recurringRuleId": "internet",
+      "id": "txn-0150",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "dig",
+      "categoryId": "dining",
+      "postedOn": "2025-11-12",
+      "amountCents": -5943,
+      "id": "txn-0163",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "trader-joes",
+      "categoryId": "groceries",
+      "postedOn": "2025-11-12",
+      "amountCents": -5288,
+      "id": "txn-0176",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "cvs",
+      "categoryId": "health",
+      "postedOn": "2025-11-12",
+      "amountCents": -7544,
+      "id": "txn-0191",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2025-11-13",
+      "amountCents": -2617,
+      "id": "txn-0179",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2025-11-13",
+      "amountCents": -4748,
+      "id": "txn-0180",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "icloud",
+      "categoryId": "subscriptions",
+      "postedOn": "2025-11-14",
+      "amountCents": -999,
+      "recurringRuleId": "icloud",
+      "id": "txn-0155",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "employer",
+      "categoryId": "income",
+      "postedOn": "2025-11-15",
+      "amountCents": 328000,
+      "recurringRuleId": "salary",
+      "id": "txn-0147",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "savings-transfer",
+      "categoryId": "transfer",
+      "postedOn": "2025-11-16",
+      "amountCents": -100000,
+      "transferGroupId": "save-2025-11",
+      "id": "txn-0159",
+      "status": "posted"
+    },
+    {
+      "accountId": "savings",
+      "merchantId": "savings-transfer",
+      "categoryId": "transfer",
+      "postedOn": "2025-11-16",
+      "amountCents": 100000,
+      "transferGroupId": "save-2025-11",
+      "id": "txn-0160",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "dig",
+      "categoryId": "dining",
+      "postedOn": "2025-11-16",
+      "amountCents": -3125,
+      "id": "txn-0165",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "citibike",
+      "categoryId": "transport",
+      "postedOn": "2025-11-16",
+      "amountCents": -1377,
+      "id": "txn-0181",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "notion",
+      "categoryId": "subscriptions",
+      "postedOn": "2025-11-17",
+      "amountCents": -1000,
+      "recurringRuleId": "notion",
+      "id": "txn-0156",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "tmobile",
+      "categoryId": "utilities",
+      "postedOn": "2025-11-18",
+      "amountCents": -7200,
+      "recurringRuleId": "phone",
+      "id": "txn-0151",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2025-11-18",
+      "amountCents": -3579,
+      "id": "txn-0178",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2025-11-18",
+      "amountCents": -3824,
+      "id": "txn-0183",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "brooklyn-museum",
+      "categoryId": "entertainment",
+      "postedOn": "2025-11-18",
+      "amountCents": -6062,
+      "id": "txn-0190",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "thai-diner",
+      "categoryId": "dining",
+      "postedOn": "2025-11-19",
+      "amountCents": -6575,
+      "id": "txn-0164",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "thai-diner",
+      "categoryId": "dining",
+      "postedOn": "2025-11-19",
+      "amountCents": -8243,
+      "id": "txn-0167",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "amex-payment",
+      "categoryId": "transfer",
+      "postedOn": "2025-11-20",
+      "amountCents": -200000,
+      "transferGroupId": "card-2025-11",
+      "recurringRuleId": "card-autopay",
+      "id": "txn-0161",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "amex-payment",
+      "categoryId": "transfer",
+      "postedOn": "2025-11-20",
+      "amountCents": 200000,
+      "transferGroupId": "card-2025-11",
+      "recurringRuleId": "card-autopay",
+      "id": "txn-0162",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "dig",
+      "categoryId": "dining",
+      "postedOn": "2025-11-20",
+      "amountCents": -6038,
+      "id": "txn-0168",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "wegmans",
+      "categoryId": "groceries",
+      "postedOn": "2025-11-20",
+      "amountCents": -8253,
+      "id": "txn-0174",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "whole-foods",
+      "categoryId": "groceries",
+      "postedOn": "2025-11-20",
+      "amountCents": -7991,
+      "id": "txn-0175",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "brooklyn-museum",
+      "categoryId": "entertainment",
+      "postedOn": "2025-11-21",
+      "amountCents": -3534,
+      "id": "txn-0189",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "nyt",
+      "categoryId": "subscriptions",
+      "postedOn": "2025-11-22",
+      "amountCents": -2500,
+      "recurringRuleId": "nyt",
+      "id": "txn-0157",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "geico",
+      "categoryId": "utilities",
+      "postedOn": "2025-11-24",
+      "amountCents": -14600,
+      "recurringRuleId": "insurance",
+      "id": "txn-0152",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "thai-diner",
+      "categoryId": "dining",
+      "postedOn": "2025-11-24",
+      "amountCents": -1929,
+      "id": "txn-0170",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "trader-joes",
+      "categoryId": "groceries",
+      "postedOn": "2025-11-24",
+      "amountCents": -12431,
+      "id": "txn-0171",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "trader-joes",
+      "categoryId": "groceries",
+      "postedOn": "2025-11-27",
+      "amountCents": -10743,
+      "id": "txn-0172",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "target",
+      "categoryId": "shopping",
+      "postedOn": "2025-11-27",
+      "amountCents": -17165,
+      "id": "txn-0188",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2025-11-29",
+      "amountCents": -4416,
+      "id": "txn-0182",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "employer",
+      "categoryId": "income",
+      "postedOn": "2025-12-01",
+      "amountCents": 328000,
+      "recurringRuleId": "salary",
+      "id": "txn-0194",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "lilia",
+      "categoryId": "dining",
+      "postedOn": "2025-12-02",
+      "amountCents": -3068,
+      "id": "txn-0213",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2025-12-02",
+      "amountCents": -3754,
+      "id": "txn-0230",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "landlord",
+      "categoryId": "housing",
+      "postedOn": "2025-12-03",
+      "amountCents": -265000,
+      "recurringRuleId": "rent",
+      "id": "txn-0196",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "blue-bottle",
+      "categoryId": "dining",
+      "postedOn": "2025-12-03",
+      "amountCents": -3358,
+      "id": "txn-0216",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "trader-joes",
+      "categoryId": "groceries",
+      "postedOn": "2025-12-04",
+      "amountCents": -9494,
+      "id": "txn-0222",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2025-12-04",
+      "amountCents": -3466,
+      "id": "txn-0228",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "equinox",
+      "categoryId": "health",
+      "postedOn": "2025-12-05",
+      "amountCents": -21500,
+      "recurringRuleId": "gym",
+      "id": "txn-0206",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "netflix",
+      "categoryId": "subscriptions",
+      "postedOn": "2025-12-06",
+      "amountCents": -2299,
+      "recurringRuleId": "netflix",
+      "id": "txn-0201",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "dig",
+      "categoryId": "dining",
+      "postedOn": "2025-12-07",
+      "amountCents": -8370,
+      "id": "txn-0217",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2025-12-07",
+      "amountCents": -3703,
+      "id": "txn-0227",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "dig",
+      "categoryId": "dining",
+      "postedOn": "2025-12-08",
+      "amountCents": -4832,
+      "id": "txn-0218",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "spotify",
+      "categoryId": "subscriptions",
+      "postedOn": "2025-12-09",
+      "amountCents": -1199,
+      "recurringRuleId": "spotify",
+      "id": "txn-0202",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "coned",
+      "categoryId": "utilities",
+      "postedOn": "2025-12-10",
+      "amountCents": -11800,
+      "recurringRuleId": "electric",
+      "id": "txn-0197",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "wegmans",
+      "categoryId": "groceries",
+      "postedOn": "2025-12-10",
+      "amountCents": -13751,
+      "id": "txn-0224",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "brooklyn-museum",
+      "categoryId": "entertainment",
+      "postedOn": "2025-12-10",
+      "amountCents": -1990,
+      "id": "txn-0238",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2025-12-11",
+      "amountCents": -1676,
+      "id": "txn-0231",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "fios",
+      "categoryId": "utilities",
+      "postedOn": "2025-12-12",
+      "amountCents": -7900,
+      "recurringRuleId": "internet",
+      "id": "txn-0198",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "amazon",
+      "categoryId": "shopping",
+      "postedOn": "2025-12-13",
+      "amountCents": -9033,
+      "id": "txn-0234",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "cvs",
+      "categoryId": "health",
+      "postedOn": "2025-12-13",
+      "amountCents": -8864,
+      "id": "txn-0239",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "icloud",
+      "categoryId": "subscriptions",
+      "postedOn": "2025-12-14",
+      "amountCents": -999,
+      "recurringRuleId": "icloud",
+      "id": "txn-0203",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "employer",
+      "categoryId": "income",
+      "postedOn": "2025-12-15",
+      "amountCents": 328000,
+      "recurringRuleId": "salary",
+      "id": "txn-0195",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "wegmans",
+      "categoryId": "groceries",
+      "postedOn": "2025-12-15",
+      "amountCents": -9428,
+      "id": "txn-0220",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "savings-transfer",
+      "categoryId": "transfer",
+      "postedOn": "2025-12-16",
+      "amountCents": -100000,
+      "transferGroupId": "save-2025-12",
+      "id": "txn-0207",
+      "status": "posted"
+    },
+    {
+      "accountId": "savings",
+      "merchantId": "savings-transfer",
+      "categoryId": "transfer",
+      "postedOn": "2025-12-16",
+      "amountCents": 100000,
+      "transferGroupId": "save-2025-12",
+      "id": "txn-0208",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "notion",
+      "categoryId": "subscriptions",
+      "postedOn": "2025-12-17",
+      "amountCents": -1000,
+      "recurringRuleId": "notion",
+      "id": "txn-0204",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "tmobile",
+      "categoryId": "utilities",
+      "postedOn": "2025-12-18",
+      "amountCents": -7200,
+      "recurringRuleId": "phone",
+      "id": "txn-0199",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "wegmans",
+      "categoryId": "groceries",
+      "postedOn": "2025-12-19",
+      "amountCents": -5460,
+      "id": "txn-0223",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "amex-payment",
+      "categoryId": "transfer",
+      "postedOn": "2025-12-20",
+      "amountCents": -200000,
+      "transferGroupId": "card-2025-12",
+      "recurringRuleId": "card-autopay",
+      "id": "txn-0209",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "amex-payment",
+      "categoryId": "transfer",
+      "postedOn": "2025-12-20",
+      "amountCents": 200000,
+      "transferGroupId": "card-2025-12",
+      "recurringRuleId": "card-autopay",
+      "id": "txn-0210",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "sweetgreen",
+      "categoryId": "dining",
+      "postedOn": "2025-12-20",
+      "amountCents": -6807,
+      "id": "txn-0211",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2025-12-20",
+      "amountCents": -770,
+      "id": "txn-0229",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "sweetgreen",
+      "categoryId": "dining",
+      "postedOn": "2025-12-21",
+      "amountCents": -2520,
+      "id": "txn-0212",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "nyt",
+      "categoryId": "subscriptions",
+      "postedOn": "2025-12-22",
+      "amountCents": -2500,
+      "recurringRuleId": "nyt",
+      "id": "txn-0205",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2025-12-22",
+      "amountCents": -2014,
+      "id": "txn-0225",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uniqlo",
+      "categoryId": "shopping",
+      "postedOn": "2025-12-22",
+      "amountCents": -7854,
+      "id": "txn-0236",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "trader-joes",
+      "categoryId": "groceries",
+      "postedOn": "2025-12-23",
+      "amountCents": -12545,
+      "id": "txn-0219",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "trader-joes",
+      "categoryId": "groceries",
+      "postedOn": "2025-12-23",
+      "amountCents": -14160,
+      "id": "txn-0221",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "geico",
+      "categoryId": "utilities",
+      "postedOn": "2025-12-24",
+      "amountCents": -14600,
+      "recurringRuleId": "insurance",
+      "id": "txn-0200",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2025-12-25",
+      "amountCents": -1746,
+      "id": "txn-0232",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "amazon",
+      "categoryId": "shopping",
+      "postedOn": "2025-12-25",
+      "amountCents": -2150,
+      "id": "txn-0235",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "delta",
+      "categoryId": "travel",
+      "postedOn": "2025-12-25",
+      "amountCents": -53948,
+      "id": "txn-0242",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "laundry",
+      "categoryId": "misc",
+      "postedOn": "2025-12-26",
+      "amountCents": -1195,
+      "id": "txn-0241",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "dig",
+      "categoryId": "dining",
+      "postedOn": "2025-12-27",
+      "amountCents": -1242,
+      "id": "txn-0214",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "thai-diner",
+      "categoryId": "dining",
+      "postedOn": "2025-12-27",
+      "amountCents": -2394,
+      "id": "txn-0215",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2025-12-28",
+      "amountCents": -2287,
+      "id": "txn-0226",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "laundry",
+      "categoryId": "misc",
+      "postedOn": "2025-12-28",
+      "amountCents": -6402,
+      "id": "txn-0240",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2025-12-30",
+      "amountCents": -3983,
+      "id": "txn-0233",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "amc",
+      "categoryId": "entertainment",
+      "postedOn": "2025-12-31",
+      "amountCents": -5779,
+      "id": "txn-0237",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "employer",
+      "categoryId": "income",
+      "postedOn": "2026-01-01",
+      "amountCents": 328000,
+      "recurringRuleId": "salary",
+      "id": "txn-0243",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "blue-bottle",
+      "categoryId": "dining",
+      "postedOn": "2026-01-02",
+      "amountCents": -1742,
+      "id": "txn-0267",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "landlord",
+      "categoryId": "housing",
+      "postedOn": "2026-01-03",
+      "amountCents": -265000,
+      "recurringRuleId": "rent",
+      "id": "txn-0245",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2026-01-03",
+      "amountCents": -3714,
+      "id": "txn-0277",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "blue-bottle",
+      "categoryId": "dining",
+      "postedOn": "2026-01-04",
+      "amountCents": -6957,
+      "id": "txn-0262",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "citibike",
+      "categoryId": "transport",
+      "postedOn": "2026-01-04",
+      "amountCents": -2225,
+      "id": "txn-0282",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "equinox",
+      "categoryId": "health",
+      "postedOn": "2026-01-05",
+      "amountCents": -21500,
+      "recurringRuleId": "gym",
+      "id": "txn-0255",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2026-01-05",
+      "amountCents": -3463,
+      "id": "txn-0281",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "amazon",
+      "categoryId": "shopping",
+      "postedOn": "2026-01-05",
+      "amountCents": -16584,
+      "id": "txn-0285",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "netflix",
+      "categoryId": "subscriptions",
+      "postedOn": "2026-01-06",
+      "amountCents": -2299,
+      "recurringRuleId": "netflix",
+      "id": "txn-0250",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2026-01-06",
+      "amountCents": -4537,
+      "id": "txn-0279",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "sweetgreen",
+      "categoryId": "dining",
+      "postedOn": "2026-01-07",
+      "amountCents": -9146,
+      "id": "txn-0265",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "blue-bottle",
+      "categoryId": "dining",
+      "postedOn": "2026-01-08",
+      "amountCents": -3907,
+      "id": "txn-0266",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "spotify",
+      "categoryId": "subscriptions",
+      "postedOn": "2026-01-09",
+      "amountCents": -1199,
+      "recurringRuleId": "spotify",
+      "id": "txn-0251",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "coned",
+      "categoryId": "utilities",
+      "postedOn": "2026-01-10",
+      "amountCents": -11800,
+      "recurringRuleId": "electric",
+      "id": "txn-0246",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "wegmans",
+      "categoryId": "groceries",
+      "postedOn": "2026-01-11",
+      "amountCents": -11505,
+      "id": "txn-0269",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "fios",
+      "categoryId": "utilities",
+      "postedOn": "2026-01-12",
+      "amountCents": -7900,
+      "recurringRuleId": "internet",
+      "id": "txn-0247",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "amazon",
+      "categoryId": "shopping",
+      "postedOn": "2026-01-12",
+      "amountCents": -17134,
+      "id": "txn-0284",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "cvs",
+      "categoryId": "health",
+      "postedOn": "2026-01-12",
+      "amountCents": -8660,
+      "id": "txn-0288",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "icloud",
+      "categoryId": "subscriptions",
+      "postedOn": "2026-01-14",
+      "amountCents": -999,
+      "recurringRuleId": "icloud",
+      "id": "txn-0252",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "employer",
+      "categoryId": "income",
+      "postedOn": "2026-01-15",
+      "amountCents": 328000,
+      "recurringRuleId": "salary",
+      "id": "txn-0244",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "savings-transfer",
+      "categoryId": "transfer",
+      "postedOn": "2026-01-16",
+      "amountCents": -100000,
+      "transferGroupId": "save-2026-1",
+      "id": "txn-0256",
+      "status": "posted"
+    },
+    {
+      "accountId": "savings",
+      "merchantId": "savings-transfer",
+      "categoryId": "transfer",
+      "postedOn": "2026-01-16",
+      "amountCents": 100000,
+      "transferGroupId": "save-2026-1",
+      "id": "txn-0257",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "notion",
+      "categoryId": "subscriptions",
+      "postedOn": "2026-01-17",
+      "amountCents": -1000,
+      "recurringRuleId": "notion",
+      "id": "txn-0253",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "wegmans",
+      "categoryId": "groceries",
+      "postedOn": "2026-01-17",
+      "amountCents": -9476,
+      "id": "txn-0273",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "tmobile",
+      "categoryId": "utilities",
+      "postedOn": "2026-01-18",
+      "amountCents": -7200,
+      "recurringRuleId": "phone",
+      "id": "txn-0248",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "trader-joes",
+      "categoryId": "groceries",
+      "postedOn": "2026-01-18",
+      "amountCents": -4563,
+      "id": "txn-0272",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2026-01-18",
+      "amountCents": -3699,
+      "id": "txn-0278",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "amc",
+      "categoryId": "entertainment",
+      "postedOn": "2026-01-18",
+      "amountCents": -2160,
+      "id": "txn-0286",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "amc",
+      "categoryId": "entertainment",
+      "postedOn": "2026-01-18",
+      "amountCents": -3910,
+      "id": "txn-0287",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2026-01-19",
+      "amountCents": -4253,
+      "id": "txn-0275",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "amex-payment",
+      "categoryId": "transfer",
+      "postedOn": "2026-01-20",
+      "amountCents": -200000,
+      "transferGroupId": "card-2026-1",
+      "recurringRuleId": "card-autopay",
+      "id": "txn-0258",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "amex-payment",
+      "categoryId": "transfer",
+      "postedOn": "2026-01-20",
+      "amountCents": 200000,
+      "transferGroupId": "card-2026-1",
+      "recurringRuleId": "card-autopay",
+      "id": "txn-0259",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "amazon",
+      "categoryId": "shopping",
+      "postedOn": "2026-01-20",
+      "amountCents": -3797,
+      "id": "txn-0283",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "corner-store",
+      "categoryId": "misc",
+      "postedOn": "2026-01-20",
+      "amountCents": -4087,
+      "id": "txn-0289",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2026-01-21",
+      "amountCents": -852,
+      "id": "txn-0276",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "nyt",
+      "categoryId": "subscriptions",
+      "postedOn": "2026-01-22",
+      "amountCents": -2500,
+      "recurringRuleId": "nyt",
+      "id": "txn-0254",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "lilia",
+      "categoryId": "dining",
+      "postedOn": "2026-01-23",
+      "amountCents": -5651,
+      "id": "txn-0260",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "blue-bottle",
+      "categoryId": "dining",
+      "postedOn": "2026-01-23",
+      "amountCents": -2000,
+      "id": "txn-0263",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "whole-foods",
+      "categoryId": "groceries",
+      "postedOn": "2026-01-23",
+      "amountCents": -9553,
+      "id": "txn-0268",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "trader-joes",
+      "categoryId": "groceries",
+      "postedOn": "2026-01-23",
+      "amountCents": -6815,
+      "id": "txn-0271",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "geico",
+      "categoryId": "utilities",
+      "postedOn": "2026-01-24",
+      "amountCents": -14600,
+      "recurringRuleId": "insurance",
+      "id": "txn-0249",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "laundry",
+      "categoryId": "misc",
+      "postedOn": "2026-01-24",
+      "amountCents": -1490,
+      "id": "txn-0290",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2026-01-25",
+      "amountCents": -2235,
+      "id": "txn-0274",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2026-01-25",
+      "amountCents": -1365,
+      "id": "txn-0280",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "sweetgreen",
+      "categoryId": "dining",
+      "postedOn": "2026-01-27",
+      "amountCents": -3271,
+      "id": "txn-0261",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "trader-joes",
+      "categoryId": "groceries",
+      "postedOn": "2026-01-29",
+      "amountCents": -9203,
+      "id": "txn-0270",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "dig",
+      "categoryId": "dining",
+      "postedOn": "2026-01-31",
+      "amountCents": -2681,
+      "id": "txn-0264",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "employer",
+      "categoryId": "income",
+      "postedOn": "2026-02-01",
+      "amountCents": 328000,
+      "recurringRuleId": "salary",
+      "id": "txn-0291",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2026-02-01",
+      "amountCents": -1410,
+      "id": "txn-0326",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "landlord",
+      "categoryId": "housing",
+      "postedOn": "2026-02-03",
+      "amountCents": -265000,
+      "recurringRuleId": "rent",
+      "id": "txn-0293",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "whole-foods",
+      "categoryId": "groceries",
+      "postedOn": "2026-02-03",
+      "amountCents": -9153,
+      "id": "txn-0318",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2026-02-03",
+      "amountCents": -4784,
+      "id": "txn-0327",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "brooklyn-museum",
+      "categoryId": "entertainment",
+      "postedOn": "2026-02-03",
+      "amountCents": -7718,
+      "id": "txn-0334",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "cvs",
+      "categoryId": "health",
+      "postedOn": "2026-02-04",
+      "amountCents": -2565,
+      "id": "txn-0336",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "equinox",
+      "categoryId": "health",
+      "postedOn": "2026-02-05",
+      "amountCents": -21500,
+      "recurringRuleId": "gym",
+      "id": "txn-0303",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "whole-foods",
+      "categoryId": "groceries",
+      "postedOn": "2026-02-05",
+      "amountCents": -5741,
+      "id": "txn-0317",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "netflix",
+      "categoryId": "subscriptions",
+      "postedOn": "2026-02-06",
+      "amountCents": -2299,
+      "recurringRuleId": "netflix",
+      "id": "txn-0298",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "amc",
+      "categoryId": "entertainment",
+      "postedOn": "2026-02-06",
+      "amountCents": -6661,
+      "id": "txn-0335",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "corner-store",
+      "categoryId": "misc",
+      "postedOn": "2026-02-06",
+      "amountCents": -4472,
+      "id": "txn-0338",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "trader-joes",
+      "categoryId": "groceries",
+      "postedOn": "2026-02-07",
+      "amountCents": -7163,
+      "id": "txn-0320",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "sweetgreen",
+      "categoryId": "dining",
+      "postedOn": "2026-02-08",
+      "amountCents": -8969,
+      "id": "txn-0310",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "wegmans",
+      "categoryId": "groceries",
+      "postedOn": "2026-02-08",
+      "amountCents": -10396,
+      "id": "txn-0319",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2026-02-08",
+      "amountCents": -3736,
+      "id": "txn-0322",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "spotify",
+      "categoryId": "subscriptions",
+      "postedOn": "2026-02-09",
+      "amountCents": -1199,
+      "recurringRuleId": "spotify",
+      "id": "txn-0299",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "coned",
+      "categoryId": "utilities",
+      "postedOn": "2026-02-10",
+      "amountCents": -11800,
+      "recurringRuleId": "electric",
+      "id": "txn-0294",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2026-02-11",
+      "amountCents": -2357,
+      "id": "txn-0323",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "fios",
+      "categoryId": "utilities",
+      "postedOn": "2026-02-12",
+      "amountCents": -7900,
+      "recurringRuleId": "internet",
+      "id": "txn-0295",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "thai-diner",
+      "categoryId": "dining",
+      "postedOn": "2026-02-12",
+      "amountCents": -3997,
+      "id": "txn-0309",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "whole-foods",
+      "categoryId": "groceries",
+      "postedOn": "2026-02-13",
+      "amountCents": -8120,
+      "id": "txn-0321",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uniqlo",
+      "categoryId": "shopping",
+      "postedOn": "2026-02-13",
+      "amountCents": -7598,
+      "id": "txn-0332",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "icloud",
+      "categoryId": "subscriptions",
+      "postedOn": "2026-02-14",
+      "amountCents": -999,
+      "recurringRuleId": "icloud",
+      "id": "txn-0300",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "citibike",
+      "categoryId": "transport",
+      "postedOn": "2026-02-14",
+      "amountCents": -4111,
+      "id": "txn-0324",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "employer",
+      "categoryId": "income",
+      "postedOn": "2026-02-15",
+      "amountCents": 328000,
+      "recurringRuleId": "salary",
+      "id": "txn-0292",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "sweetgreen",
+      "categoryId": "dining",
+      "postedOn": "2026-02-15",
+      "amountCents": -3800,
+      "id": "txn-0313",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2026-02-15",
+      "amountCents": -3791,
+      "id": "txn-0325",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2026-02-15",
+      "amountCents": -804,
+      "id": "txn-0328",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "savings-transfer",
+      "categoryId": "transfer",
+      "postedOn": "2026-02-16",
+      "amountCents": -100000,
+      "transferGroupId": "save-2026-2",
+      "id": "txn-0304",
+      "status": "posted"
+    },
+    {
+      "accountId": "savings",
+      "merchantId": "savings-transfer",
+      "categoryId": "transfer",
+      "postedOn": "2026-02-16",
+      "amountCents": 100000,
+      "transferGroupId": "save-2026-2",
+      "id": "txn-0305",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "notion",
+      "categoryId": "subscriptions",
+      "postedOn": "2026-02-17",
+      "amountCents": -1000,
+      "recurringRuleId": "notion",
+      "id": "txn-0301",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "tmobile",
+      "categoryId": "utilities",
+      "postedOn": "2026-02-18",
+      "amountCents": -7200,
+      "recurringRuleId": "phone",
+      "id": "txn-0296",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "blue-bottle",
+      "categoryId": "dining",
+      "postedOn": "2026-02-19",
+      "amountCents": -6109,
+      "id": "txn-0308",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "target",
+      "categoryId": "shopping",
+      "postedOn": "2026-02-19",
+      "amountCents": -6393,
+      "id": "txn-0331",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "amex-payment",
+      "categoryId": "transfer",
+      "postedOn": "2026-02-20",
+      "amountCents": -200000,
+      "transferGroupId": "card-2026-2",
+      "recurringRuleId": "card-autopay",
+      "id": "txn-0306",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "amex-payment",
+      "categoryId": "transfer",
+      "postedOn": "2026-02-20",
+      "amountCents": 200000,
+      "transferGroupId": "card-2026-2",
+      "recurringRuleId": "card-autopay",
+      "id": "txn-0307",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "sweetgreen",
+      "categoryId": "dining",
+      "postedOn": "2026-02-21",
+      "amountCents": -6757,
+      "id": "txn-0312",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "whole-foods",
+      "categoryId": "groceries",
+      "postedOn": "2026-02-21",
+      "amountCents": -4416,
+      "id": "txn-0316",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "nyt",
+      "categoryId": "subscriptions",
+      "postedOn": "2026-02-22",
+      "amountCents": -2500,
+      "recurringRuleId": "nyt",
+      "id": "txn-0302",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "laundry",
+      "categoryId": "misc",
+      "postedOn": "2026-02-22",
+      "amountCents": -3242,
+      "id": "txn-0337",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2026-02-23",
+      "amountCents": -433,
+      "id": "txn-0330",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "geico",
+      "categoryId": "utilities",
+      "postedOn": "2026-02-24",
+      "amountCents": -14600,
+      "recurringRuleId": "insurance",
+      "id": "txn-0297",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "citibike",
+      "categoryId": "transport",
+      "postedOn": "2026-02-24",
+      "amountCents": -3652,
+      "id": "txn-0329",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "blue-bottle",
+      "categoryId": "dining",
+      "postedOn": "2026-02-25",
+      "amountCents": -1927,
+      "id": "txn-0311",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "thai-diner",
+      "categoryId": "dining",
+      "postedOn": "2026-02-26",
+      "amountCents": -8981,
+      "id": "txn-0314",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uniqlo",
+      "categoryId": "shopping",
+      "postedOn": "2026-02-26",
+      "amountCents": -4121,
+      "id": "txn-0333",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "thai-diner",
+      "categoryId": "dining",
+      "postedOn": "2026-02-27",
+      "amountCents": -7836,
+      "id": "txn-0315",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "employer",
+      "categoryId": "income",
+      "postedOn": "2026-03-01",
+      "amountCents": 328000,
+      "recurringRuleId": "salary",
+      "id": "txn-0339",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "thai-diner",
+      "categoryId": "dining",
+      "postedOn": "2026-03-02",
+      "amountCents": -7441,
+      "id": "txn-0358",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "wegmans",
+      "categoryId": "groceries",
+      "postedOn": "2026-03-02",
+      "amountCents": -9978,
+      "id": "txn-0365",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "citymd",
+      "categoryId": "health",
+      "postedOn": "2026-03-02",
+      "amountCents": -7020,
+      "id": "txn-0384",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "landlord",
+      "categoryId": "housing",
+      "postedOn": "2026-03-03",
+      "amountCents": -265000,
+      "recurringRuleId": "rent",
+      "id": "txn-0341",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "whole-foods",
+      "categoryId": "groceries",
+      "postedOn": "2026-03-04",
+      "amountCents": -8911,
+      "id": "txn-0369",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "equinox",
+      "categoryId": "health",
+      "postedOn": "2026-03-05",
+      "amountCents": -21500,
+      "recurringRuleId": "gym",
+      "id": "txn-0351",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "laundry",
+      "categoryId": "misc",
+      "postedOn": "2026-03-05",
+      "amountCents": -2921,
+      "id": "txn-0385",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "netflix",
+      "categoryId": "subscriptions",
+      "postedOn": "2026-03-06",
+      "amountCents": -2299,
+      "recurringRuleId": "netflix",
+      "id": "txn-0346",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "wegmans",
+      "categoryId": "groceries",
+      "postedOn": "2026-03-06",
+      "amountCents": -9923,
+      "id": "txn-0367",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2026-03-07",
+      "amountCents": -1882,
+      "id": "txn-0370",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "spotify",
+      "categoryId": "subscriptions",
+      "postedOn": "2026-03-09",
+      "amountCents": -1199,
+      "recurringRuleId": "spotify",
+      "id": "txn-0347",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "coned",
+      "categoryId": "utilities",
+      "postedOn": "2026-03-10",
+      "amountCents": -11800,
+      "recurringRuleId": "electric",
+      "id": "txn-0342",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "amc",
+      "categoryId": "entertainment",
+      "postedOn": "2026-03-10",
+      "amountCents": -8317,
+      "id": "txn-0382",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "fios",
+      "categoryId": "utilities",
+      "postedOn": "2026-03-12",
+      "amountCents": -7900,
+      "recurringRuleId": "internet",
+      "id": "txn-0343",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2026-03-12",
+      "amountCents": -3508,
+      "id": "txn-0376",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "citibike",
+      "categoryId": "transport",
+      "postedOn": "2026-03-12",
+      "amountCents": -3979,
+      "id": "txn-0378",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "dig",
+      "categoryId": "dining",
+      "postedOn": "2026-03-13",
+      "amountCents": -6202,
+      "id": "txn-0357",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "wegmans",
+      "categoryId": "groceries",
+      "postedOn": "2026-03-13",
+      "amountCents": -13577,
+      "id": "txn-0368",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2026-03-13",
+      "amountCents": -1702,
+      "id": "txn-0373",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2026-03-13",
+      "amountCents": -1796,
+      "id": "txn-0377",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "icloud",
+      "categoryId": "subscriptions",
+      "postedOn": "2026-03-14",
+      "amountCents": -999,
+      "recurringRuleId": "icloud",
+      "id": "txn-0348",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "citibike",
+      "categoryId": "transport",
+      "postedOn": "2026-03-14",
+      "amountCents": -4489,
+      "id": "txn-0374",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2026-03-14",
+      "amountCents": -1280,
+      "id": "txn-0375",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "employer",
+      "categoryId": "income",
+      "postedOn": "2026-03-15",
+      "amountCents": 328000,
+      "recurringRuleId": "salary",
+      "id": "txn-0340",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "trader-joes",
+      "categoryId": "groceries",
+      "postedOn": "2026-03-15",
+      "amountCents": -12799,
+      "id": "txn-0366",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "savings-transfer",
+      "categoryId": "transfer",
+      "postedOn": "2026-03-16",
+      "amountCents": -100000,
+      "transferGroupId": "save-2026-3",
+      "id": "txn-0352",
+      "status": "posted"
+    },
+    {
+      "accountId": "savings",
+      "merchantId": "savings-transfer",
+      "categoryId": "transfer",
+      "postedOn": "2026-03-16",
+      "amountCents": 100000,
+      "transferGroupId": "save-2026-3",
+      "id": "txn-0353",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "notion",
+      "categoryId": "subscriptions",
+      "postedOn": "2026-03-17",
+      "amountCents": -1000,
+      "recurringRuleId": "notion",
+      "id": "txn-0349",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "citibike",
+      "categoryId": "transport",
+      "postedOn": "2026-03-17",
+      "amountCents": -4715,
+      "id": "txn-0371",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "tmobile",
+      "categoryId": "utilities",
+      "postedOn": "2026-03-18",
+      "amountCents": -7200,
+      "recurringRuleId": "phone",
+      "id": "txn-0344",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "amc",
+      "categoryId": "entertainment",
+      "postedOn": "2026-03-18",
+      "amountCents": -7397,
+      "id": "txn-0383",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "amex-payment",
+      "categoryId": "transfer",
+      "postedOn": "2026-03-20",
+      "amountCents": -200000,
+      "transferGroupId": "card-2026-3",
+      "recurringRuleId": "card-autopay",
+      "id": "txn-0354",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "amex-payment",
+      "categoryId": "transfer",
+      "postedOn": "2026-03-20",
+      "amountCents": 200000,
+      "transferGroupId": "card-2026-3",
+      "recurringRuleId": "card-autopay",
+      "id": "txn-0355",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "blue-bottle",
+      "categoryId": "dining",
+      "postedOn": "2026-03-20",
+      "amountCents": -8143,
+      "id": "txn-0360",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "amazon",
+      "categoryId": "shopping",
+      "postedOn": "2026-03-21",
+      "amountCents": -21430,
+      "id": "txn-0381",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "delta",
+      "categoryId": "travel",
+      "postedOn": "2026-03-21",
+      "amountCents": -41961,
+      "id": "txn-0387",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "nyt",
+      "categoryId": "subscriptions",
+      "postedOn": "2026-03-22",
+      "amountCents": -2500,
+      "recurringRuleId": "nyt",
+      "id": "txn-0350",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2026-03-22",
+      "amountCents": -1706,
+      "id": "txn-0372",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "target",
+      "categoryId": "shopping",
+      "postedOn": "2026-03-23",
+      "amountCents": -15340,
+      "id": "txn-0379",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "geico",
+      "categoryId": "utilities",
+      "postedOn": "2026-03-24",
+      "amountCents": -14600,
+      "recurringRuleId": "insurance",
+      "id": "txn-0345",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "blue-bottle",
+      "categoryId": "dining",
+      "postedOn": "2026-03-24",
+      "amountCents": -8879,
+      "id": "txn-0363",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "amazon",
+      "categoryId": "shopping",
+      "postedOn": "2026-03-25",
+      "amountCents": -3248,
+      "id": "txn-0380",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "dig",
+      "categoryId": "dining",
+      "postedOn": "2026-03-26",
+      "amountCents": -1942,
+      "id": "txn-0356",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "corner-store",
+      "categoryId": "misc",
+      "postedOn": "2026-03-27",
+      "amountCents": -6280,
+      "id": "txn-0386",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "blue-bottle",
+      "categoryId": "dining",
+      "postedOn": "2026-03-28",
+      "amountCents": -5653,
+      "id": "txn-0362",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "sweetgreen",
+      "categoryId": "dining",
+      "postedOn": "2026-03-30",
+      "amountCents": -7580,
+      "id": "txn-0359",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "lilia",
+      "categoryId": "dining",
+      "postedOn": "2026-03-30",
+      "amountCents": -5532,
+      "id": "txn-0361",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "whole-foods",
+      "categoryId": "groceries",
+      "postedOn": "2026-03-30",
+      "amountCents": -11368,
+      "id": "txn-0364",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "employer",
+      "categoryId": "income",
+      "postedOn": "2026-04-01",
+      "amountCents": 328000,
+      "recurringRuleId": "salary",
+      "id": "txn-0388",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "landlord",
+      "categoryId": "housing",
+      "postedOn": "2026-04-03",
+      "amountCents": -265000,
+      "recurringRuleId": "rent",
+      "id": "txn-0390",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "dig",
+      "categoryId": "dining",
+      "postedOn": "2026-04-03",
+      "amountCents": -6483,
+      "id": "txn-0411",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "citibike",
+      "categoryId": "transport",
+      "postedOn": "2026-04-03",
+      "amountCents": -4567,
+      "id": "txn-0423",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "equinox",
+      "categoryId": "health",
+      "postedOn": "2026-04-05",
+      "amountCents": -21500,
+      "recurringRuleId": "gym",
+      "id": "txn-0400",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "citibike",
+      "categoryId": "transport",
+      "postedOn": "2026-04-05",
+      "amountCents": -4200,
+      "id": "txn-0425",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "target",
+      "categoryId": "shopping",
+      "postedOn": "2026-04-05",
+      "amountCents": -16254,
+      "id": "txn-0430",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "netflix",
+      "categoryId": "subscriptions",
+      "postedOn": "2026-04-06",
+      "amountCents": -2299,
+      "recurringRuleId": "netflix",
+      "id": "txn-0395",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "target",
+      "categoryId": "shopping",
+      "postedOn": "2026-04-06",
+      "amountCents": -14399,
+      "id": "txn-0428",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "trader-joes",
+      "categoryId": "groceries",
+      "postedOn": "2026-04-07",
+      "amountCents": -3844,
+      "id": "txn-0418",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "spotify",
+      "categoryId": "subscriptions",
+      "postedOn": "2026-04-09",
+      "amountCents": -1199,
+      "recurringRuleId": "spotify",
+      "id": "txn-0396",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "coned",
+      "categoryId": "utilities",
+      "postedOn": "2026-04-10",
+      "amountCents": -11800,
+      "recurringRuleId": "electric",
+      "id": "txn-0391",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "blue-bottle",
+      "categoryId": "dining",
+      "postedOn": "2026-04-11",
+      "amountCents": -3659,
+      "id": "txn-0405",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2026-04-11",
+      "amountCents": -909,
+      "id": "txn-0426",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "fios",
+      "categoryId": "utilities",
+      "postedOn": "2026-04-12",
+      "amountCents": -7900,
+      "recurringRuleId": "internet",
+      "id": "txn-0392",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "trader-joes",
+      "categoryId": "groceries",
+      "postedOn": "2026-04-12",
+      "amountCents": -4906,
+      "id": "txn-0417",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "wegmans",
+      "categoryId": "groceries",
+      "postedOn": "2026-04-13",
+      "amountCents": -5999,
+      "id": "txn-0414",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "icloud",
+      "categoryId": "subscriptions",
+      "postedOn": "2026-04-14",
+      "amountCents": -999,
+      "recurringRuleId": "icloud",
+      "id": "txn-0397",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "laundry",
+      "categoryId": "misc",
+      "postedOn": "2026-04-14",
+      "amountCents": -2186,
+      "id": "txn-0434",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "employer",
+      "categoryId": "income",
+      "postedOn": "2026-04-15",
+      "amountCents": 328000,
+      "recurringRuleId": "salary",
+      "id": "txn-0389",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "savings-transfer",
+      "categoryId": "transfer",
+      "postedOn": "2026-04-16",
+      "amountCents": -100000,
+      "transferGroupId": "save-2026-4",
+      "id": "txn-0401",
+      "status": "posted"
+    },
+    {
+      "accountId": "savings",
+      "merchantId": "savings-transfer",
+      "categoryId": "transfer",
+      "postedOn": "2026-04-16",
+      "amountCents": 100000,
+      "transferGroupId": "save-2026-4",
+      "id": "txn-0402",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "lilia",
+      "categoryId": "dining",
+      "postedOn": "2026-04-16",
+      "amountCents": -4273,
+      "id": "txn-0407",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "amc",
+      "categoryId": "entertainment",
+      "postedOn": "2026-04-16",
+      "amountCents": -5400,
+      "id": "txn-0431",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "notion",
+      "categoryId": "subscriptions",
+      "postedOn": "2026-04-17",
+      "amountCents": -1000,
+      "recurringRuleId": "notion",
+      "id": "txn-0398",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uniqlo",
+      "categoryId": "shopping",
+      "postedOn": "2026-04-17",
+      "amountCents": -3536,
+      "id": "txn-0429",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "tmobile",
+      "categoryId": "utilities",
+      "postedOn": "2026-04-18",
+      "amountCents": -7200,
+      "recurringRuleId": "phone",
+      "id": "txn-0393",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "amex-payment",
+      "categoryId": "transfer",
+      "postedOn": "2026-04-20",
+      "amountCents": -200000,
+      "transferGroupId": "card-2026-4",
+      "recurringRuleId": "card-autopay",
+      "id": "txn-0403",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "amex-payment",
+      "categoryId": "transfer",
+      "postedOn": "2026-04-20",
+      "amountCents": 200000,
+      "transferGroupId": "card-2026-4",
+      "recurringRuleId": "card-autopay",
+      "id": "txn-0404",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "dig",
+      "categoryId": "dining",
+      "postedOn": "2026-04-20",
+      "amountCents": -9172,
+      "id": "txn-0408",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "whole-foods",
+      "categoryId": "groceries",
+      "postedOn": "2026-04-20",
+      "amountCents": -6227,
+      "id": "txn-0413",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2026-04-20",
+      "amountCents": -3228,
+      "id": "txn-0419",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "brooklyn-museum",
+      "categoryId": "entertainment",
+      "postedOn": "2026-04-20",
+      "amountCents": -2026,
+      "id": "txn-0432",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "dig",
+      "categoryId": "dining",
+      "postedOn": "2026-04-21",
+      "amountCents": -1472,
+      "id": "txn-0406",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "wegmans",
+      "categoryId": "groceries",
+      "postedOn": "2026-04-21",
+      "amountCents": -12673,
+      "id": "txn-0416",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "laundry",
+      "categoryId": "misc",
+      "postedOn": "2026-04-21",
+      "amountCents": -4481,
+      "id": "txn-0435",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "nyt",
+      "categoryId": "subscriptions",
+      "postedOn": "2026-04-22",
+      "amountCents": -2500,
+      "recurringRuleId": "nyt",
+      "id": "txn-0399",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "cvs",
+      "categoryId": "health",
+      "postedOn": "2026-04-22",
+      "amountCents": -8790,
+      "id": "txn-0433",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "thai-diner",
+      "categoryId": "dining",
+      "postedOn": "2026-04-23",
+      "amountCents": -8568,
+      "id": "txn-0412",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2026-04-23",
+      "amountCents": -2866,
+      "id": "txn-0420",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "geico",
+      "categoryId": "utilities",
+      "postedOn": "2026-04-24",
+      "amountCents": -14600,
+      "recurringRuleId": "insurance",
+      "id": "txn-0394",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "blue-bottle",
+      "categoryId": "dining",
+      "postedOn": "2026-04-24",
+      "amountCents": -6317,
+      "id": "txn-0409",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "sweetgreen",
+      "categoryId": "dining",
+      "postedOn": "2026-04-25",
+      "amountCents": -6588,
+      "id": "txn-0410",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "wegmans",
+      "categoryId": "groceries",
+      "postedOn": "2026-04-26",
+      "amountCents": -8151,
+      "id": "txn-0415",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2026-04-26",
+      "amountCents": -1528,
+      "id": "txn-0427",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2026-04-27",
+      "amountCents": -1927,
+      "id": "txn-0421",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "citibike",
+      "categoryId": "transport",
+      "postedOn": "2026-04-28",
+      "amountCents": -734,
+      "id": "txn-0424",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2026-04-30",
+      "amountCents": -4428,
+      "id": "txn-0422",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "employer",
+      "categoryId": "income",
+      "postedOn": "2026-05-01",
+      "amountCents": 328000,
+      "recurringRuleId": "salary",
+      "id": "txn-0436",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "landlord",
+      "categoryId": "housing",
+      "postedOn": "2026-05-03",
+      "amountCents": -265000,
+      "recurringRuleId": "rent",
+      "id": "txn-0438",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "blue-bottle",
+      "categoryId": "dining",
+      "postedOn": "2026-05-04",
+      "amountCents": -7112,
+      "id": "txn-0458",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2026-05-04",
+      "amountCents": -3199,
+      "id": "txn-0471",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "equinox",
+      "categoryId": "health",
+      "postedOn": "2026-05-05",
+      "amountCents": -21500,
+      "recurringRuleId": "gym",
+      "id": "txn-0448",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "citibike",
+      "categoryId": "transport",
+      "postedOn": "2026-05-05",
+      "amountCents": -1463,
+      "id": "txn-0474",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "netflix",
+      "categoryId": "subscriptions",
+      "postedOn": "2026-05-06",
+      "amountCents": -2299,
+      "recurringRuleId": "netflix",
+      "id": "txn-0443",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "trader-joes",
+      "categoryId": "groceries",
+      "postedOn": "2026-05-06",
+      "amountCents": -10192,
+      "id": "txn-0465",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "brooklyn-museum",
+      "categoryId": "entertainment",
+      "postedOn": "2026-05-06",
+      "amountCents": -5775,
+      "id": "txn-0479",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "blue-bottle",
+      "categoryId": "dining",
+      "postedOn": "2026-05-08",
+      "amountCents": -7007,
+      "id": "txn-0460",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2026-05-08",
+      "amountCents": -604,
+      "id": "txn-0467",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2026-05-08",
+      "amountCents": -598,
+      "id": "txn-0475",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "spotify",
+      "categoryId": "subscriptions",
+      "postedOn": "2026-05-09",
+      "amountCents": -1199,
+      "recurringRuleId": "spotify",
+      "id": "txn-0444",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "trader-joes",
+      "categoryId": "groceries",
+      "postedOn": "2026-05-09",
+      "amountCents": -12713,
+      "id": "txn-0466",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "coned",
+      "categoryId": "utilities",
+      "postedOn": "2026-05-10",
+      "amountCents": -11800,
+      "recurringRuleId": "electric",
+      "id": "txn-0439",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uniqlo",
+      "categoryId": "shopping",
+      "postedOn": "2026-05-11",
+      "amountCents": -2679,
+      "id": "txn-0476",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "fios",
+      "categoryId": "utilities",
+      "postedOn": "2026-05-12",
+      "amountCents": -7900,
+      "recurringRuleId": "internet",
+      "id": "txn-0440",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "lilia",
+      "categoryId": "dining",
+      "postedOn": "2026-05-12",
+      "amountCents": -4078,
+      "id": "txn-0459",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2026-05-13",
+      "amountCents": -1184,
+      "id": "txn-0470",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "icloud",
+      "categoryId": "subscriptions",
+      "postedOn": "2026-05-14",
+      "amountCents": -999,
+      "recurringRuleId": "icloud",
+      "id": "txn-0445",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "sweetgreen",
+      "categoryId": "dining",
+      "postedOn": "2026-05-14",
+      "amountCents": -3213,
+      "id": "txn-0456",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2026-05-14",
+      "amountCents": -395,
+      "id": "txn-0473",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "amc",
+      "categoryId": "entertainment",
+      "postedOn": "2026-05-14",
+      "amountCents": -2914,
+      "id": "txn-0480",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "employer",
+      "categoryId": "income",
+      "postedOn": "2026-05-15",
+      "amountCents": 328000,
+      "recurringRuleId": "salary",
+      "id": "txn-0437",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "laundry",
+      "categoryId": "misc",
+      "postedOn": "2026-05-15",
+      "amountCents": -5034,
+      "id": "txn-0482",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "savings-transfer",
+      "categoryId": "transfer",
+      "postedOn": "2026-05-16",
+      "amountCents": -100000,
+      "transferGroupId": "save-2026-5",
+      "id": "txn-0449",
+      "status": "posted"
+    },
+    {
+      "accountId": "savings",
+      "merchantId": "savings-transfer",
+      "categoryId": "transfer",
+      "postedOn": "2026-05-16",
+      "amountCents": 100000,
+      "transferGroupId": "save-2026-5",
+      "id": "txn-0450",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2026-05-16",
+      "amountCents": -4742,
+      "id": "txn-0468",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "notion",
+      "categoryId": "subscriptions",
+      "postedOn": "2026-05-17",
+      "amountCents": -1000,
+      "recurringRuleId": "notion",
+      "id": "txn-0446",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "wegmans",
+      "categoryId": "groceries",
+      "postedOn": "2026-05-17",
+      "amountCents": -8467,
+      "id": "txn-0462",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "tmobile",
+      "categoryId": "utilities",
+      "postedOn": "2026-05-18",
+      "amountCents": -7200,
+      "recurringRuleId": "phone",
+      "id": "txn-0441",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uniqlo",
+      "categoryId": "shopping",
+      "postedOn": "2026-05-18",
+      "amountCents": -6167,
+      "id": "txn-0477",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "amex-payment",
+      "categoryId": "transfer",
+      "postedOn": "2026-05-20",
+      "amountCents": -200000,
+      "transferGroupId": "card-2026-5",
+      "recurringRuleId": "card-autopay",
+      "id": "txn-0451",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "amex-payment",
+      "categoryId": "transfer",
+      "postedOn": "2026-05-20",
+      "amountCents": 200000,
+      "transferGroupId": "card-2026-5",
+      "recurringRuleId": "card-autopay",
+      "id": "txn-0452",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "dig",
+      "categoryId": "dining",
+      "postedOn": "2026-05-20",
+      "amountCents": -7731,
+      "id": "txn-0454",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "thai-diner",
+      "categoryId": "dining",
+      "postedOn": "2026-05-21",
+      "amountCents": -2240,
+      "id": "txn-0453",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "citibike",
+      "categoryId": "transport",
+      "postedOn": "2026-05-21",
+      "amountCents": -605,
+      "id": "txn-0469",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "nyt",
+      "categoryId": "subscriptions",
+      "postedOn": "2026-05-22",
+      "amountCents": -2500,
+      "recurringRuleId": "nyt",
+      "id": "txn-0447",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "trader-joes",
+      "categoryId": "groceries",
+      "postedOn": "2026-05-22",
+      "amountCents": -9522,
+      "id": "txn-0463",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "whole-foods",
+      "categoryId": "groceries",
+      "postedOn": "2026-05-23",
+      "amountCents": -5708,
+      "id": "txn-0464",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "geico",
+      "categoryId": "utilities",
+      "postedOn": "2026-05-24",
+      "amountCents": -14600,
+      "recurringRuleId": "insurance",
+      "id": "txn-0442",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "thai-diner",
+      "categoryId": "dining",
+      "postedOn": "2026-05-25",
+      "amountCents": -8078,
+      "id": "txn-0455",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "citymd",
+      "categoryId": "health",
+      "postedOn": "2026-05-25",
+      "amountCents": -3054,
+      "id": "txn-0481",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uniqlo",
+      "categoryId": "shopping",
+      "postedOn": "2026-05-26",
+      "amountCents": -3468,
+      "id": "txn-0478",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "lilia",
+      "categoryId": "dining",
+      "postedOn": "2026-05-27",
+      "amountCents": -1792,
+      "id": "txn-0457",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "whole-foods",
+      "categoryId": "groceries",
+      "postedOn": "2026-05-27",
+      "amountCents": -7976,
+      "id": "txn-0461",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "corner-store",
+      "categoryId": "misc",
+      "postedOn": "2026-05-27",
+      "amountCents": -5579,
+      "id": "txn-0483",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2026-05-29",
+      "amountCents": -3833,
+      "id": "txn-0472",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "employer",
+      "categoryId": "income",
+      "postedOn": "2026-06-01",
+      "amountCents": 328000,
+      "recurringRuleId": "salary",
+      "id": "txn-0484",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2026-06-02",
+      "amountCents": -2773,
+      "id": "txn-0515",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2026-06-02",
+      "amountCents": -4676,
+      "id": "txn-0520",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "amc",
+      "categoryId": "entertainment",
+      "postedOn": "2026-06-02",
+      "amountCents": -3867,
+      "id": "txn-0528",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "landlord",
+      "categoryId": "housing",
+      "postedOn": "2026-06-03",
+      "amountCents": -265000,
+      "recurringRuleId": "rent",
+      "id": "txn-0486",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "sweetgreen",
+      "categoryId": "dining",
+      "postedOn": "2026-06-03",
+      "amountCents": -2501,
+      "id": "txn-0507",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "corner-store",
+      "categoryId": "misc",
+      "postedOn": "2026-06-03",
+      "amountCents": -2256,
+      "id": "txn-0531",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "citibike",
+      "categoryId": "transport",
+      "postedOn": "2026-06-04",
+      "amountCents": -4376,
+      "id": "txn-0516",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "equinox",
+      "categoryId": "health",
+      "postedOn": "2026-06-05",
+      "amountCents": -21500,
+      "recurringRuleId": "gym",
+      "id": "txn-0496",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "dig",
+      "categoryId": "dining",
+      "postedOn": "2026-06-05",
+      "amountCents": -7305,
+      "id": "txn-0504",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "citymd",
+      "categoryId": "health",
+      "postedOn": "2026-06-05",
+      "amountCents": -7056,
+      "id": "txn-0529",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "netflix",
+      "categoryId": "subscriptions",
+      "postedOn": "2026-06-06",
+      "amountCents": -2299,
+      "recurringRuleId": "netflix",
+      "id": "txn-0491",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "whole-foods",
+      "categoryId": "groceries",
+      "postedOn": "2026-06-06",
+      "amountCents": -11009,
+      "id": "txn-0511",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "citibike",
+      "categoryId": "transport",
+      "postedOn": "2026-06-08",
+      "amountCents": -997,
+      "id": "txn-0518",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2026-06-08",
+      "amountCents": -4272,
+      "id": "txn-0522",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "spotify",
+      "categoryId": "subscriptions",
+      "postedOn": "2026-06-09",
+      "amountCents": -1199,
+      "recurringRuleId": "spotify",
+      "id": "txn-0492",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "sweetgreen",
+      "categoryId": "dining",
+      "postedOn": "2026-06-09",
+      "amountCents": -2548,
+      "id": "txn-0501",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "dig",
+      "categoryId": "dining",
+      "postedOn": "2026-06-09",
+      "amountCents": -1981,
+      "id": "txn-0508",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "whole-foods",
+      "categoryId": "groceries",
+      "postedOn": "2026-06-09",
+      "amountCents": -10144,
+      "id": "txn-0510",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "trader-joes",
+      "categoryId": "groceries",
+      "postedOn": "2026-06-09",
+      "amountCents": -7943,
+      "id": "txn-0512",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "coned",
+      "categoryId": "utilities",
+      "postedOn": "2026-06-10",
+      "amountCents": -11800,
+      "recurringRuleId": "electric",
+      "id": "txn-0487",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "corner-store",
+      "categoryId": "misc",
+      "postedOn": "2026-06-11",
+      "amountCents": -2173,
+      "id": "txn-0530",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "fios",
+      "categoryId": "utilities",
+      "postedOn": "2026-06-12",
+      "amountCents": -7900,
+      "recurringRuleId": "internet",
+      "id": "txn-0488",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "icloud",
+      "categoryId": "subscriptions",
+      "postedOn": "2026-06-14",
+      "amountCents": -999,
+      "recurringRuleId": "icloud",
+      "id": "txn-0493",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "sweetgreen",
+      "categoryId": "dining",
+      "postedOn": "2026-06-14",
+      "amountCents": -7865,
+      "id": "txn-0503",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "employer",
+      "categoryId": "income",
+      "postedOn": "2026-06-15",
+      "amountCents": 328000,
+      "recurringRuleId": "salary",
+      "id": "txn-0485",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "savings-transfer",
+      "categoryId": "transfer",
+      "postedOn": "2026-06-16",
+      "amountCents": -100000,
+      "transferGroupId": "save-2026-6",
+      "id": "txn-0497",
+      "status": "posted"
+    },
+    {
+      "accountId": "savings",
+      "merchantId": "savings-transfer",
+      "categoryId": "transfer",
+      "postedOn": "2026-06-16",
+      "amountCents": 100000,
+      "transferGroupId": "save-2026-6",
+      "id": "txn-0498",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "notion",
+      "categoryId": "subscriptions",
+      "postedOn": "2026-06-17",
+      "amountCents": -1000,
+      "recurringRuleId": "notion",
+      "id": "txn-0494",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "trader-joes",
+      "categoryId": "groceries",
+      "postedOn": "2026-06-17",
+      "amountCents": -10602,
+      "id": "txn-0514",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "tmobile",
+      "categoryId": "utilities",
+      "postedOn": "2026-06-18",
+      "amountCents": -7200,
+      "recurringRuleId": "phone",
+      "id": "txn-0489",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "lilia",
+      "categoryId": "dining",
+      "postedOn": "2026-06-18",
+      "amountCents": -8598,
+      "id": "txn-0506",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "citibike",
+      "categoryId": "transport",
+      "postedOn": "2026-06-18",
+      "amountCents": -675,
+      "id": "txn-0521",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2026-06-19",
+      "amountCents": -657,
+      "id": "txn-0519",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "amex-payment",
+      "categoryId": "transfer",
+      "postedOn": "2026-06-20",
+      "amountCents": -200000,
+      "transferGroupId": "card-2026-6",
+      "recurringRuleId": "card-autopay",
+      "id": "txn-0499",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "amex-payment",
+      "categoryId": "transfer",
+      "postedOn": "2026-06-20",
+      "amountCents": 200000,
+      "transferGroupId": "card-2026-6",
+      "recurringRuleId": "card-autopay",
+      "id": "txn-0500",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "nyt",
+      "categoryId": "subscriptions",
+      "postedOn": "2026-06-22",
+      "amountCents": -2500,
+      "recurringRuleId": "nyt",
+      "id": "txn-0495",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2026-06-23",
+      "amountCents": -4477,
+      "id": "txn-0523",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "brooklyn-museum",
+      "categoryId": "entertainment",
+      "postedOn": "2026-06-23",
+      "amountCents": -6659,
+      "id": "txn-0527",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "geico",
+      "categoryId": "utilities",
+      "postedOn": "2026-06-24",
+      "amountCents": -14600,
+      "recurringRuleId": "insurance",
+      "id": "txn-0490",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "trader-joes",
+      "categoryId": "groceries",
+      "postedOn": "2026-06-24",
+      "amountCents": -10136,
+      "id": "txn-0513",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "citibike",
+      "categoryId": "transport",
+      "postedOn": "2026-06-24",
+      "amountCents": -2682,
+      "id": "txn-0517",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "blue-bottle",
+      "categoryId": "dining",
+      "postedOn": "2026-06-26",
+      "amountCents": -2125,
+      "id": "txn-0502",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "blue-bottle",
+      "categoryId": "dining",
+      "postedOn": "2026-06-26",
+      "amountCents": -3698,
+      "id": "txn-0505",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "target",
+      "categoryId": "shopping",
+      "postedOn": "2026-06-26",
+      "amountCents": -4273,
+      "id": "txn-0524",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "trader-joes",
+      "categoryId": "groceries",
+      "postedOn": "2026-06-27",
+      "amountCents": -11477,
+      "id": "txn-0509",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uniqlo",
+      "categoryId": "shopping",
+      "postedOn": "2026-06-27",
+      "amountCents": -20929,
+      "id": "txn-0526",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "delta",
+      "categoryId": "travel",
+      "postedOn": "2026-06-28",
+      "amountCents": -36035,
+      "id": "txn-0532",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uniqlo",
+      "categoryId": "shopping",
+      "postedOn": "2026-06-29",
+      "amountCents": -13890,
+      "id": "txn-0525",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "employer",
+      "categoryId": "income",
+      "postedOn": "2026-07-01",
+      "amountCents": 328000,
+      "recurringRuleId": "salary",
+      "id": "txn-0533",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "thai-diner",
+      "categoryId": "dining",
+      "postedOn": "2026-07-02",
+      "amountCents": -1510,
+      "id": "txn-0547",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "amazon",
+      "categoryId": "shopping",
+      "postedOn": "2026-07-02",
+      "amountCents": -10661,
+      "id": "txn-0570",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "landlord",
+      "categoryId": "housing",
+      "postedOn": "2026-07-03",
+      "amountCents": -265000,
+      "recurringRuleId": "rent",
+      "id": "txn-0535",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "dig",
+      "categoryId": "dining",
+      "postedOn": "2026-07-03",
+      "amountCents": -8922,
+      "id": "txn-0549",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "lilia",
+      "categoryId": "dining",
+      "postedOn": "2026-07-03",
+      "amountCents": -2161,
+      "id": "txn-0550",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "trader-joes",
+      "categoryId": "groceries",
+      "postedOn": "2026-07-04",
+      "amountCents": -9657,
+      "id": "txn-0559",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "brooklyn-museum",
+      "categoryId": "entertainment",
+      "postedOn": "2026-07-04",
+      "amountCents": -5092,
+      "id": "txn-0573",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "laundry",
+      "categoryId": "misc",
+      "postedOn": "2026-07-04",
+      "amountCents": -5770,
+      "id": "txn-0575",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "equinox",
+      "categoryId": "health",
+      "postedOn": "2026-07-05",
+      "amountCents": -21500,
+      "recurringRuleId": "gym",
+      "id": "txn-0543",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "citibike",
+      "categoryId": "transport",
+      "postedOn": "2026-07-05",
+      "amountCents": -2253,
+      "id": "txn-0563",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2026-07-05",
+      "amountCents": -3999,
+      "id": "txn-0564",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "netflix",
+      "categoryId": "subscriptions",
+      "postedOn": "2026-07-06",
+      "amountCents": -2299,
+      "recurringRuleId": "netflix",
+      "id": "txn-0539",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "sweetgreen",
+      "categoryId": "dining",
+      "postedOn": "2026-07-06",
+      "amountCents": -5626,
+      "id": "txn-0551",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "laundry",
+      "categoryId": "misc",
+      "postedOn": "2026-07-06",
+      "amountCents": -6341,
+      "id": "txn-0576",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "blue-bottle",
+      "categoryId": "dining",
+      "postedOn": "2026-07-07",
+      "amountCents": -9135,
+      "id": "txn-0553",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2026-07-07",
+      "amountCents": -3708,
+      "id": "txn-0560",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "mta",
+      "categoryId": "transport",
+      "postedOn": "2026-07-07",
+      "amountCents": -1210,
+      "id": "txn-0562",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "spotify",
+      "categoryId": "subscriptions",
+      "postedOn": "2026-07-09",
+      "amountCents": -1199,
+      "recurringRuleId": "spotify",
+      "id": "txn-0540",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2026-07-09",
+      "amountCents": -2583,
+      "id": "txn-0561",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "coned",
+      "categoryId": "utilities",
+      "postedOn": "2026-07-10",
+      "amountCents": -11800,
+      "recurringRuleId": "electric",
+      "id": "txn-0536",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2026-07-10",
+      "amountCents": -889,
+      "id": "txn-0565",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "citibike",
+      "categoryId": "transport",
+      "postedOn": "2026-07-11",
+      "amountCents": -2397,
+      "id": "txn-0568",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "fios",
+      "categoryId": "utilities",
+      "postedOn": "2026-07-12",
+      "amountCents": -7900,
+      "recurringRuleId": "internet",
+      "id": "txn-0537",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "thai-diner",
+      "categoryId": "dining",
+      "postedOn": "2026-07-12",
+      "amountCents": -2508,
+      "id": "txn-0548",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "trader-joes",
+      "categoryId": "groceries",
+      "postedOn": "2026-07-12",
+      "amountCents": -10511,
+      "id": "txn-0554",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "citymd",
+      "categoryId": "health",
+      "postedOn": "2026-07-12",
+      "amountCents": -6485,
+      "id": "txn-0574",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "thai-diner",
+      "categoryId": "dining",
+      "postedOn": "2026-07-13",
+      "amountCents": -4400,
+      "id": "txn-0546",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "whole-foods",
+      "categoryId": "groceries",
+      "postedOn": "2026-07-13",
+      "amountCents": -11582,
+      "id": "txn-0555",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "whole-foods",
+      "categoryId": "groceries",
+      "postedOn": "2026-07-13",
+      "amountCents": -13261,
+      "id": "txn-0556",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "amazon",
+      "categoryId": "shopping",
+      "postedOn": "2026-07-13",
+      "amountCents": -14129,
+      "id": "txn-0569",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "brooklyn-museum",
+      "categoryId": "entertainment",
+      "postedOn": "2026-07-13",
+      "amountCents": -2028,
+      "id": "txn-0572",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "icloud",
+      "categoryId": "subscriptions",
+      "postedOn": "2026-07-14",
+      "amountCents": -999,
+      "recurringRuleId": "icloud",
+      "id": "txn-0541",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2026-07-14",
+      "amountCents": -623,
+      "id": "txn-0566",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "employer",
+      "categoryId": "income",
+      "postedOn": "2026-07-15",
+      "amountCents": 328000,
+      "recurringRuleId": "salary",
+      "id": "txn-0534",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "sweetgreen",
+      "categoryId": "dining",
+      "postedOn": "2026-07-15",
+      "amountCents": -6332,
+      "id": "txn-0552",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "trader-joes",
+      "categoryId": "groceries",
+      "postedOn": "2026-07-15",
+      "amountCents": -11755,
+      "id": "txn-0558",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "savings-transfer",
+      "categoryId": "transfer",
+      "postedOn": "2026-07-16",
+      "amountCents": -100000,
+      "transferGroupId": "save-2026-7",
+      "id": "txn-0544",
+      "status": "posted"
+    },
+    {
+      "accountId": "savings",
+      "merchantId": "savings-transfer",
+      "categoryId": "transfer",
+      "postedOn": "2026-07-16",
+      "amountCents": 100000,
+      "transferGroupId": "save-2026-7",
+      "id": "txn-0545",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "uniqlo",
+      "categoryId": "shopping",
+      "postedOn": "2026-07-16",
+      "amountCents": -8568,
+      "id": "txn-0571",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "notion",
+      "categoryId": "subscriptions",
+      "postedOn": "2026-07-17",
+      "amountCents": -1000,
+      "recurringRuleId": "notion",
+      "id": "txn-0542",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "tmobile",
+      "categoryId": "utilities",
+      "postedOn": "2026-07-18",
+      "amountCents": -7200,
+      "recurringRuleId": "phone",
+      "id": "txn-0538",
+      "status": "posted"
+    },
+    {
+      "accountId": "credit",
+      "merchantId": "whole-foods",
+      "categoryId": "groceries",
+      "postedOn": "2026-07-18",
+      "amountCents": -11830,
+      "id": "txn-0557",
+      "status": "posted"
+    },
+    {
+      "accountId": "checking",
+      "merchantId": "uber",
+      "categoryId": "transport",
+      "postedOn": "2026-07-18",
+      "amountCents": -3274,
+      "id": "txn-0567",
+      "status": "posted"
+    }
+  ]
+}

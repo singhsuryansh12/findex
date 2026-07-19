@@ -1,0 +1,23 @@
+{
+  "name": "findex-workspace-sandbox",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run && playwright test",
+    "bundle": "node build.mjs",
+    "preview": "node server.mjs"
+  },
+  "dependencies": {
+    "@playwright/test": "1.61.1",
+    "@types/node": "22.19.19",
+    "date-fns": "4.4.0",
+    "esbuild": "0.28.1",
+    "lucide-react": "1.25.0",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
+    "recharts": "3.9.2",
+    "typescript": "5.9.3",
+    "vitest": "4.1.10"
+  }
+}
