@@ -1,6 +1,6 @@
 import { Template, defaultBuildLogger } from "e2b";
 
-const name = process.env.E2B_TEMPLATE ?? "findex-codex-widget:v1";
+const name = process.env.E2B_TEMPLATE ?? "findex-codex-widget:v2";
 const template = Template({ fileContextPath: process.cwd() })
   .fromTemplate("openai-codex")
   .makeDir(["/home/user/findex-widget", "/opt/findex"])

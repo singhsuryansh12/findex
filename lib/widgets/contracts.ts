@@ -136,11 +136,11 @@ export default function GeneratedWidget({ data }: Props) {
 
   const projection = useMemo(() => {
     const monthlyRate = returnRate / 100 / 12;
-    let balance = current;
     return Array.from({ length: years + 1 }, (_, year) => {
-      if (year > 0) {
-        for (let month = 0; month < 12; month += 1) balance = balance * (1 + monthlyRate) + contribution;
-      }
+      const months = year * 12;
+      const growth = Math.pow(1 + monthlyRate, months);
+      const deposits = monthlyRate === 0 ? contribution * months : contribution * ((growth - 1) / monthlyRate);
+      const balance = current * growth + deposits;
       return { age: data.persona.age + year, balance: Math.round(balance), target };
     });
   }, [contribution, current, data.persona.age, returnRate, target, years]);
@@ -170,7 +170,7 @@ export default function GeneratedWidget({ data }: Props) {
           <AreaChart data={projection} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
             <defs><linearGradient id="fireFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#337b60" stopOpacity={0.3}/><stop offset="100%" stopColor="#337b60" stopOpacity={0.02}/></linearGradient></defs>
             <CartesianGrid stroke="#e8e9e4" vertical={false}/><XAxis dataKey="age" tickLine={false} axisLine={false}/><YAxis tickFormatter={(value) => "$" + Math.round(value / 1000) + "k"} tickLine={false} axisLine={false} width={52}/>
-            <Tooltip formatter={(value) => money(Number(value))} labelFormatter={(age) => "Age " + age}/>
+            <Tooltip formatter={(value: unknown) => money(Number(value ?? 0))} labelFormatter={(age: React.ReactNode) => "Age " + age}/>
             <Area type="monotone" dataKey="balance" stroke="#2e765d" strokeWidth={2.5} fill="url(#fireFill)"/>
           </AreaChart>
         </ResponsiveContainer>

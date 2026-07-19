@@ -2,6 +2,7 @@
 
 import { SandpackLayout, SandpackPreview, SandpackProvider } from "@codesandbox/sandpack-react";
 import type { WidgetArtifact } from "@/lib/widgets/contracts";
+import { widgetPreviewDependencies } from "@/lib/widgets/preview-dependencies";
 
 const widgetKitSource = `import React from "react";
 export function Panel({ children }) { return <section className="widget-panel">{children}</section>; }
@@ -29,7 +30,7 @@ export function WidgetSandbox({ artifact }: { artifact: WidgetArtifact }) {
     <SandpackProvider
       template="react-ts"
       files={files}
-      customSetup={{ entry: "/App.tsx", dependencies: { recharts: "^3.9.2" } }}
+      customSetup={{ dependencies: widgetPreviewDependencies }}
       options={{ activeFile: "/GeneratedWidget.tsx", externalResources: [], recompileMode: "delayed", recompileDelay: 300 }}
       theme="light"
     >

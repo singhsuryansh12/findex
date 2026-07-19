@@ -11,7 +11,7 @@ The public demo is intentionally single-user and uses only generated US/USD data
 1. **Rich deterministic ledger** — 12 months, 576 posted transactions, three reconciled accounts, linked transfers, recurring income and liabilities, and no empty states.
 2. **Predictive cashflow** — a tested 30-day checking projection and a protected safe-to-spend headline derived from the lowest balance in the window.
 3. **Financial Brain** — a typed SSE chat endpoint that delegates all currency calculations to read-only TypeScript tools.
-4. **Generative UI Factory** — a strict `WidgetSpec` becomes React code in a disposable E2B/Codex workspace, passes validation, and renders in Sandpack without navigation.
+4. **Generative UI Factory** — a strict `WidgetSpec` becomes React code through the Codex CLI, passes validation, and renders in Sandpack without navigation. Local development can use the signed-in CLI directly; the hosted demo runs the same CLI-backed workflow in disposable E2B.
 
 The frozen acceptance prompt is:
 
@@ -33,8 +33,8 @@ flowchart LR
     R --> Q["Read-only TypeScript finance tools"]
     Q --> A["Grounded answer + provenance"]
     R --> S["Sanitized WidgetSpec v1"]
-    S --> E["Disposable E2B microVM"]
-    E --> C["Codex SDK edits React scaffold"]
+    S --> X["Executor · local or E2B"]
+    X --> C["Codex SDK · CLI-backed React edits"]
     C --> V["Diff · typecheck · lint · test · bundle · policy scan"]
     V --> P["Cross-origin Sandpack iframe"]
     P --> W["Interactive dashboard widget"]
@@ -45,10 +45,10 @@ The layers have deliberately different responsibilities:
 | Layer | Responsibility |
 | --- | --- |
 | Finance engine | Integer-cent aggregation, transfer exclusion, recurrence expansion, forecast, and safe-to-spend math |
-| OpenAI Responses API | Select the appropriate read-only tool and explain its returned result |
-| Codex SDK in E2B | Write or repair `GeneratedWidget.tsx` from a sanitized spec and filtered mock data |
+| OpenAI Responses API | Select the appropriate read-only finance tool and explain its returned result; it does not write widget code |
+| Codex SDK / CLI | Write or repair `GeneratedWidget.tsx` from a sanitized spec and filtered mock data |
 | E2B | Provide a disposable workspace, validation commands, deadline, and guaranteed cleanup |
-| Sandpack | Compile and hot-render the validated browser artifact in a cross-origin iframe |
+| Sandpack | Compile and hot-render the validated browser artifact in a cross-origin iframe with React, React DOM, `react-is`, and Recharts pinned as one compatible runtime |
 | Verified sample | Keep the demo useful during missing credentials, timeout, or validation failure; always visibly labeled |
 
 ## Stack
@@ -56,7 +56,7 @@ The layers have deliberately different responsibilities:
 - Next.js 16 App Router, React 19, strict TypeScript
 - Tailwind CSS v4, Radix primitives, Lucide, Recharts 3
 - OpenAI Responses API with strict function schemas
-- `@openai/codex-sdk` inside a versioned E2B template
+- `@openai/codex-sdk`, which launches the bundled Codex CLI, locally or inside a versioned E2B template
 - Sandpack for lazy-loaded browser compilation
 - Zod, Vitest, Testing Library, and Playwright
 - Imported static JSON for zero-latency, Vercel-compatible demo storage
@@ -73,6 +73,14 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) and choose **Login as Demo User**. The dashboard and deterministic Brain flows work without API credentials. With live widgets disabled or unavailable, FinDex uses the labeled verified FIRE fixture.
 
+For live widget generation on your own machine, sign in once with `codex login` (or provide `CODEX_API_KEY`) and use:
+
+```bash
+WIDGET_EXECUTION_MODE=local npm run dev
+```
+
+The local executor creates an ephemeral scaffold under the operating system temp directory, invokes the CLI through the Codex SDK, validates the result, and deletes the workspace. Do not copy local Codex authentication files into a deployment.
+
 For browser tests, install Chromium once:
 
 ```bash
@@ -85,15 +93,20 @@ All credentials remain server-only. No variable uses a `NEXT_PUBLIC_` prefix.
 
 | Variable | Purpose |
 | --- | --- |
-| `OPENAI_API_KEY` | Responses API and Codex client credential |
+| `OPENAI_API_KEY` | Financial Brain Responses API credential; also used as the Codex credential when `CODEX_API_KEY` is empty |
+| `CODEX_API_KEY` | Optional dedicated credential for hosted Codex automation |
 | `E2B_API_KEY` | Creates and destroys disposable widget sandboxes |
 | `E2B_TEMPLATE` | Versioned template name or ID |
 | `OPENAI_CHAT_MODEL` | Brain model; defaults to `gpt-5.6-terra` |
-| `CODEX_MODEL` | Widget coding model; defaults to `gpt-5.3-codex` |
+| `CODEX_MODEL` | Hosted E2B widget coding model; defaults to `gpt-5.3-codex` |
+| `CODEX_REASONING_EFFORT` | Hosted Codex effort; defaults to `high` |
+| `LOCAL_CODEX_MODEL` | Signed-in local CLI model; defaults to the faster `gpt-5.6-terra` |
+| `LOCAL_CODEX_REASONING_EFFORT` | Local CLI effort; defaults to `medium` to fit the interactive deadline |
 | `DEMO_AS_OF` | Fixture date used when regenerating data |
 | `DEMO_SEED` | Deterministic seed |
 | `DEMO_SESSION_SECRET` | HMAC secret for anonymous demo sessions |
 | `ENABLE_LIVE_WIDGETS` | Set `false` to force the verified sample path |
+| `WIDGET_EXECUTION_MODE` | `auto`, `local`, `e2b`, or `disabled`; `auto` uses configured E2B in production and local CLI in development |
 
 ## Data and finance invariants
 
@@ -138,17 +151,19 @@ Public controls cap prompts at 500 characters, Brain turns at 25, and widget gen
 
 The route converts build intent into `WidgetSpec v1`; raw conversation text is not sent to the coding agent. The data envelope contains aggregates, forecast points, recurring obligations, and at most 100 purpose-filtered mock transactions. It strips account IDs and unrelated fields.
 
-Codex can edit only `GeneratedWidget.tsx` and its optional test. Artifacts may import React, Recharts, and `./widget-kit`. Validation rejects unexpected files, source over 25 KB, invalid TypeScript, lint/test/bundle failures, network APIs, dynamic imports, `eval`, `Function`, parent-window access, unsafe HTML, scripts, and iframes. One repair turn is allowed. The route has a 120-second cap, generation has a 90-second deadline, and sandbox destruction runs in `finally` for success, failure, abort, and timeout.
+Codex can edit only `GeneratedWidget.tsx` and its optional test. Artifacts may import React, Recharts, and `./widget-kit`. Validation rejects changed or newly created files outside the allowlist, source over 25 KB, invalid TypeScript, lint/test/bundle failures, network APIs, dynamic imports, `eval`, `Function`, parent-window access, unsafe HTML, scripts, and iframes. One repair turn is allowed. The route has a 120-second cap, generation has a 90-second deadline, and the E2B sandbox or local temporary workspace is destroyed in `finally` for success, failure, abort, and timeout.
+
+The Codex SDK is not a second code-generation implementation: it launches the bundled `codex` CLI and exchanges structured JSONL events with it. The finance chat remains on the Responses API because its job is strict function calling over deterministic tools, while Codex is reserved for coding work.
 
 ### Build the E2B template
 
 Authenticate E2B, set `E2B_API_KEY`, then run:
 
 ```bash
-E2B_TEMPLATE=findex-codex-widget:v1 npm run e2b:template
+E2B_TEMPLATE=findex-codex-widget:v2 npm run e2b:template
 ```
 
-The template extends E2B’s Codex image, installs the exact React/TypeScript/test toolchain, and commits a clean Git baseline. Set the resulting template name or ID in Vercel.
+The template extends E2B’s Codex image, installs the exact React/TypeScript/test toolchain (including a React-matched `react-is` peer), and commits a clean Git baseline. Set `WIDGET_EXECUTION_MODE=e2b`, the resulting template name or ID, `E2B_API_KEY`, and a server-only Codex credential in Vercel.
 
 ## Verification
 
@@ -167,7 +182,7 @@ Live OpenAI/E2B smoke tests are intentionally separate because they consume exte
 ## Vercel deployment
 
 1. Import the public repository into Vercel.
-2. Add every value from `.env.example` in Project Settings; replace the session secret.
+2. Add every value from `.env.example` in Project Settings; replace the session secret and use `WIDGET_EXECUTION_MODE=e2b` for live hosted generation.
 3. Use Node.js 22 and the standard `npm run build` command.
 4. Confirm the selected Vercel plan permits the route’s `maxDuration = 120` requirement.
 5. Run the deployed smoke checks, then freeze the commit at least two hours before judging.

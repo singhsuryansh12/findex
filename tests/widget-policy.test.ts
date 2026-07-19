@@ -5,6 +5,27 @@ import {
   widgetSpecSchema,
 } from "@/lib/widgets/contracts";
 import { validateWidgetSource } from "@/lib/widgets/validator";
+import { resolveWidgetExecutor } from "@/lib/widgets/execution";
+import { widgetPreviewDependencies } from "@/lib/widgets/preview-dependencies";
+
+describe("widget execution boundary", () => {
+  it("pins the Recharts peer runtime to the same React version", () => {
+    expect(widgetPreviewDependencies["react-is"]).toBe(widgetPreviewDependencies.react);
+    expect(widgetPreviewDependencies["react-dom"]).toBe(widgetPreviewDependencies.react);
+  });
+
+  it("uses E2B for configured hosted generation and local Codex during development", () => {
+    expect(resolveWidgetExecutor({
+      requested: "auto", enabled: true, nodeEnv: "production", hasE2bConfig: true, hasCodexCredential: true,
+    })).toBe("e2b");
+    expect(resolveWidgetExecutor({
+      requested: "auto", enabled: true, nodeEnv: "development", hasE2bConfig: false, hasCodexCredential: false,
+    })).toBe("local");
+    expect(resolveWidgetExecutor({
+      requested: "auto", enabled: true, nodeEnv: "production", hasE2bConfig: false, hasCodexCredential: false,
+    })).toBe("disabled");
+  });
+});
 
 describe("widget data boundary", () => {
   it("caps and strips transactions before generation", () => {

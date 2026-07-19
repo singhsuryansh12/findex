@@ -7,7 +7,7 @@
 - [ ] `npm run validate` passes from a clean checkout.
 - [ ] `npm run test:e2e` passes after `npx playwright install chromium`.
 - [ ] No browser console errors on desktop or a 390×844 viewport.
-- [ ] `OPENAI_API_KEY`, `E2B_API_KEY`, `E2B_TEMPLATE`, and `DEMO_SESSION_SECRET` are present in Vercel.
+- [ ] `OPENAI_API_KEY`, `E2B_API_KEY`, `E2B_TEMPLATE`, `WIDGET_EXECUTION_MODE=e2b`, and `DEMO_SESSION_SECRET` are present in Vercel. Add `CODEX_API_KEY` when widget generation uses a separate credential.
 - [ ] No secret is prefixed `NEXT_PUBLIC_` or included in a client bundle.
 - [ ] Live sandbox generation completes in under 90 seconds.
 - [ ] E2B shows no orphaned sandboxes after success, retry, failure, abort, and timeout checks.
@@ -35,12 +35,13 @@ Run once locally and once against the deployed URL before freeze:
 - Validation report contains typecheck, lint, render/interaction test, bundle, and host policy scan.
 - Generated source has no account IDs or unrelated transactions.
 - Refresh preserves the artifact; Reset Demo removes it.
+- The Sandpack frame renders “FIRE runway” with no dependency-resolution overlay, and changing a range control updates immediately.
 - Disable `ENABLE_LIVE_WIDGETS` and verify the labeled sample plus Retry path.
 - Force an invalid artifact or timeout in a non-production branch and verify the sample is returned and the sandbox is killed.
 
 ## Recovery
 
-- **OpenAI unavailable:** set `ENABLE_LIVE_WIDGETS=false`; deterministic dashboard/Brain demo routes and the verified sample remain functional.
+- **Financial Brain model unavailable:** deterministic demo prompts remain functional; use `ENABLE_LIVE_WIDGETS=false` only when the Codex generation path is also unavailable.
 - **E2B unavailable:** the route catches failure, kills any created sandbox, and returns the labeled sample.
 - **Slow venue network:** preload the public page and keep a second clean tab ready. Do not represent the sample as live output.
 - **Deployment regression:** roll Vercel back to the frozen deployment; do not change finance fixture values during judging.

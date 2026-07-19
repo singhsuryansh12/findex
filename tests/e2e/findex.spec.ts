@@ -34,6 +34,14 @@ test("fixture-backed Codex artifact inserts without navigation and survives relo
   await page.getByRole("button", { name: "Send message" }).click();
   await expect(page.getByText("Verified sample · live generation unavailable")).toBeVisible({ timeout: 30_000 });
   await expect(page.locator(".generated-preview iframe")).toBeAttached();
+  const preview = page.frameLocator(".generated-preview iframe");
+  await expect(preview.getByRole("heading", { name: "FIRE runway" })).toBeVisible({ timeout: 30_000 });
+  await expect(preview.getByText("Projected at retirement")).toBeVisible();
+  await expect(preview.locator("body")).not.toContainText("Could not find dependency");
+  const monthlyContribution = preview.locator('input[type="range"]').first();
+  await expect(monthlyContribution).toBeVisible();
+  await monthlyContribution.fill("2500");
+  await expect(monthlyContribution).toHaveValue("2500");
   expect(page.url()).toBe(originalUrl);
   await page.reload();
   await expect(page.getByText("Verified sample · live generation unavailable")).toBeVisible();
