@@ -5,6 +5,8 @@ import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAx
 import { CalendarClock, ChevronRight, CircleDollarSign, Info, Sparkles, WalletCards } from "lucide-react";
 import type { DemoDataset } from "@/lib/finance/types";
 import { formatMoney, getCashFlowForecast } from "@/lib/finance/engine";
+import { BrainGuidance } from "@/components/brain/brain-guidance";
+import { MetricHint } from "@/components/dashboard/metric-hint";
 import { ForecastChart } from "./forecast-chart";
 
 export function CashFlowView({ dataset, onAskBrain }: { dataset: DemoDataset; onAskBrain: (prompt: string) => void }) {
@@ -27,11 +29,13 @@ export function CashFlowView({ dataset, onAskBrain }: { dataset: DemoDataset; on
         <button className="fd-ask-button" onClick={() => onAskBrain("What is safe to spend and how does my cash flow look?")}><Sparkles size={15} />Ask the Brain</button>
       </header>
 
+      <BrainGuidance view="cash-flow" onSelectChip={(prompt) => onAskBrain(prompt)} />
+
       <section className="fd-metric-row fd-cash-metrics" aria-label="Cash flow summary">
-        <article className="featured"><span>Safe to spend now</span><strong>{formatMoney(forecast.safeToSpendNowCents)}</strong><small>Protects the {formatMoney(dataset.persona.reserveFloorCents)} checking buffer</small></article>
+        <article className="featured"><span>Safe to spend now</span><strong>{formatMoney(forecast.safeToSpendNowCents)}</strong><small>Protects the {formatMoney(dataset.persona.reserveFloorCents)} checking buffer</small><MetricHint>Cash you can use now while keeping the checking safety buffer intact.</MetricHint></article>
         <article><span>Take-home income</span><strong>{formatMoney(forecast.monthlyTakeHomeCents)}</strong><small>{formatMoney(dataset.persona.grossAnnualIncomeCents)} gross salary · synthetic demo, not a tax estimate</small></article>
         <article className={forecast.expectedMonthlySurplusCents >= 0 ? "positive" : "warning"}><span>Expected monthly surplus</span><strong>{formatMoney(forecast.expectedMonthlySurplusCents)}</strong><small>After spending and checking-funded investing</small></article>
-        <article><span>Lowest projected balance</span><strong>{formatMoney(forecast.lowestBalanceCents)}</strong><small>{new Date(`${forecast.lowestBalanceDate}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" })} · checking</small></article>
+        <article><span>Lowest projected balance</span><strong>{formatMoney(forecast.lowestBalanceCents)}</strong><small>{new Date(`${forecast.lowestBalanceDate}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" })} · checking</small><MetricHint>Lowest point on the forecast — as long as it stays above the buffer, the plan holds.</MetricHint></article>
         <article><span>Liquid cash</span><strong>{formatMoney(liquidCashCents)}</strong><small>Checking + savings</small></article>
       </section>
 
