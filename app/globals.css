@@ -2921,3 +2921,188 @@ button {
     view-transition-name: none;
   }
 }
+
+/* Brain guidance, handoff, metric hints */
+.fd-brain-guidance {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0 4px;
+}
+
+.fd-guidance-tip {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--muted);
+  font-size: var(--fd-text-meta);
+  line-height: 1.45;
+}
+
+.fd-guidance-tip button {
+  border: 0;
+  background: transparent;
+  color: var(--emerald);
+  font-size: var(--fd-text-caption);
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  white-space: nowrap;
+}
+
+.fd-guidance-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+}
+
+.fd-guidance-chips > button {
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 252, 0.55);
+  color: var(--ink-soft);
+  border-radius: 999px;
+  font-size: var(--fd-text-label);
+  padding: 7px 12px;
+  cursor: pointer;
+  line-height: 1.35;
+}
+
+.fd-guidance-chips > button:hover:not(:disabled) {
+  color: var(--ink);
+  border-color: rgba(46, 118, 93, 0.28);
+  background: var(--emerald-pale);
+}
+
+.fd-guidance-chips > button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.fd-guidance-help {
+  position: relative;
+  display: inline-flex;
+}
+
+.fd-guidance-help > button {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  font-size: var(--fd-text-label);
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.fd-guidance-help > button:hover,
+.fd-guidance-help > button[aria-expanded="true"] {
+  color: var(--emerald);
+  border-color: rgba(46, 118, 93, 0.3);
+  background: var(--emerald-pale);
+}
+
+.fd-guidance-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 20;
+  width: min(320px, 78vw);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--card-solid);
+  box-shadow: 0 12px 28px rgba(36, 54, 44, 0.1);
+  padding: 14px 15px 13px;
+  display: grid;
+  gap: 8px;
+}
+
+.fd-guidance-popover > strong {
+  font-size: var(--fd-text-label);
+  color: var(--ink);
+}
+
+.fd-guidance-popover > p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: var(--fd-text-meta);
+  line-height: 1.5;
+}
+
+.fd-guidance-popover ul {
+  list-style: none;
+  margin: 2px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.fd-guidance-popover li {
+  display: grid;
+  gap: 2px;
+}
+
+.fd-guidance-popover li strong {
+  font-size: var(--fd-text-caption);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--emerald);
+}
+
+.fd-guidance-popover li span {
+  color: var(--ink-soft);
+  font-size: var(--fd-text-meta);
+  line-height: 1.45;
+}
+
+.fd-brain-handoff {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(46, 118, 93, 0.22);
+  border-radius: 12px;
+  background: rgba(220, 234, 227, 0.45);
+}
+
+.fd-brain-handoff p {
+  margin: 0;
+  font-size: var(--fd-text-meta);
+  color: var(--ink-soft);
+  line-height: 1.45;
+}
+
+.fd-brain-handoff strong {
+  color: var(--emerald);
+  font-weight: 720;
+}
+
+.fd-brain-handoff button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 2px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
+
+.fd-brain-handoff button:hover {
+  color: var(--ink);
+}
+
+.fd-metric-hint {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: var(--fd-text-meta);
+  line-height: 1.45;
+  max-width: 42ch;
+}
