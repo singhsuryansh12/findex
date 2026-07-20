@@ -66,12 +66,15 @@ export function BrainPanel({
   initialPrompt,
   onPromptConsumed,
   onUserSend,
+  preserveHandoffBanner = false,
 }: {
   onWorkspace: (artifact: WorkspaceArtifactV2) => void | Promise<void>;
   activeWorkspace: WorkspaceArtifactV2 | null;
   initialPrompt: string | null;
   onPromptConsumed: () => void;
   onUserSend?: () => void;
+  /** When true, consuming initialPrompt skips clearing the handoff banner (real cross-page handoff). */
+  preserveHandoffBanner?: boolean;
 }) {
   const [messages, setMessages] = useState<Message[]>([{
     id: "intro",
@@ -466,14 +469,15 @@ export function BrainPanel({
     }
     if (initialHandled.current !== initialPrompt && !busy) {
       initialHandled.current = initialPrompt;
+      const fromHandoff = preserveHandoffBanner;
       const timer = window.setTimeout(() => {
         onPromptConsumed();
         if (initialPrompt.startsWith("Can I afford")) setPurchaseOpen(true);
-        else void send(initialPrompt, { fromHandoff: true });
+        else void send(initialPrompt, { fromHandoff });
       }, 0);
       return () => window.clearTimeout(timer);
     }
-  }, [initialPrompt, busy, onPromptConsumed, send]);
+  }, [initialPrompt, busy, onPromptConsumed, preserveHandoffBanner, send]);
 
   const submit = (event: FormEvent) => { event.preventDefault(); void send(input); };
   const onComposerKeyDown = (event: ReactKeyboardEvent<HTMLTextAreaElement>) => {

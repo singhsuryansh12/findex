@@ -105,14 +105,13 @@ export function BrainGuidance({
             type="button"
             aria-label="What can the Financial Brain do?"
             aria-expanded={helpOpen}
-            aria-haspopup="dialog"
             onClick={() => setHelpOpen((open) => !open)}
           >
             ?
           </button>
 
           {helpOpen ? (
-            <div className="fd-guidance-popover" role="dialog" aria-label={guidance.helpTitle}>
+            <div className="fd-guidance-popover" role="region" aria-label={guidance.helpTitle}>
               <strong>{guidance.helpTitle}</strong>
               <p>{guidance.helpBody}</p>
               <ul>

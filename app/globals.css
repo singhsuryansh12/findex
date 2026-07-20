@@ -2907,6 +2907,23 @@ button {
   view-transition-name: fd-ask-brain;
 }
 
+@supports not (view-transition-name: none) {
+  .fd-view-stage {
+    animation: fd-view-fade-in 220ms ease;
+  }
+}
+
+@keyframes fd-view-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*),
   ::view-transition-old(*),
@@ -2919,6 +2936,10 @@ button {
   .fd-brain-hero,
   .fd-ask-button {
     view-transition-name: none;
+  }
+
+  .fd-view-stage {
+    animation: none;
   }
 }
 
