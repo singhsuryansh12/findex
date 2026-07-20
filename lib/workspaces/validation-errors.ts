@@ -93,6 +93,27 @@ export function validationFailureFrom(error: unknown): WorkspaceValidationFailur
   };
 }
 
+function extractHostContractDiagnostics(raw: string) {
+  const marker = "Workspace quality contract failed.";
+  const start = raw.indexOf(marker);
+  if (start >= 0) {
+    const rest = raw.slice(start + marker.length);
+    const endMatch = rest.search(/\n\s*at\s+\S+|\nCall log:|\n\s*\d+\)\s/);
+    const body = (endMatch >= 0 ? rest.slice(0, endMatch) : rest)
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .join("\n");
+    return body ? `${marker}\n${body}` : marker;
+  }
+  const focused = raw
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => /Workspace quality|Missing visible h1|Missing controls|Missing outputs|WCAG |accessible label|must initialize|changing the control|chart must|Live status|required state|off-step value|percentage maximum|numeric control must|Error: expect\(|Console\/page errors|Body text preview|Root HTML preview/i.test(line));
+  if (focused.length) return [...new Set(focused)].slice(0, 40).join("\n");
+  return null;
+}
+
 export function commandValidationFailure(options: {
   script: "typecheck" | "bundle" | "test";
   error: unknown;
@@ -103,11 +124,15 @@ export function commandValidationFailure(options: {
     .map((part) => typeof part === "string" ? part : part?.toString("utf8"))
     .filter((part): part is string => Boolean(part?.trim()));
   const fallback = commandError instanceof Error ? commandError.message : `npm run ${options.script} failed.`;
-  const diagnostic = sanitizeWorkspaceDiagnostic(output.length ? output.join("\n") : fallback, {
+  const raw = output.length ? output.join("\n") : fallback;
+  const focused = options.script === "test" ? extractHostContractDiagnostics(raw) : null;
+  const diagnostic = sanitizeWorkspaceDiagnostic(focused ?? raw, {
     workspaceRoot: options.workspaceRoot,
-    maxChars: 12_000,
+    maxChars: focused ? 6_000 : 12_000,
   }) || `npm run ${options.script} failed without compiler or test diagnostics.`;
-  const platformTransient = transientPattern.test(diagnostic)
+  const missingToolchain = /tsc:\s*command not found|not found: tsc|Cannot find module ['"]?typescript|\[externals\].*typescript\/lib\/tsc|TS2688:\s*Cannot find type definition file for ['"](?:node|vitest\/globals)['"]|TS7016:\s*Could not find a declaration file for module ['"]react(?:\/jsx-runtime)?['"]|Could not find a declaration file for module ['"]react(?:-dom)?['"]|JSX element implicitly has type 'any' because no interface 'JSX\.IntrinsicElements' exists|Try `npm i --save-dev @types\/react`/i.test(diagnostic);
+  const platformTransient = missingToolchain
+    || transientPattern.test(diagnostic)
     || (commandError instanceof Error && (commandError.name === "AbortError" || commandError.name === "TimeoutError"));
   const code = options.script === "typecheck"
     ? "WORKSPACE_TYPECHECK_FAILED"
@@ -117,7 +142,9 @@ export function commandValidationFailure(options: {
   return {
     code: platformTransient ? "WORKSPACE_PLATFORM_FAILED" : code,
     diagnostics: [diagnostic],
-    actionable: !platformTransient && hasActionableWorkspaceDiagnostics([diagnostic]),
+    // Playwright/Vitest host-contract failures are always repairable when they
+    // produce diagnostics; their wording often lacks TypeScript path markers.
+    actionable: !platformTransient && (options.script === "test" || hasActionableWorkspaceDiagnostics([diagnostic])),
     platformTransient,
   };
 }

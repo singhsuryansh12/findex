@@ -16,7 +16,9 @@ export const stageDeadlines = {
   standardBuildMs: 240_000,
   complexBuildMs: 240_000,
   validationMs: 210_000,
-  reviewMs: 90_000,
+  // Review includes plan + full source; keep headroom above provider latency without
+  // attaching large screenshot payloads on standard builds.
+  reviewMs: 150_000,
   workflowMs: 20 * 60_000,
 } as const;
 

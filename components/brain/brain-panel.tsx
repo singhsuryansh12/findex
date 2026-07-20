@@ -32,7 +32,7 @@ const phaseLabels: Record<WorkspaceProgressPhase, string> = {
   browser_testing: "Findex is verifying interactions",
   reviewing: "Findex is independently reviewing the workspace",
   repairing: "Findex is repairing measured findings",
-  publishing: "Findex is publishing a verified version",
+  publishing: "Findex is publishing your workspace",
 };
 
 async function readEventStream(response: Response, onEvent: (event: BrainEvent, index: number | null) => void | Promise<void>) {
@@ -99,6 +99,8 @@ export function BrainPanel({
   const activeRetry = useRef<RetryRequest | null>(null);
   const terminalRun = useRef<string | null>(null);
   const activeAssistantId = useRef<string | null>(null);
+  /** After a draft mounts, chat unlocks while background polish may still stream. */
+  const draftUnlocked = useRef(false);
 
   const setAssistantContent = useCallback((assistantId: string, content: string, append = false) => {
     setMessages((current) => current.map((item) => item.id === assistantId
@@ -115,6 +117,7 @@ export function BrainPanel({
     setBusy(false);
     setPhase(null);
     setPhaseDetail("");
+    draftUnlocked.current = false;
     activeAssistantId.current = null;
   }, []);
 
@@ -125,17 +128,66 @@ export function BrainPanel({
       setPhaseHistory((current) => current.includes(event.phase) ? current : [...current, event.phase]);
       return;
     }
+    if (event.type === "assistant_delta") {
+      setAssistantContent(assistantId, event.delta, true);
+      return;
+    }
     if (event.type === "workspace_published") {
       if (!publishedArtifacts.current.has(event.artifact.id)) {
         publishedArtifacts.current.add(event.artifact.id);
         await onWorkspace(event.artifact);
       }
+      const isDraft = event.artifact.qualityTier === "draft";
       const assumptionSummary = event.artifact.plan.assumptions.length
         ? ` Assumptions: ${event.artifact.plan.assumptions.slice(0, 3).join("; ")}.`
-        : " No unstated assumptions remain.";
-      setAssistantContent(assistantId, `${event.artifact.title} passed ${event.artifact.validation.checks.length} checks and Findex’s independent review. It is saved as version ${event.artifact.version}.${assumptionSummary}`);
+        : "";
+      if (isDraft) {
+        setAssistantContent(
+          assistantId,
+          `${event.artifact.title} is ready as a working draft (v${event.artifact.version}). I’m refining it in the background—ask for any changes.${assumptionSummary}`,
+        );
+        setRetryRequest(null);
+        draftUnlocked.current = true;
+        setBusy(false);
+        // Keep the run open so background refine / offer events can arrive.
+        return;
+      }
+      setAssistantContent(
+        assistantId,
+        `${event.artifact.title} is verified and saved as version ${event.artifact.version}.${assumptionSummary || " No unstated assumptions remain."}`,
+      );
       setRetryRequest(null);
       await finishRun(runId);
+      return;
+    }
+    if (event.type === "workspace_refined") {
+      if (!publishedArtifacts.current.has(event.artifact.id)) {
+        publishedArtifacts.current.add(event.artifact.id);
+        await onWorkspace(event.artifact);
+      } else {
+        await onWorkspace(event.artifact);
+      }
+      setAssistantContent(
+        assistantId,
+        event.artifact.qualityTier === "verified"
+          ? ` Updated ${event.artifact.title} with a verified polish (v${event.artifact.version}). Tell me if you want more changes.`
+          : ` Updated ${event.artifact.title} with a safe polish (v${event.artifact.version}). Tell me if you want more changes.`,
+        true,
+      );
+      if (event.artifact.qualityTier === "verified") {
+        setRetryRequest(null);
+        await finishRun(runId);
+      }
+      return;
+    }
+    if (event.type === "workspace_upgrade_offer") {
+      setAssistantContent(
+        assistantId,
+        ` ${event.summary} Tell me which of these you want applied, or describe a different change. Your current draft stays usable.\n${event.changes.map((change) => `• ${change}`).join("\n")}`,
+        true,
+      );
+      draftUnlocked.current = true;
+      setBusy(false);
       return;
     }
     if (event.type === "workspace_failed" || event.type === "error") {
@@ -153,7 +205,26 @@ export function BrainPanel({
     if (!response.ok) throw new Error("Findex could not recover this build run.");
     const status = await response.json() as RunStatus;
     if (status.status === "completed" && status.returnValue?.status === "completed") {
-      await handleRunEvent({ type: "workspace_published", artifact: status.returnValue.artifact }, assistantId, run.runId);
+      const artifact = status.returnValue.artifact;
+      if (artifact.qualityTier === "draft") {
+        if (!publishedArtifacts.current.has(artifact.id)) {
+          publishedArtifacts.current.add(artifact.id);
+          await onWorkspace(artifact);
+        }
+        // Do not clobber richer stream content (upgrade offers / soft notes).
+        setMessages((current) => current.map((item) => {
+          if (item.id !== assistantId) return item;
+          if (item.content.trim().length > 40) return item;
+          return {
+            ...item,
+            content: `${artifact.title} remains a working draft (v${artifact.version}). Tell me what to refine.`,
+          };
+        }));
+      } else {
+        await handleRunEvent({ type: "workspace_published", artifact }, assistantId, run.runId);
+      }
+      setRetryRequest(null);
+      await finishRun(run.runId);
       return true;
     }
     if (status.status === "completed" && status.returnValue?.status === "failed") {
@@ -161,7 +232,10 @@ export function BrainPanel({
       return true;
     }
     if (status.status === "failed") {
-      await handleRunEvent({ type: "workspace_failed", message: "Findex couldn't finish this workspace; nothing was published.", recoverable: true }, assistantId, run.runId);
+      const message = status.returnValue?.status === "failed" && status.returnValue.message.startsWith("Findex")
+        ? status.returnValue.message
+        : "Findex couldn't finish this workspace; nothing was published.";
+      await handleRunEvent({ type: "workspace_failed", message, recoverable: true }, assistantId, run.runId);
       return true;
     }
     if (status.status === "cancelled") {
@@ -170,7 +244,7 @@ export function BrainPanel({
       return true;
     }
     return false;
-  }, [finishRun, handleRunEvent, setAssistantContent]);
+  }, [finishRun, handleRunEvent, onWorkspace, setAssistantContent]);
 
   const connectToRun = useCallback(async (run: ActiveBrainRun, assistantId: string) => {
     if (terminalRun.current === run.runId) return;
@@ -178,7 +252,7 @@ export function BrainPanel({
     const abort = new AbortController();
     streamAbort.current = abort;
     setActiveRun(run);
-    setBusy(true);
+    if (!draftUnlocked.current) setBusy(true);
     setReconnecting(true);
     if (!runStartedAt.current) runStartedAt.current = Date.now();
     let cursor = run.lastEventIndex;
@@ -242,6 +316,16 @@ export function BrainPanel({
   const send = useCallback(async (message: string, options?: { token?: string | null; clarificationAnswers?: string[] }) => {
     const cleaned = message.trim().slice(0, 1_000);
     if (!cleaned || busy) return;
+    // A new user turn supersedes background polish on the previous run.
+    if (activeRun) {
+      streamAbort.current?.abort();
+      await fetch(`/api/brain/runs/${encodeURIComponent(activeRun.runId)}/cancel`, {
+        method: "POST",
+        headers: { authorization: `Bearer ${activeRun.accessToken}` },
+      }).catch(() => undefined);
+      await clearActiveBrainRun(activeRun.runId).catch(() => undefined);
+      setActiveRun(null);
+    }
     const userMessage: Message = { id: crypto.randomUUID(), role: "user", content: cleaned };
     const assistantId = crypto.randomUUID();
     const prior = messages.filter((item) => item.id !== "intro").slice(-12);
@@ -250,6 +334,7 @@ export function BrainPanel({
     const retry = { message: cleaned, token, clarificationAnswers };
     activeRetry.current = retry;
     terminalRun.current = null;
+    draftUnlocked.current = false;
     activeAssistantId.current = assistantId;
     runStartedAt.current = Date.now();
     setElapsedSeconds(0);
@@ -311,10 +396,10 @@ export function BrainPanel({
     setPhase(null);
     setPhaseDetail("");
     setBusy(false);
-  }, [activeWorkspace, busy, connectToRun, handleImmediateEvent, messages, pending, setAssistantContent]);
+  }, [activeRun, activeWorkspace, busy, connectToRun, handleImmediateEvent, messages, pending, setAssistantContent]);
 
   const stopRun = useCallback(async () => {
-    if (!busy) return;
+    if (!busy && !activeRun) return;
     requestAbort.current?.abort();
     streamAbort.current?.abort();
     try {
@@ -409,7 +494,7 @@ export function BrainPanel({
   return (
     <section className={`brain-panel${isPristine ? " is-pristine" : ""}`} aria-label="Financial Brain">
       <header className="brain-header">
-        <div className="brain-title-row"><span className="brain-orb"><Sparkles size={15} /></span><div><div className="brain-title">Financial Brain</div><div className="brain-status">{activeWorkspace ? `Editing ${activeWorkspace.title} · v${activeWorkspace.version}` : "Grounded in your complete demo picture"}</div></div></div>
+        <div className="brain-title-row"><span className="brain-orb"><Sparkles size={15} /></span><div><div className="brain-title">Financial Brain</div><div className="brain-status">{activeWorkspace ? `Editing ${activeWorkspace.title} · v${activeWorkspace.version}${activeWorkspace.qualityTier === "draft" ? " · draft" : ""}` : "Grounded in your complete demo picture"}</div></div></div>
       </header>
       <div className="brain-messages" aria-live="polite" ref={messagesRef}>
         {messages.map((message) => (
@@ -431,7 +516,7 @@ export function BrainPanel({
           <div className="brain-progress" role="status" aria-live="polite">
             <div className="brain-progress-current"><LoaderCircle className="spin" size={14} /><span><strong>{phaseLabels[phase]}</strong><small>{reconnecting ? "Reconnecting to the same build" : phaseDetail}</small></span><time>{Math.floor(elapsedSeconds / 60)}:{String(elapsedSeconds % 60).padStart(2, "0")}</time></div>
             {visiblePhases.length > 1 && <ol className="brain-phase-timeline">{visiblePhases.map((item) => <li className={item === phase ? "active" : "complete"} key={item}>{phaseLabels[item]}</li>)}</ol>}
-            {busy && <button className="brain-stop" type="button" onClick={() => void stopRun()}><Square size={9} />Stop</button>}
+            {(busy || activeRun) && <button className="brain-stop" type="button" onClick={() => void stopRun()}><Square size={9} />Stop</button>}
           </div>
         )}
         {pending && !busy && (
@@ -455,7 +540,7 @@ export function BrainPanel({
         </form>
       )}
       <form className="brain-composer" onSubmit={submit}>
-        <textarea className="brain-input" value={input} onChange={(event) => setInput(event.target.value.slice(0, 1_000))} onKeyDown={onComposerKeyDown} placeholder={pending ? "Answer the questions above…" : activeWorkspace ? "Ask a question or describe a revision…" : "Ask about your money, or describe a tool…"} aria-label="Message the Financial Brain" aria-describedby="brain-composer-hint" />
+        <textarea className="brain-input" value={input} onChange={(event) => setInput(event.target.value.slice(0, 1_000))} onKeyDown={onComposerKeyDown} placeholder={pending ? "Answer the questions above…" : activeWorkspace ? "Ask for a refinement, or describe what to change…" : "Ask about your money, or describe a tool…"} aria-label="Message the Financial Brain" aria-describedby="brain-composer-hint" />
         <div className="composer-footer"><span className="composer-hint" id="brain-composer-hint">Enter to send · Shift+Enter for a new line · {input.length}/1000 · Educational, not advice</span><button className="send-button" disabled={busy || !input.trim()} aria-label="Send message"><ArrowUp size={14} /></button></div>
       </form>
     </section>

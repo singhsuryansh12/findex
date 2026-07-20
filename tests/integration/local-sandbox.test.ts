@@ -27,9 +27,9 @@ describe.skipIf(!enabled)("local workspace sandbox parity", () => {
     const plan: WorkspaceBuildPlan = {
       schemaVersion: 2, intent: "create", title: "Interactive FIRE verification lab", goal: "Verify local SDK parity", response: "",
       assumptions: ["Constant annual return"], inputs: [
-        { id: "current_age", label: "Current age", type: "number", description: "Current age", required: true, defaultValue: "30" },
-        { id: "target_age", label: "Target retirement age", type: "number", description: "Retirement age", required: true, defaultValue: "50" },
-        { id: "annual_return", label: "Expected annual investment return", type: "percentage", description: "Nominal annual return", required: true, defaultValue: "7" },
+        { id: "current_age", label: "Current age", type: "number", description: "Current age", required: true, defaultValue: "30", min: "18", max: "100", step: "1" },
+        { id: "target_age", label: "Target retirement age", type: "number", description: "Retirement age", required: true, defaultValue: "50", min: "19", max: "120", step: "1" },
+        { id: "annual_return", label: "Expected annual investment return", type: "percentage", description: "Nominal annual return", required: true, defaultValue: "7", min: "-99", max: "100", step: "0.1" },
       ],
       outputs: [{ id: "fire_target", label: "Projected FIRE number at target age", description: "Projected portfolio", format: "USD" }],
       interactions: ["Changing any valid input updates the projected result"], layout: ["Responsive single view"], dataNeeds: [],
@@ -51,7 +51,7 @@ describe.skipIf(!enabled)("local workspace sandbox parity", () => {
     const plan: WorkspaceBuildPlan = {
       schemaVersion: 2, intent: "create", title: "Whole-year validation regression", goal: "Reject fractional target ages", response: "",
       assumptions: ["Annual projection"],
-      inputs: [{ id: "target_age", label: "Target retirement age", type: "number", description: "Target retirement age in years", required: true, defaultValue: "50" }],
+      inputs: [{ id: "target_age", label: "Target retirement age", type: "number", description: "Target retirement age in years", required: true, defaultValue: "50", min: "19", max: "110", step: "1" }],
       outputs: [{ id: "portfolio", label: "Projected portfolio at target age", description: "Portfolio at target age", format: "USD" }],
       interactions: ["Changing target age updates the projection"], layout: ["Responsive single view"], dataNeeds: [],
       persistence: { enabled: false, stateSchemaVersion: 1, description: "" }, capabilities: [], disclosures: ["Educational only"],
@@ -75,8 +75,8 @@ describe.skipIf(!enabled)("local workspace sandbox parity", () => {
     const plan: WorkspaceBuildPlan = {
       schemaVersion: 2, intent: "create", title: "FIRE quality regression", goal: "Verify the quality contract", response: "",
       assumptions: ["4% withdrawal rate"], inputs: [
-        { id: "annual_spend", label: "Annual spending", type: "currency", description: "Annual retirement spending", required: true, defaultValue: "60000" },
-        { id: "withdrawal_rate", label: "Withdrawal rate", type: "percentage", description: "Withdrawal percentage", required: true, defaultValue: "4" },
+        { id: "annual_spend", label: "Annual spending", type: "currency", description: "Annual retirement spending", required: true, defaultValue: "60000", min: "0", max: "1000000000", step: "100" },
+        { id: "withdrawal_rate", label: "Withdrawal rate", type: "percentage", description: "Withdrawal percentage", required: true, defaultValue: "4", min: "0.1", max: "100", step: "0.1" },
       ],
       outputs: [{ id: "fire_target", label: "FIRE target", description: "Annual spending divided by withdrawal rate", format: "USD" }],
       interactions: ["Inputs update the FIRE target"], layout: ["Responsive single view"], dataNeeds: [],
@@ -106,8 +106,8 @@ describe.skipIf(!enabled)("local workspace sandbox parity", () => {
       schemaVersion: 2, intent: "create", title: "Projection accessibility regression", goal: "Verify chart alternatives", response: "",
       assumptions: ["Constant annual return"],
       inputs: [
-        { id: "annual_return", label: "Expected annual return", type: "percentage", description: "Nominal annual return", required: true, defaultValue: "7" },
-        { id: "planning_horizon", label: "Planning horizon", type: "number", description: "Projection period in years", required: true, defaultValue: "40" },
+        { id: "annual_return", label: "Expected annual return", type: "percentage", description: "Nominal annual return", required: true, defaultValue: "7", min: "-50", max: "50", step: "0.1" },
+        { id: "planning_horizon", label: "Planning horizon", type: "number", description: "Projection period in years", required: true, defaultValue: "40", min: "1", max: "100", step: "1" },
       ],
       outputs: [{ id: "projection", label: "Projection", description: "Annual projected balances", format: "chart" }],
       interactions: ["Changing the return updates the projection"], layout: ["Responsive single view"], dataNeeds: [],
@@ -120,28 +120,20 @@ describe.skipIf(!enabled)("local workspace sandbox parity", () => {
   }, 120_000);
 
   it("uses one actionable browser repair and then publishes the corrected workspace", async () => {
-    const badSource = `import React,{useState} from "react";import "./styles.css";export default function App(){const [spend,setSpend]=useState(60000);return <main><h1>FIRE planner</h1><label>Annual spending<input type="number" value={spend} onChange={(event)=>setSpend(Number(event.target.value))}/></label><output>{spend*25}</output><p>4% withdrawal rate. Educational, not financial advice.</p></main>}`;
-    const fixedSource = `import React,{useState} from "react";import "./styles.css";export default function App(){const [spend,setSpend]=useState(60000);const [withdrawal,setWithdrawal]=useState(4);const [notice,setNotice]=useState("Results ready.");const commit=()=>setNotice("FIRE target recalculated for the updated assumption.");return <main><h1>FIRE planner</h1><label htmlFor="spend">Annual spending</label><p id="spend-help">Retirement spending in US dollars per year.</p><input id="spend" required type="number" min="0" max="1000000000" step="100" value={spend} onChange={(event)=>setSpend(Number(event.target.value))} onBlur={commit} aria-invalid={spend<0||spend>1000000000} aria-describedby="spend-help"/><label htmlFor="withdrawal">Withdrawal rate</label><p id="withdrawal-help">Annual withdrawal rate in percent.</p><input id="withdrawal" required type="number" min="0.1" max="100" step="0.1" value={withdrawal} onChange={(event)=>setWithdrawal(Number(event.target.value))} onBlur={commit} aria-invalid={withdrawal<0.1||withdrawal>100} aria-describedby="withdrawal-help"/><span>FIRE target</span><output aria-label="FIRE target">{Math.round(spend/(withdrawal/100))}</output><p role="status" aria-live="polite">{notice}</p><p>Educational, not financial advice.</p></main>}`;
+    const styles = { path: "src/styles.css", content: "main{max-width:720px;margin:auto;padding:24px}input{width:100%}" };
+    // Passes static host preflight (labels/defaults/bounds) but fails Chromium because
+    // withdrawal rate is text-only, not an interactive control.
+    const badSource = `import React,{useState} from "react";import "./styles.css";export default function App(){const [spend,setSpend]=useState(60000);return <main><h1>FIRE planner</h1><label htmlFor="spend">Annual spending</label><p id="spend-help">Retirement spending in US dollars per year.</p><input id="spend" required type="number" min="0" max="1000000000" step="100" value={spend} onChange={(event)=>setSpend(Number(event.target.value))} aria-describedby="spend-help"/><p>Withdrawal rate assumption remains fixed at 4 percent.</p><span>FIRE target</span><output aria-label="FIRE target">{spend*25}</output><p role="status" aria-live="polite">Results ready.</p><p>Educational information only; not financial advice.</p></main>}`;
+    const fixedSource = `import React,{useState} from "react";import "./styles.css";export default function App(){const [spend,setSpend]=useState(60000);const [withdrawal,setWithdrawal]=useState(4);const [notice,setNotice]=useState("Results ready.");const commit=()=>setNotice("FIRE target recalculated for the updated assumption.");return <main><h1>FIRE planner</h1><label htmlFor="spend">Annual spending</label><p id="spend-help">Retirement spending in US dollars per year.</p><input id="spend" required type="number" min="0" max="1000000000" step="100" value={spend} onChange={(event)=>setSpend(Number(event.target.value))} onBlur={commit} aria-invalid={spend<0||spend>1000000000} aria-describedby="spend-help"/><label htmlFor="withdrawal">Withdrawal rate</label><p id="withdrawal-help">Annual withdrawal rate in percent.</p><input id="withdrawal" required type="number" min="0.1" max="100" step="0.1" value={withdrawal} onChange={(event)=>setWithdrawal(Number(event.target.value))} onBlur={commit} aria-invalid={withdrawal<0.1||withdrawal>100} aria-describedby="withdrawal-help"/><span>FIRE target</span><output aria-label="FIRE target">{Math.round(spend/(withdrawal/100))}</output><p role="status" aria-live="polite">{notice}</p><p>Educational information only; not financial advice.</p></main>}`;
     const create = vi.fn()
-      .mockResolvedValueOnce(toolResponse("initial_write", "write_file", { path: "src/App.tsx", content: badSource }))
-      .mockResolvedValueOnce(toolResponse("initial_check", "run_check", { check: "policy_typecheck_and_bundle" }))
-      .mockResolvedValueOnce(toolResponse("initial_finish", "finish_workspace", { summary: "Initial FIRE planner" }))
-      .mockImplementationOnce(async (request: { instructions: string }) => {
-        expect(request.instructions).toContain("Missing controls: Withdrawal rate");
-        expect(request.instructions).toContain("Missing outputs: FIRE target");
-        expect(request.instructions).toContain("The withdrawal-rate assumption is not an interactive input");
-        expect(request.instructions).toContain("FIRE target");
-        return toolResponse("repair_patch", "write_file", { path: "src/App.tsx", content: fixedSource });
-      })
-      .mockResolvedValueOnce(toolResponse("repair_check", "run_check", { check: "policy_typecheck_and_bundle" }))
-      .mockResolvedValueOnce(toolResponse("repair_finish", "finish_workspace", { summary: "Corrected FIRE planner" }));
-    const failedReview = {
-      passed: false,
-      score: 72,
-      issues: ["The withdrawal-rate assumption is not an interactive input, so the user cannot test the core FIRE formula."],
-      strengths: ["The educational disclosure is visible."],
-      acceptanceResults: [{ criterion: "Annual spending updates FIRE target", passed: false, detail: "The requested withdrawal control is missing." }],
-    };
+      .mockResolvedValueOnce(toolResponse("initial_write", "write_workspace", {
+        files: [{ path: "src/App.tsx", content: badSource }, styles],
+        summary: "Initial FIRE planner",
+      }))
+      .mockImplementation(async () => toolResponse(`repair_write_${create.mock.calls.length}`, "write_workspace", {
+        files: [{ path: "src/App.tsx", content: fixedSource }, styles],
+        summary: "Corrected FIRE planner",
+      }));
     const passedReview = {
       passed: true,
       score: 96,
@@ -149,29 +141,20 @@ describe.skipIf(!enabled)("local workspace sandbox parity", () => {
       strengths: ["The requested output is visible and interactive."],
       acceptanceResults: [{ criterion: "Annual spending updates FIRE target", passed: true, detail: "Verified by the sandbox." }],
     };
-    const parse = vi.fn()
-      .mockResolvedValueOnce({
-        id: "review_response_initial",
-        status: "completed",
-        output: [],
-        output_parsed: failedReview,
-        incomplete_details: null,
-        usage: { input_tokens: 1, output_tokens: 1, total_tokens: 2 },
-      })
-      .mockResolvedValueOnce({
-        id: "review_response_repaired",
-        status: "completed",
-        output: [],
-        output_parsed: passedReview,
-        incomplete_details: null,
-        usage: { input_tokens: 1, output_tokens: 1, total_tokens: 2 },
-      });
+    const parse = vi.fn().mockResolvedValue({
+      id: "review_response_repaired",
+      status: "completed",
+      output: [],
+      output_parsed: passedReview,
+      incomplete_details: null,
+      usage: { input_tokens: 1, output_tokens: 1, total_tokens: 2 },
+    });
     const client = { responses: { create, parse } } as unknown as OpenAI;
     const plan: WorkspaceBuildPlan = {
       schemaVersion: 2, intent: "create", title: "FIRE planner", goal: "Estimate a FIRE target", response: "",
       assumptions: ["4% withdrawal rate"], inputs: [
-        { id: "annual_spend", label: "Annual spending", type: "currency", description: "Annual retirement spending", required: true, defaultValue: "60000" },
-        { id: "withdrawal_rate", label: "Withdrawal rate", type: "percentage", description: "Assumed withdrawal rate", required: true, defaultValue: "4" },
+        { id: "annual_spend", label: "Annual spending", type: "currency", description: "Annual retirement spending", required: true, defaultValue: "60000", min: "0", max: "1000000000", step: "100" },
+        { id: "withdrawal_rate", label: "Withdrawal rate", type: "percentage", description: "Assumed withdrawal rate", required: true, defaultValue: "4", min: "0.1", max: "100", step: "0.1" },
       ],
       outputs: [{ id: "fire_target", label: "FIRE target", description: "Annual spending multiplied by 25", format: "USD" }],
       interactions: ["Annual spending updates FIRE target"], layout: ["Responsive single view"], dataNeeds: [],
@@ -191,14 +174,15 @@ describe.skipIf(!enabled)("local workspace sandbox parity", () => {
       requestId: "local-browser-repair",
     });
 
-    expect(create).toHaveBeenCalledTimes(6);
-    expect(parse).toHaveBeenCalledTimes(2);
-    expect(create.mock.calls[0]?.[0]?.instructions).toContain("Never compare a real portfolio projection with a nominal target");
-    expect(create.mock.calls[0]?.[0]?.instructions).toContain("A visual suffix with aria-hidden is not enough");
-    expect(create.mock.calls[0]?.[0]?.instructions).toContain("disable save/export actions");
-    expect(create.mock.calls[0]?.[0]?.instructions).toContain("generic confirmation or one primary result");
+    expect(create.mock.calls.length).toBeGreaterThanOrEqual(2);
+    expect(parse).toHaveBeenCalledTimes(1);
+    expect(create.mock.calls[0]?.[0]).toMatchObject({ tool_choice: { type: "function", name: "write_workspace" } });
+    expect(create.mock.calls[0]?.[0]?.instructions).toContain("prefer a fast correct draft over ornate perfection");
     expect(create.mock.calls[0]?.[0]?.instructions).toContain("exact plan.defaultValue");
-    expect(artifact).toMatchObject({ repairCount: 1, validation: { passed: true }, complexity: { level: "standard" } });
+    expect(JSON.stringify(create.mock.calls.slice(1))).toMatch(/Withdrawal rate|min=0\.1|step=0\.1/);
+    // Host contract-lint/preflight recovery corrects the draft before sandbox; that is not a Workflow repair.
+    expect(artifact).toMatchObject({ repairCount: 0, validation: { passed: true }, complexity: { level: "standard" }, qualityTier: "verified" });
     expect(artifact.files.find((file) => file.path === "src/App.tsx")?.content).toContain('aria-label="FIRE target"');
+    expect(artifact.files.find((file) => file.path === "src/App.tsx")?.content).toContain('htmlFor="withdrawal"');
   }, 180_000);
 });

@@ -40,5 +40,12 @@ export type BrainEvent =
   | { type: "insight_card"; card: BrainInsightCard }
   | { type: "clarification_required"; questions: string[]; token: string; planTitle: string }
   | { type: "workspace_published"; artifact: WorkspaceArtifactV2 }
+  | { type: "workspace_refined"; artifact: WorkspaceArtifactV2; reason: "safe_polish" }
+  | {
+    type: "workspace_upgrade_offer";
+    summary: string;
+    changes: string[];
+    candidateVersionId: string;
+  }
   | { type: "workspace_failed"; message: string; recoverable: boolean; code?: string }
   | { type: "error"; message: string; recoverable: boolean };

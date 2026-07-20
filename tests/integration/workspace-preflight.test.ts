@@ -12,10 +12,22 @@ export default function App() {
   return <main><h1>FIRE planner</h1><output>{scenario.annualSpend * 25}</output><p>Educational, not financial advice.</p></main>;
 }`;
 
-const goodStateSource = badStateSource.replace(
-  "useWorkspaceState<{ annualSpend: number }>({ annualSpend: 60000 })",
-  "useWorkspaceState<{ annualSpend: number }>(\"fire-planner\", { annualSpend: 60000 })",
-);
+const goodStateSource = `import React from "react";
+import { useWorkspaceState } from "@findex/workspace-sdk";
+export default function App() {
+  const [scenario, setScenario] = useWorkspaceState<{ annualSpend: number }>("fire-planner", { annualSpend: 60000 });
+  return (
+    <main>
+      <h1>FIRE planner</h1>
+      <label htmlFor="annual-spend">Annual spending (USD)
+        <input id="annual-spend" type="number" required min={1000} max={500000} step={1000} value={scenario.annualSpend}
+          onChange={(event) => setScenario({ annualSpend: Number(event.target.value) })} />
+      </label>
+      <p aria-label="FIRE target">FIRE target: {scenario.annualSpend * 25}</p>
+      <p>Educational information only; not financial advice.</p>
+    </main>
+  );
+}`;
 
 const styles: WorkspaceFile = { path: "src/styles.css", content: "main{max-width:50rem;margin:auto;padding:1rem}" };
 
@@ -27,7 +39,7 @@ function firePlan(): WorkspaceBuildPlan {
     goal: "Plan financial independence",
     response: "",
     assumptions: ["4% withdrawal rate"],
-    inputs: [{ id: "annualSpend", label: "Annual spending", type: "currency", description: "Annual retirement spending", required: true, defaultValue: "60000" }],
+    inputs: [{ id: "annualSpend", label: "Annual spending", type: "currency", description: "Annual retirement spending", required: true, defaultValue: "60000", min: "1000", max: "500000", step: "1000" }],
     outputs: [{ id: "target", label: "FIRE target", description: "Annual spending divided by withdrawal rate", format: "USD" }],
     interactions: ["Annual spending updates the FIRE target"],
     layout: ["Responsive calculator"],
@@ -51,6 +63,76 @@ function toolResponse(id: string, name: string, args: Record<string, unknown>) {
 }
 
 describe("workspace builder preflight parity", () => {
+  it("accepts one complete bounded workspace write after host policy/typecheck preflight", async () => {
+    vi.spyOn(console, "info").mockImplementation(() => undefined);
+    const create = vi.fn().mockResolvedValue(toolResponse("resp_workspace", "write_workspace", {
+      files: [
+        { path: "src/App.tsx", content: goodStateSource },
+        styles,
+      ],
+      summary: "Complete FIRE planner",
+    }));
+    const client = { responses: { create } } as unknown as OpenAI;
+
+    const result = await buildWorkspaceDraft({
+      client,
+      plan: firePlan(),
+      assessment: { level: "standard", riskFlags: [], rationale: "Editable retirement assumptions" },
+      active: null,
+      requestId: "complete-workspace-regression",
+    });
+
+    expect(create).toHaveBeenCalledTimes(1);
+    expect(create.mock.calls[0]?.[0]).toMatchObject({
+      tool_choice: { type: "function", name: "write_workspace" },
+      parallel_tool_calls: false,
+    });
+    expect(String(create.mock.calls[0]?.[0]?.input)).toContain("Current editable source");
+    expect(result.files).toEqual(expect.arrayContaining([
+      expect.objectContaining({ path: "src/App.tsx", content: goodStateSource }),
+      styles,
+    ]));
+  });
+
+  it("forces one host-check recovery write when the first workspace fails policy", async () => {
+    vi.spyOn(console, "info").mockImplementation(() => undefined);
+    vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const loopingSource = `import React from "react";
+export default function App() {
+  const years = [];
+  for (let i = 0; i < 10; i += 1) years.push(i);
+  return <main><h1>FIRE</h1><p>{years.length}</p></main>;
+}`;
+    const create = vi.fn()
+      .mockResolvedValueOnce(toolResponse("resp_bad", "write_workspace", {
+        files: [{ path: "src/App.tsx", content: loopingSource }, styles],
+        summary: "Looping draft",
+      }))
+      .mockResolvedValueOnce(toolResponse("resp_fixed", "write_workspace", {
+        files: [{ path: "src/App.tsx", content: goodStateSource }, styles],
+        summary: "Corrected FIRE planner",
+      }));
+    const client = { responses: { create } } as unknown as OpenAI;
+
+    const result = await buildWorkspaceDraft({
+      client,
+      plan: firePlan(),
+      assessment: { level: "standard", riskFlags: [], rationale: "Editable retirement assumptions" },
+      active: null,
+      requestId: "host-check-recovery",
+    });
+
+    expect(create).toHaveBeenCalledTimes(2);
+    expect(create.mock.calls[1]?.[0]).toMatchObject({
+      tool_choice: { type: "function", name: "write_workspace" },
+      previous_response_id: "resp_bad",
+    });
+    expect(JSON.stringify(create.mock.calls[1]?.[0]?.input)).toContain("Imperative loops are not allowed");
+    expect(result.files).toEqual(expect.arrayContaining([
+      expect.objectContaining({ path: "src/App.tsx", content: goodStateSource }),
+    ]));
+  });
+
   it("forces a bounded first tool and preserves response metadata when the contract is violated", async () => {
     vi.spyOn(console, "info").mockImplementation(() => undefined);
     vi.spyOn(console, "warn").mockImplementation(() => undefined);
@@ -78,8 +160,8 @@ describe("workspace builder preflight parity", () => {
       },
     });
     expect(create).toHaveBeenCalledTimes(2);
-    expect(create.mock.calls[0]?.[0]).toMatchObject({ tool_choice: { type: "function", name: "list_files" }, parallel_tool_calls: false });
-    expect(create.mock.calls[1]?.[0]).toMatchObject({ tool_choice: { type: "function", name: "list_files" }, previous_response_id: "resp_text_only" });
+    expect(create.mock.calls[0]?.[0]).toMatchObject({ tool_choice: { type: "function", name: "write_workspace" }, parallel_tool_calls: false });
+    expect(create.mock.calls[1]?.[0]).toMatchObject({ tool_choice: { type: "function", name: "write_workspace" }, previous_response_id: "resp_text_only" });
   });
 
   it("retries one explicit transient provider failure without changing model or reasoning", async () => {
@@ -101,8 +183,8 @@ describe("workspace builder preflight parity", () => {
     })).resolves.toMatchObject({ model: "gpt-5.6-terra", effort: "medium" });
 
     expect(create).toHaveBeenCalledTimes(4);
-    expect(create.mock.calls[0]?.[0]).toMatchObject({ model: "gpt-5.6-terra", reasoning: { effort: "medium" }, tool_choice: { type: "function", name: "list_files" } });
-    expect(create.mock.calls[1]?.[0]).toMatchObject({ model: "gpt-5.6-terra", reasoning: { effort: "medium" }, tool_choice: { type: "function", name: "list_files" } });
+    expect(create.mock.calls[0]?.[0]).toMatchObject({ model: "gpt-5.6-terra", reasoning: { effort: "medium" }, tool_choice: { type: "function", name: "write_workspace" } });
+    expect(create.mock.calls[1]?.[0]).toMatchObject({ model: "gpt-5.6-terra", reasoning: { effort: "medium" }, tool_choice: { type: "function", name: "write_workspace" } });
   });
 
   it("classifies an exhausted build signal as timeout even when the provider error name is minified", async () => {

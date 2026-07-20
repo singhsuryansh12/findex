@@ -63,7 +63,7 @@ describe.skipIf(!enabled)("environment-gated live provider release checks", () =
     }];
     const plan: WorkspaceBuildPlan = {
       schemaVersion: 2, intent: "create", title: "Vercel verification lab", goal: "Verify hosted isolation", response: "", assumptions: [],
-      inputs: [{ id: "value", label: "Value", type: "number", description: "Test input", required: true, defaultValue: "5" }],
+      inputs: [{ id: "value", label: "Value", type: "number", description: "Test input", required: true, defaultValue: "5", min: "0", max: "100", step: "1" }],
       outputs: [{ id: "result", label: "Result", description: "Triple the value", format: "number" }],
       interactions: ["Value updates Result"], layout: ["Responsive single view"], dataNeeds: [],
       persistence: { enabled: false, stateSchemaVersion: 1, description: "" }, capabilities: [], disclosures: ["Educational only"],

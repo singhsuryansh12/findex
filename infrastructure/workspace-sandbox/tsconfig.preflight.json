@@ -10,7 +10,7 @@
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "types": ["node", "vitest/globals"]
+    "types": []
   },
-  "include": ["src", "preview.tsx", "vitest.config.ts"]
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
 }

@@ -71,7 +71,7 @@ export default function App(){const [amount,setAmount]=useState(50000);return <m
     const secondId = crypto.randomUUID();
     const plan = {
       schemaVersion: 2, intent: "create", title: "Adaptive purchase lab", goal: "Explore purchase amounts", response: "",
-      assumptions: ["Hypothetical USD values"], inputs: [{ id: "purchase_amount", label: "Purchase amount", type: "currency", description: "Purchase price", required: true, defaultValue: "50000" }],
+      assumptions: ["Hypothetical USD values"], inputs: [{ id: "purchase_amount", label: "Purchase amount", type: "currency", description: "Purchase price", required: true, defaultValue: "50000", min: "0", max: "1000000", step: "100" }],
       outputs: [{ id: "selected_amount", label: "Selected amount", description: "Current scenario", format: "USD" }], interactions: ["Changing the range updates the output"],
       layout: ["Responsive single view"], dataNeeds: [], persistence: { enabled: false, stateSchemaVersion: 1, description: "" }, capabilities: [],
       disclosures: ["Educational only"], acceptanceCriteria: ["Range updates output"], clarificationQuestions: [],
@@ -84,6 +84,7 @@ export default function App(){const [amount,setAmount]=useState(50000);return <m
         bundle: { javascript, css, sha256 },
         manifest: { schemaVersion: 2, entry: "src/App.tsx", capabilities: [], stateSchemaVersion: 1, allowedImports: ["react"], sourceBytes: new TextEncoder().encode(source).length, bundleBytes: new TextEncoder().encode(javascript).length + new TextEncoder().encode(css).length },
         validation: { passed: true, checks: [{ name: "Browser", passed: true, detail: "passed" }], issues: [], review: { passed: true, score: 96, issues: [], strengths: [], acceptanceResults: [{ criterion: "Range updates output", passed: true, detail: "passed" }] } },
+        qualityTier: "verified",
         model: "gpt-5.6-sol", effort: "medium", complexity: { level: "standard", riskFlags: [], rationale: "Interactive chart" }, effortEscalations: [],
         tokenUsage: { inputTokens: 10, outputTokens: 10, totalTokens: 20 }, timings: { assessmentMs: 50, planningMs: 100, codingMs: 300, validationMs: 300, reviewMs: 250, totalMs: 1000 }, durationMs: 1000, repairCount: 0, generatedAt: new Date().toISOString(), provenance: "Test verified workspace", capabilityToken: "x".repeat(32), artifactSignature: "x".repeat(43),
       };

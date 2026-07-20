@@ -123,6 +123,7 @@ export function logModelFailureContext(requestId: string, stage: ModelStageTrace
     requestId,
     stage,
     code: error.code,
+    messagePreview: error.message.replace(/\s+/g, " ").slice(0, 240),
     providerErrorClass: error.metadata.providerErrorClass,
     providerStatus: error.metadata.providerStatus,
     providerCode: error.metadata.providerCode,

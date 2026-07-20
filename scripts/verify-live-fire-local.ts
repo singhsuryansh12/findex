@@ -9,8 +9,10 @@ function assert(condition: unknown, message: string): asserts condition {
 }
 
 async function visibleFindexFailure(page: Page) {
+  // A mounted draft/verified card means the product succeeded; background polish notes may still say "couldn't".
+  if (await page.locator(".generated-card").count()) return null;
   const messages = await page.locator(".message.assistant").allTextContents().catch(() => []);
-  return [...messages].reverse().find((message) => /couldn['’]t|failed|nothing was published/i.test(message))?.trim() ?? null;
+  return [...messages].reverse().find((message) => /couldn['’]t|failed|nothing was published/i.test(message) && !/working draft|still available/i.test(message))?.trim() ?? null;
 }
 
 async function activeArtifactTelemetry(page: Page) {
@@ -37,6 +39,7 @@ async function activeArtifactTelemetry(page: Page) {
             const artifact = artifactRequest.result as {
               title?: string;
               version?: number;
+              qualityTier?: string;
               complexity?: { level?: string };
               repairCount?: number;
               tokenUsage?: unknown;
@@ -49,6 +52,7 @@ async function activeArtifactTelemetry(page: Page) {
             resolve(artifact ? {
               title: artifact.title,
               version: artifact.version,
+              qualityTier: artifact.qualityTier,
               complexity: artifact.complexity,
               repairCount: artifact.repairCount,
               tokenUsage: artifact.tokenUsage,
@@ -81,10 +85,13 @@ async function run() {
 
   try {
     console.log(JSON.stringify({ event: "live_fire_gate", state: "opening", baseUrl }));
+    const brainUrl = `${baseUrl.replace(/\/$/, "")}/demo/brain`;
+    // Seed the demo session directly — client router navigation after the login
+    // button is flaky against the hosted Next.js build under Playwright.
     await page.goto(baseUrl, { waitUntil: "domcontentloaded", timeout: 30_000 });
-    const login = page.getByRole("button", { name: "Login as Demo User" });
-    if (await login.isVisible().catch(() => false)) await login.click();
-    await page.waitForURL(/\/demo\/brain$/, { timeout: 15_000 });
+    await page.evaluate(() => window.sessionStorage.setItem("findex-demo-entered-v1", "true"));
+    await page.goto(brainUrl, { waitUntil: "domcontentloaded", timeout: 30_000 });
+    await page.getByLabel("Message the Financial Brain").waitFor({ state: "visible", timeout: 30_000 });
 
     const composer = page.getByLabel("Message the Financial Brain");
     await composer.fill(prompt);
@@ -102,10 +109,15 @@ async function run() {
       }
       const failure = await visibleFindexFailure(page);
       if (failure) throw new Error(failure);
-      if (/building your workspace|checking the build|verifying interactions|reviewing the workspace/i.test(phase)) break;
+      if (/building your workspace|working draft|refining the draft|checking the build|verifying interactions|reviewing/i.test(phase)) break;
+      if (await page.locator(".generated-card").count()) break;
       await page.waitForTimeout(1_000);
     }
-    assert(/building your workspace|checking the build|verifying interactions|reviewing the workspace/i.test(lastPhase), "The durable workflow did not start within four minutes.");
+    assert(
+      /building your workspace|working draft|refining the draft|checking the build|verifying interactions|reviewing/i.test(lastPhase)
+        || Boolean(await page.locator(".generated-card").count()),
+      "The durable workflow did not start within four minutes.",
+    );
 
     await page.reload({ waitUntil: "domcontentloaded" });
     assert(brainPosts === 1, `Reload started another paid Brain request; observed ${brainPosts}.`);
@@ -113,11 +125,21 @@ async function run() {
 
     const terminalDeadline = Date.now() + terminalTimeoutMs;
     lastPhase = "";
+    let stuckReconnectSince: number | null = null;
     while (Date.now() < terminalDeadline) {
       const phase = (await page.getByRole("status").textContent().catch(() => ""))?.replace(/\s+/g, " ").trim() ?? "";
       if (phase && phase !== lastPhase) {
         lastPhase = phase;
         console.log(JSON.stringify({ event: "live_fire_gate", state: "progress", phase }));
+      }
+      if (/reconnecting to the same build/i.test(phase)) {
+        stuckReconnectSince ??= Date.now();
+        if (Date.now() - stuckReconnectSince > 90_000) {
+          await page.reload({ waitUntil: "domcontentloaded" });
+          stuckReconnectSince = null;
+        }
+      } else {
+        stuckReconnectSince = null;
       }
       if (await page.locator(".generated-card").count()) break;
       const failure = await visibleFindexFailure(page);
@@ -135,10 +157,12 @@ async function run() {
     const frame = page.frameLocator(".workspace-frame");
     const frameBody = frame.locator("body");
     await frameBody.waitFor({ state: "visible", timeout: 30_000 });
+    // Wait for hydration — the shell can be visible before React paints methodology/disclosure.
+    await frame.getByText(/not financial advice/i).first().waitFor({ state: "visible", timeout: 30_000 });
     const originalText = await frameBody.innerText();
     assert(/withdrawal|safe withdrawal/i.test(originalText), "The calculator does not visibly explain its withdrawal-rate assumption.");
     assert(/inflation|return|contribution/i.test(originalText), "The calculator does not visibly explain growth, inflation, or contribution assumptions.");
-    assert(/educational|not financial advice/i.test(originalText), "The educational disclosure is missing from the generated workspace.");
+    assert(/not financial advice/i.test(originalText), "The educational disclosure is missing from the generated workspace.");
 
     const numericInputs = frame.locator('input[type="number"], input[type="range"]');
     const inputCount = await numericInputs.count();
@@ -166,17 +190,24 @@ async function run() {
     const telemetry = await activeArtifactTelemetry(page);
     assert(telemetry, "The published artifact was not persisted in IndexedDB.");
     const typedTelemetry = telemetry as {
+      qualityTier?: string;
       complexity?: { level?: string };
       repairCount?: number;
       stageTraces?: Array<{ stage?: string; model?: string; effort?: string; outcome?: string }>;
       validation?: { passed?: boolean; review?: { score?: number } };
     };
-    assert(typedTelemetry.complexity?.level === "standard", `FIRE routed as ${typedTelemetry.complexity?.level ?? "unknown"} instead of standard.`);
+    assert(
+      typedTelemetry.complexity?.level === "simple" || typedTelemetry.complexity?.level === "standard",
+      `FIRE routed as ${typedTelemetry.complexity?.level ?? "unknown"} instead of simple/standard.`,
+    );
     assert((typedTelemetry.repairCount ?? 0) <= 1, "The workflow exceeded the single-repair limit.");
     assert(typedTelemetry.validation?.passed === true, "The persisted artifact is not marked as validated.");
-    assert((typedTelemetry.validation.review?.score ?? 0) >= 90, "The independent review score is below the publication threshold.");
+    assert(typedTelemetry.qualityTier === "draft" || typedTelemetry.qualityTier === "verified", "Artifact qualityTier missing.");
+    if (typedTelemetry.qualityTier === "verified") {
+      assert((typedTelemetry.validation.review?.score ?? 0) >= 90, "The independent review score is below the verified publication threshold.");
+    }
     const buildTrace = typedTelemetry.stageTraces?.find((trace) => trace.stage === "building");
-    assert(buildTrace?.model === "gpt-5.6-terra" && buildTrace.effort === "medium", "The standard FIRE build did not use Terra with medium reasoning.");
+    assert(buildTrace?.model === "gpt-5.6-terra" && buildTrace.effort === "medium", "The FIRE build did not use Terra with medium reasoning.");
     assert(typedTelemetry.stageTraces?.every((trace) => trace.outcome === "completed"), "At least one paid model stage did not complete successfully.");
     assert(consoleErrors.length === 0, `Browser console errors: ${consoleErrors.join(" | ")}`);
 

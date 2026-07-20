@@ -17,7 +17,13 @@ export async function GET(request: Request, { params }: RouteContext) {
     access.run.completedAt,
   ]);
   let returnValue: FinancialWorkspaceWorkflowResult | null = null;
-  if (status === "completed") returnValue = await access.run.returnValue as FinancialWorkspaceWorkflowResult;
+  if (status === "completed" || status === "failed") {
+    try {
+      returnValue = await access.run.returnValue as FinancialWorkspaceWorkflowResult;
+    } catch {
+      returnValue = null;
+    }
+  }
   return Response.json({
     runId,
     status,
