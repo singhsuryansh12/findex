@@ -51,3 +51,4 @@ next-env.d.ts
 /infrastructure/workspace-sandbox/node_modules/
 /infrastructure/workspace-sandbox/test-results/
 /.swc
+.firecrawl/
