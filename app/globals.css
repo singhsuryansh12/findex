@@ -1375,7 +1375,7 @@ button {
   color: var(--muted);
   border-radius: 999px;
   padding: 8px 14px;
-  font-size: 10px;
+  font-size: var(--fd-text-label);
   cursor: pointer;
 }
 
@@ -1694,7 +1694,7 @@ button {
 .fd-glance-grid small,
 .fd-glance-grid p {
   color: var(--muted);
-  font-size: 9px;
+  font-size: var(--fd-text-meta);
 }
 
 .fd-glance-grid strong {
@@ -1754,7 +1754,7 @@ button {
 
 .fd-today-brief p {
   color: var(--muted);
-  font-size: 10px;
+  font-size: var(--fd-text-body);
   line-height: 1.55;
   margin: 6px 0 10px;
 }
@@ -1764,7 +1764,7 @@ button {
   padding: 0;
   background: transparent;
   color: var(--emerald);
-  font-size: 9px;
+  font-size: var(--fd-text-label);
   font-weight: 750;
   cursor: pointer;
 }
@@ -1813,7 +1813,7 @@ button {
 .fd-tools-drawer summary small,
 .fd-runway-details summary small {
   color: var(--muted);
-  font-size: 9px;
+  font-size: var(--fd-text-meta);
 }
 
 .fd-tools-drawer[open] > summary > svg,
@@ -1848,7 +1848,7 @@ button {
 .fd-empty-tools p {
   color: var(--muted);
   margin: 4px 0 0;
-  font-size: 9px;
+  font-size: var(--fd-text-meta);
 }
 
 /* Spending */
@@ -1876,7 +1876,7 @@ button {
 
 .fd-filter-card label > span {
   color: var(--muted);
-  font-size: 7px;
+  font-size: var(--fd-text-caption);
   text-transform: uppercase;
   letter-spacing: .1em;
   grid-column: 1 / -1;
@@ -1889,7 +1889,7 @@ button {
   outline: 0;
   background: transparent;
   color: var(--ink);
-  font-size: 9px;
+  font-size: var(--fd-text-label);
   appearance: none;
 }
 
@@ -1913,7 +1913,7 @@ button {
   border: 0;
   background: transparent;
   color: var(--ink-soft);
-  font-size: 9px;
+  font-size: var(--fd-text-label);
   white-space: nowrap;
   cursor: pointer;
 }
@@ -1946,7 +1946,7 @@ button {
   align-items: center;
   justify-content: center;
   gap: 5px;
-  font-size: 9px;
+  font-size: var(--fd-text-label);
   cursor: pointer;
 }
 
@@ -1985,7 +1985,7 @@ button {
 .fd-category-bars button > span {
   display: flex;
   justify-content: space-between;
-  font-size: 10px;
+  font-size: var(--fd-text-label);
   margin-bottom: 5px;
 }
 
@@ -2054,7 +2054,7 @@ button {
   background: #dceae3;
   color: var(--ink);
   padding: 8px 11px;
-  font-size: 9px;
+  font-size: var(--fd-text-label);
   cursor: pointer;
 }
 
@@ -2119,7 +2119,7 @@ button {
   background: #f0eee7;
   color: var(--ink-soft);
   padding: 5px 8px;
-  font-size: 8px;
+  font-size: var(--fd-text-meta);
   cursor: pointer;
 }
 
@@ -2131,7 +2131,7 @@ button {
   border-radius: 999px;
   padding: 8px 13px;
   color: var(--ink-soft);
-  font-size: 9px;
+  font-size: var(--fd-text-label);
   cursor: pointer;
 }
 
@@ -2161,13 +2161,13 @@ button {
 }
 
 .fd-recurring-list strong {
-  font-size: 10px;
+  font-size: var(--fd-text-label);
   font-variant-numeric: tabular-nums;
 }
 
 .fd-recurring-list small {
   color: var(--muted);
-  font-size: 8px;
+  font-size: var(--fd-text-meta);
 }
 
 .fd-recurring-mark {
@@ -2195,7 +2195,7 @@ button {
   background: transparent;
   color: var(--muted);
   padding: 7px 10px;
-  font-size: 9px;
+  font-size: var(--fd-text-label);
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -2229,14 +2229,14 @@ button {
   gap: 2px;
 }
 
-.fd-recurring-calendar time strong { font-size: 10px; }
-.fd-recurring-calendar time span { color: var(--emerald); font-size: 9px; }
+.fd-recurring-calendar time strong { font-size: var(--fd-text-meta); }
+.fd-recurring-calendar time span { color: var(--emerald); font-size: var(--fd-text-caption); }
 .fd-recurring-calendar article > div { padding: 7px 13px; display: grid; }
 .fd-recurring-calendar article > div > span { display: grid; grid-template-columns: 1fr auto; gap: 3px 12px; padding: 7px 0; border-bottom: 1px solid var(--line); }
 .fd-recurring-calendar article > div > span:last-child { border-bottom: 0; }
 .fd-recurring-calendar b,
-.fd-recurring-calendar em { font-size: 10px; font-style: normal; font-variant-numeric: tabular-nums; }
-.fd-recurring-calendar small { color: var(--muted); font-size: 8px; grid-column: 1 / -1; }
+.fd-recurring-calendar em { font-size: var(--fd-text-label); font-style: normal; font-variant-numeric: tabular-nums; }
+.fd-recurring-calendar small { color: var(--muted); font-size: var(--fd-text-caption); grid-column: 1 / -1; }
 
 /* Portfolio */
 
@@ -2264,7 +2264,7 @@ button {
 
 .fd-portfolio-hero p {
   color: rgba(255,255,255,.53);
-  font-size: 10px;
+  font-size: var(--fd-text-body);
 }
 
 .fd-portfolio-hero .fd-current-contribution {
@@ -2294,7 +2294,7 @@ button {
 
 .fd-portfolio-hero-metrics span {
   color: rgba(255,255,255,.48);
-  font-size: 8px;
+  font-size: var(--fd-text-meta);
 }
 
 .fd-portfolio-hero-metrics strong {
@@ -2340,16 +2340,16 @@ button {
 }
 
 .fd-allocation-legend strong {
-  font-size: 9px;
+  font-size: var(--fd-text-label);
 }
 
 .fd-allocation-legend small {
   color: var(--muted);
-  font-size: 8px;
+  font-size: var(--fd-text-meta);
 }
 
 .fd-allocation-legend em {
-  font-size: 10px;
+  font-size: var(--fd-text-label);
   font-style: normal;
   font-variant-numeric: tabular-nums;
 }
@@ -2362,7 +2362,7 @@ button {
   display: flex;
   align-items: flex-start;
   gap: 7px;
-  font-size: 8px;
+  font-size: var(--fd-text-caption);
   line-height: 1.45;
 }
 
@@ -2374,7 +2374,7 @@ button {
 .fd-chart-data {
   margin-top: 9px;
   color: var(--muted);
-  font-size: 9px;
+  font-size: var(--fd-text-meta);
 }
 
 .fd-chart-data summary {
@@ -2414,7 +2414,7 @@ button {
 .fd-account-grid p,
 .fd-account-grid article > span:last-child {
   color: var(--muted);
-  font-size: 8px;
+  font-size: var(--fd-text-meta);
 }
 
 .fd-account-grid h3 {
@@ -2456,12 +2456,12 @@ button {
 
 .fd-contribution-list strong,
 .fd-contribution-list span {
-  font-size: 9px;
+  font-size: var(--fd-text-label);
 }
 
 .fd-contribution-list small {
   color: var(--muted);
-  font-size: 7px;
+  font-size: var(--fd-text-caption);
 }
 
 .fd-sort-label {
@@ -2474,7 +2474,7 @@ button {
   grid-template-columns: 1fr auto;
   gap: 2px;
   color: var(--muted);
-  font-size: 7px;
+  font-size: var(--fd-text-caption);
   text-transform: uppercase;
   letter-spacing: .09em;
 }
@@ -2482,7 +2482,7 @@ button {
 .fd-sort-label select {
   border: 0;
   appearance: none;
-  font-size: 9px;
+  font-size: var(--fd-text-label);
   background: transparent;
   grid-row: 2;
 }
@@ -2496,7 +2496,7 @@ button {
   display: inline-block;
   min-width: 49px;
   color: var(--emerald);
-  font-size: 8px;
+  font-size: var(--fd-text-meta);
   letter-spacing: .05em;
 }
 
@@ -2536,7 +2536,7 @@ button {
   gap: 12px;
   padding: 10px 0;
   border-bottom: 1px solid var(--line);
-  font-size: 10px;
+  font-size: var(--fd-text-table);
 }
 
 .fd-month-breakdown strong {
@@ -2559,7 +2559,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 9px;
+  font-size: var(--fd-text-label);
   font-weight: 720;
   cursor: pointer;
 }
@@ -2576,7 +2576,7 @@ button {
 
 .fd-assumptions-card ul {
   color: var(--muted);
-  font-size: 10px;
+  font-size: var(--fd-text-body);
   line-height: 1.55;
   padding-left: 18px;
 }
@@ -2608,7 +2608,7 @@ button {
 .fd-runway-summary span,
 .fd-runway-summary small {
   color: var(--muted);
-  font-size: 8px;
+  font-size: var(--fd-text-meta);
 }
 
 .fd-runway-summary strong {
@@ -2640,7 +2640,7 @@ button {
 .fd-decision-cta p {
   color: rgba(255,255,255,.52);
   margin: 4px 0 0;
-  font-size: 10px;
+  font-size: var(--fd-text-body);
 }
 
 .fd-decision-cta button {
@@ -2649,7 +2649,7 @@ button {
   padding: 10px 13px;
   background: #dceae3;
   color: var(--ink);
-  font-size: 9px;
+  font-size: var(--fd-text-label);
   font-weight: 720;
   cursor: pointer;
 }
