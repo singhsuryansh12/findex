@@ -55,9 +55,9 @@ describe("adaptive reasoning policy", () => {
 
   it("enforces host complexity floors from capabilities instead of prompt-controlled effort", () => {
     const base = { level: "simple" as const, riskFlags: [], rationale: "One screen" };
-    expect(enforceComplexityFloor(base, plan(["ledger.snapshot"])).level).toBe("standard");
+    expect(enforceComplexityFloor(base, plan(["ledger.snapshot"])).level).toBe("simple");
     expect(enforceComplexityFloor(base, plan(["market.quote"]))).toMatchObject({ level: "complex", riskFlags: ["live_data"] });
-    expect(enforceComplexityFloor(base, plan(["workspace.state"], true))).toMatchObject({ level: "standard", riskFlags: ["persistence"] });
+    expect(enforceComplexityFloor(base, plan(["workspace.state"], true))).toMatchObject({ level: "simple", riskFlags: ["persistence"] });
     expect(enforceComplexityFloor(base, { ...plan([]), goal: "Model capital gains tax scenarios" }).level).toBe("complex");
     expect(enforceComplexityFloor(base, {
       ...plan([], true),
@@ -65,7 +65,7 @@ describe("adaptive reasoning policy", () => {
       interactions: ["Do not request credentials or account access"],
       acceptanceCriteria: ["Contains no account access, trading, credentials, or money movement"],
       disclosures: ["No trading or money movement"],
-    })).toMatchObject({ level: "standard", riskFlags: ["persistence"] });
+    })).toMatchObject({ level: "simple", riskFlags: ["persistence"] });
   });
 
   it("forces active prompts to revise in place and preserves the persisted state schema", () => {

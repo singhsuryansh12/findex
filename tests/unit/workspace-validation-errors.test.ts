@@ -69,6 +69,92 @@ describe("workspace validation diagnostics", () => {
     expect(canRepairWorkspaceValidation(failure)).toBe(true);
   });
 
+  it("treats a missing TypeScript binary as a non-actionable platform failure", () => {
+    const failure = commandValidationFailure({
+      script: "typecheck",
+      error: Object.assign(new Error("Command failed"), {
+        stdout: "> typecheck\n> tsc --noEmit\n",
+        stderr: "sh: line 1: tsc: command not found\n",
+      }),
+    });
+    expect(failure).toMatchObject({
+      code: "WORKSPACE_PLATFORM_FAILED",
+      actionable: false,
+      platformTransient: true,
+    });
+  });
+
+  it("treats Next.js [externals] typescript resolve paths as platform failures", () => {
+    const failure = commandValidationFailure({
+      script: "typecheck",
+      error: Object.assign(new Error("Command failed"), {
+        stdout: "",
+        stderr: "Error: Cannot find module '<workspace>/[externals]/typescript/lib/tsc.js [external] (typescript/lib/tsc.js, cjs, [project]/node_modules/typescript)'\n",
+      }),
+    });
+    expect(failure).toMatchObject({
+      code: "WORKSPACE_PLATFORM_FAILED",
+      actionable: false,
+      platformTransient: true,
+    });
+  });
+
+  it("treats missing host @types packages as platform failures", () => {
+    const failure = commandValidationFailure({
+      script: "typecheck",
+      error: Object.assign(new Error("Command failed"), {
+        stdout: "error TS2688: Cannot find type definition file for 'node'.\nerror TS2688: Cannot find type definition file for 'vitest/globals'.\n",
+        stderr: "",
+      }),
+    });
+    expect(failure).toMatchObject({
+      code: "WORKSPACE_PLATFORM_FAILED",
+      actionable: false,
+      platformTransient: true,
+    });
+  });
+
+  it("treats missing React declaration files on the host as platform failures", () => {
+    const failure = commandValidationFailure({
+      script: "typecheck",
+      error: Object.assign(new Error("Command failed"), {
+        stdout: "src/App.tsx(1,36): error TS7016: Could not find a declaration file for module 'react'.\nsrc/App.tsx(6,10): error TS7026: JSX element implicitly has type 'any' because no interface 'JSX.IntrinsicElements' exists.\n",
+        stderr: "",
+      }),
+    });
+    expect(failure).toMatchObject({
+      code: "WORKSPACE_PLATFORM_FAILED",
+      actionable: false,
+      platformTransient: true,
+    });
+  });
+
+  it("prefers the host quality-contract error over Playwright runner noise", () => {
+    const stdout = `
+> test
+> vitest run && playwright test
+
+Running 1 test using 1 worker
+✘ 1 workspace.e2e.ts:388:1 › renders, exercises controls, and remains responsive (29.9s)
+
+  Error: Workspace quality contract failed.
+  Missing controls: Current age; Annual spending.
+  Annual spending: accessible label/help text does not identify its unit.
+  WCAG color-contrast: Elements must have sufficient color contrast
+
+    at /tmp/findex-workspace-abc/workspace.e2e.ts:459:11
+`;
+    const failure = commandValidationFailure({
+      script: "test",
+      error: Object.assign(new Error("npm run test failed."), { stdout, stderr: "" }),
+    });
+    expect(failure.code).toBe("WORKSPACE_TEST_FAILED");
+    expect(failure.actionable).toBe(true);
+    expect(failure.diagnostics[0]).toContain("Missing controls: Current age; Annual spending.");
+    expect(failure.diagnostics[0]).toContain("accessible label/help text does not identify its unit");
+    expect(failure.diagnostics[0]).not.toContain("vitest run && playwright test");
+  });
+
   it("classifies aborts and platform transients as non-actionable capacity failures", () => {
     const aborted = new DOMException("The operation timed out", "TimeoutError");
     expect(validationFailureFrom(aborted)).toMatchObject({

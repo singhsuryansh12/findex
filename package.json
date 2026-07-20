@@ -24,7 +24,9 @@
     "test:gen-eval": "vitest run tests/evaluations/generative-eval.test.ts",
     "test:local-sandbox": "RUN_LOCAL_SANDBOX_EVAL=1 vitest run tests/integration/local-sandbox.test.ts",
     "test:live-providers": "vitest run tests/evaluations/live-providers.test.ts",
-    "verify:live-fire-local": "tsx scripts/verify-live-fire-local.ts"
+    "verify:workspace-offline": "tsx scripts/verify-workspace-offline.ts",
+    "verify:live-fire-local": "tsx scripts/verify-live-fire-local.ts",
+    "verify:grounded-build-local": "tsx scripts/verify-grounded-build-local.ts"
   },
   "dependencies": {
     "@babel/parser": "^8.0.4",
@@ -39,22 +41,22 @@
     "react": "19.2.6",
     "react-dom": "19.2.6",
     "recharts": "^3.9.2",
+    "typescript": "5.9.3",
     "workflow": "4.6.0",
-    "zod": "^4.4.3"
+    "zod": "^4.4.3",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",
     "@playwright/test": "^1.61.1",
     "@tailwindcss/postcss": "4.2.1",
     "@types/node": "22.19.19",
-    "@types/react": "19.2.14",
-    "@types/react-dom": "19.2.3",
     "eslint": "9.39.4",
     "eslint-config-next": "16.2.6",
     "fake-indexeddb": "^6.2.5",
     "tailwindcss": "4.2.1",
     "tsx": "^4.23.1",
-    "typescript": "5.9.3",
     "vitest": "^4.1.10"
   },
   "overrides": {

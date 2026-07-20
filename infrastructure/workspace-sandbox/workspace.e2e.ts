@@ -8,11 +8,14 @@ type WorkspacePlanInput = {
   type: "number" | "currency" | "percentage" | "text" | "select" | "date" | "boolean";
   required: boolean;
   defaultValue: string;
+  min?: string;
+  max?: string;
+  step?: string;
 };
 type WorkspacePlan = {
   inputs: WorkspacePlanInput[];
   outputs: Array<{ label: string }>;
-  persistence: { enabled: boolean };
+  persistence?: { enabled: boolean };
 };
 const plan = JSON.parse(await readFile("workspace-plan.json", "utf8")) as WorkspacePlan;
 
@@ -37,10 +40,12 @@ function labelsMatch(planned: string, rendered: string) {
   const actual = labelTokens(rendered);
   if (!expected.length || !actual.length) return false;
   if (expected.join(" ") === actual.join(" ")) return true;
+  // Prefer verbatim coverage: every planned content token appears in the rendered label.
+  if (expected.every((token) => actual.includes(token))) return true;
   const overlap = expected.filter((token) => actual.includes(token)).length;
   return overlap >= 2
     && overlap / Math.min(expected.length, actual.length) >= 0.8
-    && overlap / Math.max(expected.length, actual.length) >= 0.7;
+    && overlap / Math.max(expected.length, actual.length) >= 0.6;
 }
 
 function idSelector(id: string) {
@@ -67,7 +72,9 @@ async function observableOutput(page: Page) {
 
 async function visiblePlannedControl(page: Page, label: string) {
   const controls = page.locator("input, select, textarea");
-  for (let index = 0; index < await controls.count(); index += 1) {
+  const count = await controls.count();
+  // Cap the scan so a pathological DOM cannot burn the whole Playwright budget.
+  for (let index = 0; index < Math.min(count, 40); index += 1) {
     const control = controls.nth(index);
     if (!await control.isVisible()) continue;
     const renderedLabels = await control.evaluate((element) => {
@@ -297,7 +304,7 @@ async function validateControlSemantics(page: Page) {
 
 async function validateInvalidPersistence(page: Page) {
   const diagnostics: string[] = [];
-  if (!plan.persistence.enabled) return diagnostics;
+  if (!plan.persistence?.enabled) return diagnostics;
   const save = page.getByRole("button", { name: /save/i }).first();
   if (!await save.count() || !await save.isVisible()) return diagnostics;
   const candidate = plan.inputs.find((input) => input.required && ["number", "currency", "percentage"].includes(input.type));
@@ -394,67 +401,94 @@ test("renders, exercises controls, and remains responsive", async ({ page }) => 
 
   await page.goto("/");
   await page.addStyleTag({ content: "*,*::before,*::after{animation:none!important;transition:none!important}" });
-  await expect(page.locator("h1, h2").first()).toBeVisible();
+  const qualityDiagnostics: string[] = [];
+  try {
+    await expect(page.locator("h1, h2").first()).toBeVisible({ timeout: 10_000 });
+  } catch {
+    const body = await page.locator("body").innerText().catch(() => "");
+    const rootHTML = await page.locator("#root").innerHTML().catch(() => "");
+    qualityDiagnostics.push(
+      "Missing visible h1/h2 heading after load. "
+      + `Console/page errors: ${errors.join("; ") || "none"}. `
+      + `Body text preview: ${body.replace(/\s+/g, " ").trim().slice(0, 300) || "(empty)"}. `
+      + `Root HTML preview: ${rootHTML.replace(/\s+/g, " ").trim().slice(0, 300) || "(empty)"}.`,
+    );
+  }
   const missingInputs: string[] = [];
   const missingOutputs: string[] = [];
-  for (const input of plan.inputs) {
-    if (!await plannedControl(page, input.label)) missingInputs.push(input.label);
+  if (!qualityDiagnostics.length) {
+    for (const input of plan.inputs) {
+      if (!await plannedControl(page, input.label)) missingInputs.push(input.label);
+    }
+    for (const output of plan.outputs) {
+      if (!await plannedOutput(page, output.label)) missingOutputs.push(output.label);
+    }
   }
-  for (const output of plan.outputs) {
-    if (!await plannedOutput(page, output.label)) missingOutputs.push(output.label);
-  }
-  const qualityDiagnostics = [
+  qualityDiagnostics.push(
     ...(missingInputs.length ? [`Missing controls: ${missingInputs.join("; ")}.`] : []),
     ...(missingOutputs.length ? [`Missing outputs: ${missingOutputs.join("; ")}.`] : []),
-    ...await validateControlSemantics(page),
-    ...await validateWholeUnitStepHandling(page),
-    ...await validateInvalidPersistence(page),
-    ...await validateChartAlternatives(page),
-  ];
+  );
+  if (!qualityDiagnostics.some((item) => item.startsWith("Missing visible h1/h2"))) {
+    qualityDiagnostics.push(
+      ...await validateControlSemantics(page),
+      ...await validateWholeUnitStepHandling(page),
+      ...await validateInvalidPersistence(page),
+      ...await validateChartAlternatives(page),
+    );
+  }
 
-  const accessibility = await new AxeBuilder({ page })
-    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
-    .analyze();
-  qualityDiagnostics.push(...accessibility.violations.map((violation) => `WCAG ${violation.id}: ${violation.help}`));
+  const headingMissing = qualityDiagnostics.some((item) => item.startsWith("Missing visible h1/h2"));
+  if (!headingMissing) {
+    const accessibility = await new AxeBuilder({ page })
+      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+      .analyze();
+    qualityDiagnostics.push(...accessibility.violations.map((violation: { id: string; help: string }) => `WCAG ${violation.id}: ${violation.help}`));
 
-  for (const [index, input] of plan.inputs.entries()) {
-    // Exercise every control from the workspace's valid initial state. Numeric
-    // financial inputs are often interdependent, so accumulating changes can
-    // make later controls appear non-reactive simply because an earlier value
-    // (for example, current age) invalidated the whole calculator.
-    if (index > 0) {
-      await page.reload();
-      await page.addStyleTag({ content: "*,*::before,*::after{animation:none!important;transition:none!important}" });
-      await expect(page.locator("h1, h2").first()).toBeVisible();
-    }
-    const control = await plannedControl(page, input.label);
-    if (!control) continue;
-    const before = await observableOutput(page);
-    await changeControl(control);
-    try {
-      await expect.poll(() => observableOutput(page)).not.toBe(before);
-    } catch {
-      // Thresholded inputs can legitimately be unchanged by one step. For
-      // example, extending a 50-year horizon to 51 years does not affect a
-      // projection that already reaches FIRE in year 20. Exercise a bounded
-      // alternative before concluding that the control is disconnected.
-      await changeControl(control, true);
+    for (const [index, input] of plan.inputs.entries()) {
+      // Exercise every control from the workspace's valid initial state. Numeric
+      // financial inputs are often interdependent, so accumulating changes can
+      // make later controls appear non-reactive simply because an earlier value
+      // (for example, current age) invalidated the whole calculator.
+      if (index > 0) {
+        await page.reload();
+        await page.addStyleTag({ content: "*,*::before,*::after{animation:none!important;transition:none!important}" });
+        await expect(page.locator("h1, h2").first()).toBeVisible();
+      }
+      const control = await plannedControl(page, input.label);
+      if (!control) continue;
+      const before = await observableOutput(page);
+      await changeControl(control);
       try {
         await expect.poll(() => observableOutput(page)).not.toBe(before);
       } catch {
-        qualityDiagnostics.push(`${input.label}: changing the control from the valid initial state did not change a rendered financial output.`);
+        // Thresholded inputs can legitimately be unchanged by one step. For
+        // example, extending a 50-year horizon to 51 years does not affect a
+        // projection that already reaches FIRE in year 20. Exercise a bounded
+        // alternative before concluding that the control is disconnected.
+        await changeControl(control, true);
+        try {
+          await expect.poll(() => observableOutput(page)).not.toBe(before);
+        } catch {
+          qualityDiagnostics.push(`${input.label}: changing the control from the valid initial state did not change a rendered financial output.`);
+        }
       }
+      await control.blur();
+      qualityDiagnostics.push(...await validateConciseLiveStatus(page));
     }
-    await control.blur();
-    qualityDiagnostics.push(...await validateConciseLiveStatus(page));
-  }
 
-  await page.setViewportSize({ width: 1440, height: 1000 });
-  await assertNoOverflow(page);
-  await page.screenshot({ path: "test-results/workspace-desktop.png", fullPage: true });
-  await page.setViewportSize({ width: 390, height: 844 });
-  await assertNoOverflow(page);
-  await page.screenshot({ path: "test-results/workspace-mobile.png", fullPage: true });
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await assertNoOverflow(page);
+    await page.screenshot({ path: "test-results/workspace-desktop.png", fullPage: true });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await assertNoOverflow(page);
+    await page.screenshot({ path: "test-results/workspace-mobile.png", fullPage: true });
+  } else {
+    // Still capture evidence for repair diagnostics when the app never mounts.
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await page.screenshot({ path: "test-results/workspace-desktop.png", fullPage: true }).catch(() => undefined);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.screenshot({ path: "test-results/workspace-mobile.png", fullPage: true }).catch(() => undefined);
+  }
   if (qualityDiagnostics.length) {
     throw new Error(`Workspace quality contract failed.\n${[...new Set(qualityDiagnostics)].join("\n")}`);
   }

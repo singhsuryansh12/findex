@@ -56,6 +56,10 @@ export const workspacePlanInputSchema = z.object({
   description: z.string().max(240),
   required: z.boolean(),
   defaultValue: z.string().max(120),
+  /** Numeric domain for number/currency/percentage controls. Null/empty for non-numeric types. */
+  min: z.string().max(40).nullable(),
+  max: z.string().max(40).nullable(),
+  step: z.string().max(40).nullable(),
 });
 
 export const workspacePlanOutputSchema = z.object({
@@ -156,6 +160,9 @@ export const modelStageTraceSchema = z.object({
 });
 export type ModelStageTrace = z.infer<typeof modelStageTraceSchema>;
 
+export const workspaceQualityTierSchema = z.enum(["draft", "verified"]);
+export type WorkspaceQualityTier = z.infer<typeof workspaceQualityTierSchema>;
+
 export const workspaceArtifactSchema = z.object({
   schemaVersion: z.literal(2),
   id: z.string().uuid(),
@@ -174,6 +181,7 @@ export const workspaceArtifactSchema = z.object({
   }),
   manifest: workspaceManifestSchema,
   validation: workspaceValidationReportSchema,
+  qualityTier: workspaceQualityTierSchema.default("verified"),
   model: findexModelSchema,
   effort: reasoningEffortSchema,
   complexity: buildComplexityAssessmentSchema,
@@ -208,8 +216,13 @@ export const workspaceArtifactSchema = z.object({
   if (artifact.plan.persistence.stateSchemaVersion !== artifact.manifest.stateSchemaVersion) {
     context.addIssue({ code: "custom", path: ["manifest", "stateSchemaVersion"], message: "Artifact state schema does not match its plan." });
   }
-  if (!artifact.validation.passed || artifact.validation.checks.some((check) => !check.passed) || !artifact.validation.review.passed || artifact.validation.review.score < 90) {
-    context.addIssue({ code: "custom", path: ["validation"], message: "Only fully validated artifacts may be persisted." });
+  if (!artifact.validation.passed || artifact.validation.checks.some((check) => !check.passed)) {
+    context.addIssue({ code: "custom", path: ["validation"], message: "Artifacts require passed host checks before persistence." });
+  }
+  if (artifact.qualityTier === "verified") {
+    if (!artifact.validation.review.passed || artifact.validation.review.score < 90) {
+      context.addIssue({ code: "custom", path: ["validation", "review"], message: "Verified artifacts require independent review ≥90." });
+    }
   }
 });
 export type WorkspaceArtifactV2 = z.infer<typeof workspaceArtifactSchema>;

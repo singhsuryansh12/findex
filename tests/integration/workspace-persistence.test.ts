@@ -38,6 +38,7 @@ function artifact(projectId: string, version: number, parentVersionId: string | 
     bundle: { javascript, css: "", sha256: "a".repeat(64) },
     manifest: { schemaVersion: 2, entry: "src/App.tsx", capabilities: ["workspace.state"], stateSchemaVersion: 1, allowedImports: ["react"], sourceBytes: new TextEncoder().encode(source).length, bundleBytes: new TextEncoder().encode(javascript).length },
     validation: { passed: true, checks: [{ name: "test", passed: true, detail: "passed" }], issues: [], review: { passed: true, score: 100, issues: [], strengths: [], acceptanceResults: [] } },
+    qualityTier: "verified",
     model: "gpt-5.6-sol", effort: "low", complexity: { level: "simple", riskFlags: [], rationale: "test" }, effortEscalations: [],
     tokenUsage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 }, durationMs: 1, repairCount: 0,
     timings: { assessmentMs: 0, planningMs: 0, codingMs: 0, validationMs: 0, reviewMs: 0, totalMs: 1 },

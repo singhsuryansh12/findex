@@ -16,7 +16,7 @@ function plan(): WorkspaceBuildPlan {
     goal: "Plan financial independence with transparent assumptions",
     response: "",
     assumptions: ["4% withdrawal rate", "3% inflation"],
-    inputs: [{ id: "annual_spend", label: "Annual spend", type: "currency", description: "Current annual spending", required: true, defaultValue: "60000" }],
+    inputs: [{ id: "annual_spend", label: "Annual spend", type: "currency", description: "Current annual spending", required: true, defaultValue: "60000", min: "1000", max: "10000000", step: "1000" }],
     outputs: [{ id: "fire_number", label: "FIRE number", description: "Target portfolio", format: "USD" }],
     interactions: ["Annual spending updates the FIRE number"],
     layout: ["Responsive calculator and assumptions"],
@@ -54,7 +54,12 @@ describe("Findex model routing", () => {
       { level: "complex", riskFlags: ["sensitive_math"], rationale: "Several linked calculations" },
       "Build a FIRE calculator for me to plan my retirement.",
       false,
-    )).toMatchObject({ level: "standard", riskFlags: [] });
+    )).toMatchObject({ level: "simple", riskFlags: [] });
+    expect(calibrateInitialComplexity(
+      { level: "standard", riskFlags: [], rationale: "Ordinary planner" },
+      "Build a wealth projection tool for my savings.",
+      false,
+    )).toMatchObject({ level: "simple" });
     expect(calibrateInitialComplexity(
       { level: "complex", riskFlags: ["sensitive_math"], rationale: "Monte Carlo and tax work" },
       "Build a FIRE planner with Monte Carlo simulation and capital gains tax optimization.",
@@ -66,8 +71,8 @@ describe("Findex model routing", () => {
       true,
     ).level).toBe("complex");
     const persistentFirePlan = { ...plan(), persistence: { enabled: true, stateSchemaVersion: 1, description: "Save one calculator scenario" }, capabilities: ["workspace.state"] as WorkspaceBuildPlan["capabilities"] };
-    expect(enforceComplexityFloor({ level: "standard", riskFlags: [], rationale: "Retirement calculator" }, persistentFirePlan)).toMatchObject({
-      level: "standard",
+    expect(enforceComplexityFloor({ level: "simple", riskFlags: [], rationale: "Retirement calculator" }, persistentFirePlan)).toMatchObject({
+      level: "simple",
       riskFlags: ["persistence"],
     });
     const detailedFirePlan: WorkspaceBuildPlan = {
@@ -80,15 +85,20 @@ describe("Findex model routing", () => {
         description: "Editable retirement assumption",
         required: true,
         defaultValue: "1",
+        min: "0",
+        max: "100",
+        step: "1",
       })),
       interactions: Array.from({ length: 8 }, (_, index) => `Assumption ${index + 1} updates the projection`),
       layout: ["Header", "Assumption controls", "Summary row", "Portfolio projection chart", "Projection table", "Methodology footer"],
       acceptanceCriteria: ["The portfolio projection updates when retirement assumptions change"],
     };
-    expect(enforceComplexityFloor({ level: "standard", riskFlags: [], rationale: "Retirement calculator" }, detailedFirePlan)).toMatchObject({
+    expect(enforceComplexityFloor({ level: "simple", riskFlags: [], rationale: "Retirement calculator" }, detailedFirePlan)).toMatchObject({
       level: "standard",
-      riskFlags: ["persistence", "rich_interaction"],
     });
+    expect(enforceComplexityFloor({ level: "simple", riskFlags: [], rationale: "Retirement calculator" }, detailedFirePlan).riskFlags).toEqual(
+      expect.arrayContaining(["persistence", "rich_interaction"]),
+    );
     const safetyExplicitFirePlan: WorkspaceBuildPlan = {
       ...detailedFirePlan,
       acceptanceCriteria: [
@@ -96,10 +106,12 @@ describe("Findex model routing", () => {
       ],
       disclosures: ["No trading or money movement. Educational information only; not financial advice."],
     };
-    expect(enforceComplexityFloor({ level: "standard", riskFlags: [], rationale: "Retirement calculator" }, safetyExplicitFirePlan)).toMatchObject({
+    expect(enforceComplexityFloor({ level: "simple", riskFlags: [], rationale: "Retirement calculator" }, safetyExplicitFirePlan)).toMatchObject({
       level: "standard",
-      riskFlags: ["persistence", "rich_interaction"],
     });
+    expect(enforceComplexityFloor({ level: "simple", riskFlags: [], rationale: "Retirement calculator" }, safetyExplicitFirePlan).riskFlags).toEqual(
+      expect.arrayContaining(["persistence", "rich_interaction"]),
+    );
   });
 
   it("normalizes a degenerate FIRE spending default before generation while preserving explicit zero intent", () => {
@@ -112,6 +124,32 @@ describe("Findex model routing", () => {
     expect(normalized.assumptions.at(-1)).toContain("Illustrative annual retirement spending starts at 60,000");
     const explicitZero = normalizePlanForActiveWorkspace(zeroSpendingPlan, null, "Build a FIRE calculator assuming zero retirement spending.");
     expect(explicitZero.inputs[0]?.defaultValue).toBe("0");
+  });
+
+  it("host-aligns FIRE numeric domains and strips contradictory acceptance prose", () => {
+    const drifted: WorkspaceBuildPlan = {
+      ...plan(),
+      inputs: [
+        { id: "current_age", label: "Current age", type: "number", description: "Age in years", required: true, defaultValue: "30", min: "0", max: "120", step: "0.01" },
+        { id: "portfolio", label: "Current portfolio", type: "currency", description: "Invested assets", required: true, defaultValue: "100000", min: "0", max: "1e12", step: "1" },
+        { id: "annual_spend", label: "Annual retirement spending", type: "currency", description: "Yearly retirement spending", required: true, defaultValue: "60000", min: "0", max: "1e9", step: "1" },
+        { id: "withdrawal_rate", label: "Withdrawal rate", type: "percentage", description: "Safe withdrawal rate", required: true, defaultValue: "4", min: "0", max: "100", step: "0.1" },
+      ],
+      acceptanceCriteria: [
+        "Spending must be greater than 0",
+        "Portfolio allows any non-negative amount",
+        "Ages allow decimals like 30.25",
+        "Changing spending updates the FIRE target",
+      ],
+    };
+    const normalized = normalizePlanForActiveWorkspace(drifted, null, "Build a FIRE calculator for me to plan my retirement.");
+    expect(normalized.inputs.find((input) => input.id === "current_age")).toMatchObject({ min: "18", max: "100", step: "1" });
+    expect(normalized.inputs.find((input) => input.id === "portfolio")).toMatchObject({ min: "0", max: "100000000", step: "1000" });
+    expect(normalized.inputs.find((input) => input.id === "annual_spend")).toMatchObject({ min: "1000", max: "10000000", step: "1000" });
+    expect(normalized.inputs.find((input) => input.id === "withdrawal_rate")).toMatchObject({ min: "0.1", max: "20", step: "0.1" });
+    expect(normalized.acceptanceCriteria.join(" ")).not.toMatch(/greater than 0|any non-negative|30\.25/i);
+    expect(normalized.acceptanceCriteria.join(" ")).toMatch(/planned min, max, and step/i);
+    expect(normalized.acceptanceCriteria.join(" ")).toMatch(/Changing spending updates the FIRE target/i);
   });
 
   it("uses capacity retry for token exhaustion, semantic Sol repair only for ordinary plans, and no timeout/refusal escalation", () => {
@@ -131,7 +169,7 @@ describe("Findex model routing", () => {
     expect(stageDeadlines.planningAttemptMs).toBe(90_000);
     expect(stageDeadlines.standardBuildMs).toBe(240_000);
     expect(stageDeadlines.validationMs).toBe(210_000);
-    expect(stageDeadlines.reviewMs).toBe(90_000);
+    expect(stageDeadlines.reviewMs).toBe(150_000);
     expect(stageDeadlines.workflowMs).toBe(1_200_000);
   });
 });
