@@ -106,8 +106,37 @@ export function getGuidance(view: DemoView): GuidancePage {
   return GUIDANCE[view];
 }
 
-export function getTryNextPrompts(view: DemoView): string[] {
-  return TRY_NEXT_PROMPTS[view];
+export function getTryNextPrompts(view: DemoView, lastPrompt?: string): string[] {
+  const pool = TRY_NEXT_PROMPTS[view];
+
+  if (!lastPrompt) {
+    return pool.slice(0, 2);
+  }
+
+  const withoutExact = pool.filter((prompt) => prompt !== lastPrompt);
+
+  if (withoutExact.length >= 2) {
+    return withoutExact.slice(0, 2);
+  }
+
+  const result: string[] = [];
+  for (const prompt of withoutExact) {
+    if (result.length >= 2) {
+      break;
+    }
+    result.push(prompt);
+  }
+
+  for (const prompt of pool) {
+    if (result.length >= 2) {
+      break;
+    }
+    if (!result.includes(prompt)) {
+      result.push(prompt);
+    }
+  }
+
+  return result.slice(0, 2);
 }
 
 export function createHandoff(source: Exclude<DemoView, "brain">, prompt: string): BrainHandoff {

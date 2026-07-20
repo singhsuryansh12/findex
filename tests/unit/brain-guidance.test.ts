@@ -23,7 +23,16 @@ describe("brain guidance", () => {
     });
   });
 
-  it("returns try-next prompts for brain", () => {
+  it("returns exactly two try-next prompts for brain", () => {
     expect(getTryNextPrompts("brain").length).toBeGreaterThanOrEqual(2);
+    expect(getTryNextPrompts("brain")).toHaveLength(2);
+  });
+
+  it("excludes lastPrompt from try-next when alternatives exist", () => {
+    const lastPrompt = "What bills and subscriptions are coming up?";
+    const prompts = getTryNextPrompts("brain", lastPrompt);
+
+    expect(prompts).toHaveLength(2);
+    expect(prompts).not.toContain(lastPrompt);
   });
 });
