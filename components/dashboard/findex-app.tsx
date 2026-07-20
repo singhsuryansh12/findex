@@ -52,8 +52,17 @@ export function FinDexApp({ dataset, snapshot }: { dataset: DemoDataset; snapsho
   const [storageWarning, setStorageWarning] = useState(false);
   const [widgetPrompt, setWidgetPrompt] = useState<string | null>(null);
   const [handoff, setHandoff] = useState<BrainHandoff | null>(null);
+  const [prevView, setPrevView] = useState(view);
   const generatedRef = useRef<HTMLDetailsElement>(null);
   const cashFlow = useMemo(() => getCashFlowForecast({ days: 90 }), []);
+
+  // Clear handoff when navigating away from Brain (adjust during render — not an effect).
+  if (view !== prevView) {
+    setPrevView(view);
+    if (view !== "brain") {
+      setHandoff(null);
+    }
+  }
 
   const loadLibrary = useCallback(async (preferredProjectId?: string | null) => {
     const nextProjects = await listWorkspaceProjects();
@@ -85,10 +94,6 @@ export function FinDexApp({ dataset, snapshot }: { dataset: DemoDataset; snapsho
     })();
     return () => { active = false; };
   }, [loadLibrary, pathname, router]);
-
-  useEffect(() => {
-    if (view !== "brain") setHandoff(null);
-  }, [view]);
 
   const enterDemo = () => {
     window.sessionStorage.setItem(SESSION_KEY, "true");
