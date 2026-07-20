@@ -64,11 +64,13 @@ export function BrainPanel({
   activeWorkspace,
   initialPrompt,
   onPromptConsumed,
+  onUserSend,
 }: {
   onWorkspace: (artifact: WorkspaceArtifactV2) => void | Promise<void>;
   activeWorkspace: WorkspaceArtifactV2 | null;
   initialPrompt: string | null;
   onPromptConsumed: () => void;
+  onUserSend?: () => void;
 }) {
   const [messages, setMessages] = useState<Message[]>([{
     id: "intro",
@@ -316,6 +318,7 @@ export function BrainPanel({
   const send = useCallback(async (message: string, options?: { token?: string | null; clarificationAnswers?: string[] }) => {
     const cleaned = message.trim().slice(0, 1_000);
     if (!cleaned || busy) return;
+    onUserSend?.();
     // A new user turn supersedes background polish on the previous run.
     if (activeRun) {
       streamAbort.current?.abort();
@@ -396,7 +399,7 @@ export function BrainPanel({
     setPhase(null);
     setPhaseDetail("");
     setBusy(false);
-  }, [activeRun, activeWorkspace, busy, connectToRun, handleImmediateEvent, messages, pending, setAssistantContent]);
+  }, [activeRun, activeWorkspace, busy, connectToRun, handleImmediateEvent, messages, onUserSend, pending, setAssistantContent]);
 
   const stopRun = useCallback(async () => {
     if (!busy && !activeRun) return;
