@@ -2816,7 +2816,7 @@ button {
   .fd-mobile-nav button {
     border: 0;
     background: transparent;
-    color: rgba(255,255,255,.46);
+    color: rgba(255,255,255,.58);
     display: grid;
     place-items: center;
     gap: 4px;

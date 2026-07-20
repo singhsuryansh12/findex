@@ -316,10 +316,10 @@ export function BrainPanel({
     }
   }, [setAssistantContent]);
 
-  const send = useCallback(async (message: string, options?: { token?: string | null; clarificationAnswers?: string[] }) => {
+  const send = useCallback(async (message: string, options?: { token?: string | null; clarificationAnswers?: string[]; fromHandoff?: boolean }) => {
     const cleaned = message.trim().slice(0, 1_000);
     if (!cleaned || busy) return;
-    onUserSend?.();
+    if (!options?.fromHandoff) onUserSend?.();
     // A new user turn supersedes background polish on the previous run.
     if (activeRun) {
       streamAbort.current?.abort();
@@ -460,12 +460,16 @@ export function BrainPanel({
   }, [messages, phase, pending]);
 
   useEffect(() => {
-    if (initialPrompt && initialHandled.current !== initialPrompt && !busy) {
+    if (!initialPrompt) {
+      initialHandled.current = null;
+      return;
+    }
+    if (initialHandled.current !== initialPrompt && !busy) {
       initialHandled.current = initialPrompt;
       const timer = window.setTimeout(() => {
         onPromptConsumed();
         if (initialPrompt.startsWith("Can I afford")) setPurchaseOpen(true);
-        else void send(initialPrompt);
+        else void send(initialPrompt, { fromHandoff: true });
       }, 0);
       return () => window.clearTimeout(timer);
     }
