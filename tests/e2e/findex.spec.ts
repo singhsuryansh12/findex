@@ -8,7 +8,7 @@ async function mockBrain(page: import("@playwright/test").Page) {
     if (route.request().method() !== "POST") return route.fallback();
     const body = route.request().postDataJSON() as { message?: string };
     const message = body.message?.toLowerCase() ?? "";
-    const events = message.includes("dining")
+    const events = message.includes("dining") || message.includes("where did my money go")
       ? [
           { type: "tool_result", tool: "get_spending_summary", summary: "$366.21", provenance: "8 Dining transactions · Jun 1–30" },
           {
@@ -122,7 +122,7 @@ test("demo login lands on a calm Brain-first home", async ({ page }, testInfo) =
   await enterDemo(page);
   await expect(page.getByRole("region", { name: "Financial Brain" })).toBeVisible();
   await expect(page.getByRole("region", { name: "Financial glances" }).getByRole("button")).toHaveCount(3);
-  await expect(page.getByRole("button", { name: "Can I afford a car next month?" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Can I afford a car next month?" }).first()).toBeVisible();
   await expect(page.locator(".recharts-wrapper")).toHaveCount(0);
   if (testInfo.project.name === "mobile-390") {
     await expect(page.getByRole("navigation", { name: "Mobile navigation" }).getByRole("button")).toHaveCount(4);
@@ -136,6 +136,7 @@ test("route navigation, refresh, and browser history preserve each money view", 
   await page.getByRole("button", { name: /^Spending/ }).click();
   await expect(page).toHaveURL(/\/demo\/spending$/);
   await expect(page.getByRole("heading", { name: "See where your money went." })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Where did my money go last month?" })).toBeVisible();
   await page.getByRole("button", { name: /^Portfolio/ }).click();
   await expect(page.getByRole("heading", { name: "Your long-term money, in one picture." })).toBeVisible();
   await page.reload();
@@ -239,7 +240,7 @@ test("Financial Brain sends with Enter while preserving Shift+Enter and IME comp
 test("a car scenario compares the base forecast with a not-covered result", async ({ page }) => {
   await mockBrain(page);
   await enterDemo(page);
-  await page.getByRole("button", { name: "Can I afford a car next month?" }).click();
+  await page.getByRole("region", { name: "Financial Brain" }).getByRole("button", { name: "Can I afford a car next month?" }).click();
   await page.getByLabel("Purchase date").fill("2026-08-15");
   await page.getByLabel("Upfront cost").fill("15000");
   await page.getByLabel("Monthly payment").fill("650");
@@ -417,4 +418,45 @@ test("critical views pass automated accessibility and reflow checks", async ({ p
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(overflow).toBeLessThanOrEqual(1);
   }
+});
+
+test("ask the brain from spending shows handoff and runs the prompt", async ({ page }) => {
+  await mockBrain(page);
+  await enterDemo(page);
+  await page.getByRole("button", { name: /^Spending/ }).click();
+  await page.getByRole("button", { name: /Ask the Brain/ }).click();
+  await expect(page).toHaveURL(/\/demo\/brain$/);
+  await expect(page.getByRole("status", { name: "Brain handoff context" })).toContainText("From Spending");
+  await expect(page.getByText(/\$366\.21|dining out last month/i).first()).toBeVisible({ timeout: 15_000 });
+  await page.getByRole("button", { name: "Dismiss handoff" }).click();
+  await expect(page.getByRole("status", { name: "Brain handoff context" })).toHaveCount(0);
+});
+
+test("page guidance help explains ask decide build", async ({ page }) => {
+  await enterDemo(page);
+  await page.getByRole("button", { name: "What can the Financial Brain do?" }).click();
+  await expect(page.getByText("Ask", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("Decide", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("Build a tool", { exact: true }).first()).toBeVisible();
+  await page.keyboard.press("Escape");
+});
+
+test("reduced motion still navigates between views", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await enterDemo(page);
+  await page.getByRole("button", { name: /^Portfolio/ }).click();
+  await expect(page).toHaveURL(/\/demo\/portfolio$/);
+  await expect(page.getByRole("heading", { name: "Your long-term money, in one picture." })).toBeVisible();
+});
+
+test("spending table and brain composer meet comfortable font sizes", async ({ page }) => {
+  await enterDemo(page);
+  const brainInput = page.getByLabel("Message the Financial Brain");
+  const brainSize = await brainInput.evaluate((el) => Number.parseFloat(getComputedStyle(el).fontSize));
+  expect(brainSize).toBeGreaterThanOrEqual(14);
+  await page.goto("/demo/spending");
+  const cell = page.locator(".fd-data-table td, table td").first();
+  await expect(cell).toBeVisible();
+  const tableSize = await cell.evaluate((el) => Number.parseFloat(getComputedStyle(el).fontSize));
+  expect(tableSize).toBeGreaterThanOrEqual(13);
 });
