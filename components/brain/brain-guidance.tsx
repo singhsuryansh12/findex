@@ -1,7 +1,26 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { getGuidance, GUIDANCE_DISMISS_KEY, type DemoView } from "@/lib/brain/guidance";
+
+const GUIDANCE_DISMISS_EVENT = "findex-guidance-dismiss";
+
+function subscribeGuidanceDismiss(onStoreChange: () => void) {
+  window.addEventListener(GUIDANCE_DISMISS_EVENT, onStoreChange);
+  return () => window.removeEventListener(GUIDANCE_DISMISS_EVENT, onStoreChange);
+}
+
+function getGuidanceTipSnapshot() {
+  try {
+    return sessionStorage.getItem(GUIDANCE_DISMISS_KEY) !== "1";
+  } catch {
+    return true;
+  }
+}
+
+function getGuidanceTipServerSnapshot() {
+  return true;
+}
 
 export function BrainGuidance({
   view,
@@ -15,17 +34,13 @@ export function BrainGuidance({
   const guidance = getGuidance(view);
   const rootRef = useRef<HTMLDivElement>(null);
   const [helpOpen, setHelpOpen] = useState(false);
-  const [showTip, setShowTip] = useState(true);
-
-  useEffect(() => {
-    try {
-      if (sessionStorage.getItem(GUIDANCE_DISMISS_KEY) === "1") {
-        setShowTip(false);
-      }
-    } catch {
-      // sessionStorage may be unavailable
-    }
-  }, []);
+  const [localDismissed, setLocalDismissed] = useState(false);
+  const tipFromStorage = useSyncExternalStore(
+    subscribeGuidanceDismiss,
+    getGuidanceTipSnapshot,
+    getGuidanceTipServerSnapshot,
+  );
+  const showTip = tipFromStorage && !localDismissed;
 
   useEffect(() => {
     if (!helpOpen) {
@@ -53,12 +68,13 @@ export function BrainGuidance({
   }, [helpOpen]);
 
   function dismissTip() {
-    setShowTip(false);
+    setLocalDismissed(true);
     try {
       sessionStorage.setItem(GUIDANCE_DISMISS_KEY, "1");
     } catch {
       // sessionStorage may be unavailable
     }
+    window.dispatchEvent(new Event(GUIDANCE_DISMISS_EVENT));
   }
 
   return (
