@@ -186,6 +186,7 @@ export function FinDexApp({ dataset, snapshot }: { dataset: DemoDataset; snapsho
                   view="brain"
                   disabled={false}
                   onSelectChip={(prompt) => {
+                    setHandoff(null);
                     setWidgetPrompt(prompt);
                   }}
                 />
@@ -195,6 +196,7 @@ export function FinDexApp({ dataset, snapshot }: { dataset: DemoDataset; snapsho
                   initialPrompt={widgetPrompt}
                   onPromptConsumed={() => setWidgetPrompt(null)}
                   onUserSend={() => setHandoff(null)}
+                  preserveHandoffBanner={Boolean(handoff)}
                 />
               </section>
 
