@@ -15,17 +15,20 @@ import {
   saveWorkspaceArtifact,
   workspaceStorageUsage,
 } from "@/lib/workspaces/persistence";
+import { BrainGuidance } from "@/components/brain/brain-guidance";
+import { BrainHandoffBanner } from "@/components/brain/brain-handoff-banner";
 import { BrainPanel } from "@/components/brain/brain-panel";
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { WorkspaceLibrary } from "@/components/workspaces/workspace-library";
 import { WorkspaceArtifactCard } from "@/components/workspaces/workspace-artifact-card";
+import { createHandoff, type BrainHandoff } from "@/lib/brain/guidance";
+import { navigateWithTransition, viewFromPath, type DemoView } from "@/lib/brain/navigation";
 import { CashFlowView } from "./cash-flow-view";
 import { Landing } from "./landing";
 import { PortfolioView } from "./portfolio-view";
 import { SpendingView } from "./spending-view";
 
 type Snapshot = ReturnType<typeof import("@/lib/finance/engine").getFinancialSnapshot>;
-type DemoView = "brain" | "spending" | "portfolio" | "cash-flow";
 
 const SESSION_KEY = "findex-demo-entered-v1";
 const ACTIVE_WORKSPACE_KEY = "findex-active-workspace-v2";
@@ -36,11 +39,6 @@ const navItems: Array<{ view: DemoView; label: string; description: string; icon
   { view: "portfolio", label: "Portfolio", description: "Holdings & net worth", icon: BriefcaseBusiness },
   { view: "cash-flow", label: "Cash flow", description: "Income & outlook", icon: BarChart3 },
 ];
-
-function viewFromPath(pathname: string): DemoView {
-  const candidate = pathname.split("/").filter(Boolean).at(-1);
-  return candidate === "spending" || candidate === "portfolio" || candidate === "cash-flow" ? candidate : "brain";
-}
 
 export function FinDexApp({ dataset, snapshot }: { dataset: DemoDataset; snapshot: Snapshot }) {
   const router = useRouter();
@@ -53,6 +51,7 @@ export function FinDexApp({ dataset, snapshot }: { dataset: DemoDataset; snapsho
   const [versions, setVersions] = useState<WorkspaceArtifactV2[]>([]);
   const [storageWarning, setStorageWarning] = useState(false);
   const [widgetPrompt, setWidgetPrompt] = useState<string | null>(null);
+  const [handoff, setHandoff] = useState<BrainHandoff | null>(null);
   const generatedRef = useRef<HTMLDetailsElement>(null);
   const cashFlow = useMemo(() => getCashFlowForecast({ days: 90 }), []);
 
@@ -86,6 +85,10 @@ export function FinDexApp({ dataset, snapshot }: { dataset: DemoDataset; snapsho
     })();
     return () => { active = false; };
   }, [loadLibrary, pathname, router]);
+
+  useEffect(() => {
+    if (view !== "brain") setHandoff(null);
+  }, [view]);
 
   const enterDemo = () => {
     window.sessionStorage.setItem(SESSION_KEY, "true");
@@ -139,9 +142,11 @@ export function FinDexApp({ dataset, snapshot }: { dataset: DemoDataset; snapsho
     setProjects([]); setVersions([]); setArtifact(null); setEntered(false);
     router.push("/");
   };
-  const navigate = (next: DemoView) => router.push(`/demo/${next}`);
-  const askBrain = (prompt: string) => {
+  const navigate = (next: DemoView) => navigateWithTransition(router, `/demo/${next}`);
+  const askBrain = (prompt: string, source?: Exclude<DemoView, "brain">) => {
     setWidgetPrompt(prompt);
+    if (source) setHandoff(createHandoff(source, prompt));
+    else setHandoff(null);
     navigate("brain");
   };
 
@@ -163,29 +168,49 @@ export function FinDexApp({ dataset, snapshot }: { dataset: DemoDataset; snapsho
           <span className="fd-as-of"><CalendarDays size={13} />As of Jul 19 · Demo data</span>
         </header>
 
-        {view === "brain" && (
-          <main className="fd-brain-home">
-            <header className="fd-brain-hero"><span className="fd-eyebrow"><Sparkles size={12} />Your financial starting point</span><h1 className="serif">Ask about your money,<br /><em>or test a decision.</em></h1><p>One place to connect spending, income, cash flow, and investments—then understand what to do next.</p></header>
+        <div className="fd-view-stage">
+          {view === "brain" && (
+            <main className="fd-brain-home">
+              <header className="fd-brain-hero"><span className="fd-eyebrow"><Sparkles size={12} />Your financial starting point</span><h1 className="serif">Ask about your money,<br /><em>or test a decision.</em></h1><p>One place to connect spending, income, cash flow, and investments—then understand what to do next.</p></header>
 
-            <section className="fd-brain-stage"><BrainPanel onWorkspace={handleWorkspace} activeWorkspace={artifact} initialPrompt={widgetPrompt} onPromptConsumed={() => setWidgetPrompt(null)} /></section>
+              <section className="fd-brain-stage">
+                {handoff && (
+                  <BrainHandoffBanner handoff={handoff} onDismiss={() => setHandoff(null)} />
+                )}
+                <BrainGuidance
+                  view="brain"
+                  disabled={false}
+                  onSelectChip={(prompt) => {
+                    setWidgetPrompt(prompt);
+                  }}
+                />
+                <BrainPanel
+                  onWorkspace={handleWorkspace}
+                  activeWorkspace={artifact}
+                  initialPrompt={widgetPrompt}
+                  onPromptConsumed={() => setWidgetPrompt(null)}
+                  onUserSend={() => setHandoff(null)}
+                />
+              </section>
 
-            <section className="fd-glance-grid" aria-label="Financial glances">
-              <button onClick={() => navigate("cash-flow")}><span className="fd-glance-icon"><WalletCards size={17} /></span><small>Safe to spend</small><strong>{formatMoney(snapshot.forecast.safeToSpendNowCents)}</strong><p>Protected through Aug 18</p><ChevronRight size={15} /></button>
-              <button onClick={() => navigate("portfolio")}><span className="fd-glance-icon"><BriefcaseBusiness size={17} /></span><small>Complete net worth</small><strong>{formatMoney(snapshot.netWorthCents)}</strong><p>{formatMoney(snapshot.investmentAssetsCents)} invested</p><ChevronRight size={15} /></button>
-              <button onClick={() => navigate("cash-flow")}><span className="fd-glance-icon"><BarChart3 size={17} /></span><small>90-day outlook</small><strong>{cashFlow.expectedMonthlySurplusCents >= 0 ? "+" : "−"}{formatMoney(Math.abs(cashFlow.expectedMonthlySurplusCents))}</strong><p>Expected monthly surplus</p><ChevronRight size={15} /></button>
-            </section>
+              <section className="fd-glance-grid" aria-label="Financial glances">
+                <button onClick={() => navigate("cash-flow")}><span className="fd-glance-icon"><WalletCards size={17} /></span><small>Safe to spend</small><strong>{formatMoney(snapshot.forecast.safeToSpendNowCents)}</strong><p>Protected through Aug 18</p><ChevronRight size={15} /></button>
+                <button onClick={() => navigate("portfolio")}><span className="fd-glance-icon"><BriefcaseBusiness size={17} /></span><small>Complete net worth</small><strong>{formatMoney(snapshot.netWorthCents)}</strong><p>{formatMoney(snapshot.investmentAssetsCents)} invested</p><ChevronRight size={15} /></button>
+                <button onClick={() => navigate("cash-flow")}><span className="fd-glance-icon"><BarChart3 size={17} /></span><small>90-day outlook</small><strong>{cashFlow.expectedMonthlySurplusCents >= 0 ? "+" : "−"}{formatMoney(Math.abs(cashFlow.expectedMonthlySurplusCents))}</strong><p>Expected monthly surplus</p><ChevronRight size={15} /></button>
+              </section>
 
-            <section className="fd-today-brief"><div className="fd-brief-heading"><span className="fd-eyebrow">Today’s brief</span><h2>Two things worth knowing.</h2></div><article><span>01</span><div><strong>Your lowest cash point is covered.</strong><p>Checking bottoms at {formatMoney(snapshot.forecast.lowestBalanceCents)} on Jul 24, above the protected buffer.</p><button onClick={() => navigate("cash-flow")}>See the forecast</button></div></article><article><span>02</span><div><strong>Your portfolio is close to its saved target.</strong><p>The largest allocation drift is only 2.6 percentage points, in bonds.</p><button onClick={() => navigate("portfolio")}>Review allocation</button></div></article></section>
+              <section className="fd-today-brief"><div className="fd-brief-heading"><span className="fd-eyebrow">Today’s brief</span><h2>Two things worth knowing.</h2></div><article><span>01</span><div><strong>Your lowest cash point is covered.</strong><p>Checking bottoms at {formatMoney(snapshot.forecast.lowestBalanceCents)} on Jul 24, above the protected buffer.</p><button onClick={() => navigate("cash-flow")}>See the forecast</button></div></article><article><span>02</span><div><strong>Your portfolio is close to its saved target.</strong><p>The largest allocation drift is only 2.6 percentage points, in bonds.</p><button onClick={() => navigate("portfolio")}>Review allocation</button></div></article></section>
 
-            <details className="fd-tools-drawer" ref={generatedRef} open={Boolean(artifact)}>
-              <summary><span><Bot size={17} /><span><strong>My tools</strong><small>{projects.length ? `${projects.length} saved workspace${projects.length === 1 ? "" : "s"}` : "Build and save a custom financial workspace"}</small></span></span><ChevronRight size={16} /></summary>
-              <div className="fd-tools-content"><WorkspaceLibrary projects={projects} activeProjectId={artifact?.projectId ?? null} versions={versions} storageWarning={storageWarning} onNew={newWorkspace} onSelect={(projectId) => void selectWorkspace(projectId)} onRename={(name) => { if (artifact) void renameWorkspaceProject(artifact.projectId, name).then(() => loadLibrary(artifact.projectId)); }} onDuplicate={() => void duplicateWorkspace()} onDelete={() => { if (!artifact || !window.confirm(`Delete ${artifact.title} and all of its versions?`)) return; void deleteWorkspaceProject(artifact.projectId).then(() => loadLibrary(null)); }} onRestore={(version) => void restoreVersion(version)} />{artifact ? <WorkspaceArtifactCard artifact={artifact} /> : <div className="fd-empty-tools"><Sparkles size={18} /><div><strong>Describe the tool you need in the Brain.</strong><p>Findex can build, test, save, and revise a custom planner or visualization.</p></div></div>}</div>
-            </details>
-          </main>
-        )}
-        {view === "spending" && <main><SpendingView dataset={dataset} onAskBrain={askBrain} /></main>}
-        {view === "portfolio" && <main><PortfolioView dataset={dataset} onAskBrain={askBrain} /></main>}
-        {view === "cash-flow" && <main><CashFlowView dataset={dataset} onAskBrain={askBrain} /></main>}
+              <details className="fd-tools-drawer" ref={generatedRef} open={Boolean(artifact)}>
+                <summary><span><Bot size={17} /><span><strong>My tools</strong><small>{projects.length ? `${projects.length} saved workspace${projects.length === 1 ? "" : "s"}` : "Build and save a custom financial workspace"}</small></span></span><ChevronRight size={16} /></summary>
+                <div className="fd-tools-content"><WorkspaceLibrary projects={projects} activeProjectId={artifact?.projectId ?? null} versions={versions} storageWarning={storageWarning} onNew={newWorkspace} onSelect={(projectId) => void selectWorkspace(projectId)} onRename={(name) => { if (artifact) void renameWorkspaceProject(artifact.projectId, name).then(() => loadLibrary(artifact.projectId)); }} onDuplicate={() => void duplicateWorkspace()} onDelete={() => { if (!artifact || !window.confirm(`Delete ${artifact.title} and all of its versions?`)) return; void deleteWorkspaceProject(artifact.projectId).then(() => loadLibrary(null)); }} onRestore={(version) => void restoreVersion(version)} />{artifact ? <WorkspaceArtifactCard artifact={artifact} /> : <div className="fd-empty-tools"><Sparkles size={18} /><div><strong>Describe the tool you need in the Brain.</strong><p>Findex can build, test, save, and revise a custom planner or visualization.</p></div></div>}</div>
+              </details>
+            </main>
+          )}
+          {view === "spending" && <main><SpendingView dataset={dataset} onAskBrain={askBrain} /></main>}
+          {view === "portfolio" && <main><PortfolioView dataset={dataset} onAskBrain={askBrain} /></main>}
+          {view === "cash-flow" && <main><CashFlowView dataset={dataset} onAskBrain={askBrain} /></main>}
+        </div>
       </div>
 
       <nav className="fd-mobile-nav" aria-label="Mobile navigation">{navItems.map((item) => { const Icon = item.icon; return <button key={item.view} className={view === item.view ? "active" : ""} aria-current={view === item.view ? "page" : undefined} onClick={() => navigate(item.view)}><Icon size={18} /><span>{item.label === "Financial Brain" ? "Brain" : item.label}</span></button>; })}</nav>
