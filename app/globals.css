@@ -2879,3 +2879,45 @@ button {
   .preview-glances { grid-template-columns: 1fr; }
   .preview-glances > div:nth-child(n+3) { display: none; }
 }
+
+::view-transition-old(fd-view-stage),
+::view-transition-new(fd-view-stage) {
+  animation-duration: 220ms;
+  animation-timing-function: ease;
+}
+
+::view-transition-old(fd-page-title),
+::view-transition-new(fd-page-title),
+::view-transition-old(fd-ask-brain),
+::view-transition-new(fd-ask-brain) {
+  animation-duration: 260ms;
+  animation-timing-function: ease;
+}
+
+.fd-view-stage {
+  view-transition-name: fd-view-stage;
+}
+
+.fd-page-heading > div:first-child,
+.fd-brain-hero {
+  view-transition-name: fd-page-title;
+}
+
+.fd-ask-button {
+  view-transition-name: fd-ask-brain;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+
+  .fd-view-stage,
+  .fd-page-heading > div:first-child,
+  .fd-brain-hero,
+  .fd-ask-button {
+    view-transition-name: none;
+  }
+}

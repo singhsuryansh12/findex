@@ -24,6 +24,9 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/*": workspaceHostPackages,
   },
+  experimental: {
+    viewTransition: true,
+  },
 };
 
 export default withWorkflow(nextConfig);
