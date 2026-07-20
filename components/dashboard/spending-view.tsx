@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { CalendarDays, ChevronDown, ListFilter, RefreshCw, Search, Sparkles } from "lucide-react";
 import type { DemoDataset, TransactionFilters } from "@/lib/finance/types";
 import { formatMoney, getFilteredTransactions, getRecurringActivity } from "@/lib/finance/engine";
+import { BrainGuidance } from "@/components/brain/brain-guidance";
 
 type ActivityView = "activity" | "recurring";
 type DatePreset = "30_days" | "last_month" | "90_days" | "custom";
@@ -78,6 +79,8 @@ export function SpendingView({ dataset, onAskBrain }: { dataset: DemoDataset; on
         <div><span className="fd-eyebrow">Spending & activity</span><h1 className="serif">See where your money went.</h1><p>Search every demo transaction, then zoom out to bills, subscriptions, and recurring investments.</p></div>
         <button className="fd-ask-button" onClick={() => onAskBrain("Where did my money go last month?")}><Sparkles size={15} />Ask the Brain</button>
       </header>
+
+      <BrainGuidance view="spending" onSelectChip={(prompt) => onAskBrain(prompt)} />
 
       <div className="fd-segmented" role="tablist" aria-label="Spending view">
         <button role="tab" aria-selected={view === "activity"} className={view === "activity" ? "active" : ""} onClick={() => setView("activity")}>Activity</button>

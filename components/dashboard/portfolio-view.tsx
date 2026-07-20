@@ -5,6 +5,8 @@ import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YA
 import { ArrowUpRight, BriefcaseBusiness, ChevronDown, CircleDollarSign, Info, Landmark, Sparkles } from "lucide-react";
 import { formatMoney, getPortfolioSnapshot } from "@/lib/finance/engine";
 import type { AssetClass, DemoDataset } from "@/lib/finance/types";
+import { BrainGuidance } from "@/components/brain/brain-guidance";
+import { MetricHint } from "@/components/dashboard/metric-hint";
 
 const allocationColors: Record<AssetClass, string> = {
   us_equity: "#2e765d",
@@ -34,6 +36,8 @@ export function PortfolioView({ dataset, onAskBrain }: { dataset: DemoDataset; o
         <button className="fd-ask-button" onClick={() => onAskBrain("How is my portfolio allocation balanced?")}><Sparkles size={15} />Ask the Brain</button>
       </header>
 
+      <BrainGuidance view="portfolio" onSelectChip={(prompt) => onAskBrain(prompt)} />
+
       <section className="fd-portfolio-hero fd-card">
         <div><span className="fd-eyebrow">Total invested</span><strong className="fd-display-number">{formatMoney(portfolio.investedCents)}</strong><p>Across a 401(k), Roth IRA, taxable brokerage, and HSA.</p><p className="fd-current-contribution">Current recurring plan · <strong>{formatMoney(plannedAnnualContributions)}/year</strong></p></div>
         <div className="fd-portfolio-hero-metrics"><div><span>Complete net worth</span><strong>{formatMoney(portfolio.netWorthCents, 2)}</strong></div><div><span>12-month change</span><strong className="positive">+{formatMoney(portfolio.twelveMonthChangeCents)}</strong></div><div><span>Contributions</span><strong>{formatMoney(portfolio.twelveMonthContributionsCents)}</strong></div><div><span>Market movement</span><strong>{formatMoney(portfolio.twelveMonthMarketMovementCents)}</strong></div></div>
@@ -41,7 +45,7 @@ export function PortfolioView({ dataset, onAskBrain }: { dataset: DemoDataset; o
 
       <section className="fd-portfolio-overview">
         <article className="fd-card fd-allocation-card">
-          <div className="fd-card-heading"><div><span className="fd-eyebrow">Allocation</span><h2>Close to Jordan’s saved target</h2><p>{largestDrift.label} has the largest drift at {Math.abs(largestDrift.driftBasisPoints / 100).toFixed(1)} percentage points {largestDrift.driftBasisPoints >= 0 ? "above" : "below"} target.</p></div><Info size={16} /></div>
+          <div className="fd-card-heading"><div><span className="fd-eyebrow">Allocation</span><h2>Close to Jordan’s saved target</h2><p>{largestDrift.label} has the largest drift at {Math.abs(largestDrift.driftBasisPoints / 100).toFixed(1)} percentage points {largestDrift.driftBasisPoints >= 0 ? "above" : "below"} target.</p><MetricHint>Drift is how far today’s mix sits from Jordan’s saved target — small gaps are normal.</MetricHint></div><Info size={16} /></div>
           <div className="fd-allocation-bar" role="img" aria-label="Portfolio allocation: 61.1 percent U.S. equity, 20 percent international equity, 12.4 percent bonds, and 6.6 percent cash">
             {portfolio.allocation.map((item) => <span key={item.assetClass} style={{ width: `${item.basisPoints / 100}%`, background: allocationColors[item.assetClass] }} />)}
           </div>

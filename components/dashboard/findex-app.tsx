@@ -207,9 +207,9 @@ export function FinDexApp({ dataset, snapshot }: { dataset: DemoDataset; snapsho
               </details>
             </main>
           )}
-          {view === "spending" && <main><SpendingView dataset={dataset} onAskBrain={askBrain} /></main>}
-          {view === "portfolio" && <main><PortfolioView dataset={dataset} onAskBrain={askBrain} /></main>}
-          {view === "cash-flow" && <main><CashFlowView dataset={dataset} onAskBrain={askBrain} /></main>}
+          {view === "spending" && <main><SpendingView dataset={dataset} onAskBrain={(prompt) => askBrain(prompt, "spending")} /></main>}
+          {view === "portfolio" && <main><PortfolioView dataset={dataset} onAskBrain={(prompt) => askBrain(prompt, "portfolio")} /></main>}
+          {view === "cash-flow" && <main><CashFlowView dataset={dataset} onAskBrain={(prompt) => askBrain(prompt, "cash-flow")} /></main>}
         </div>
       </div>
 
