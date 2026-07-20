@@ -153,24 +153,94 @@ chips / ? read current view key
 
 ## Testing & verification
 
-### Must not break
+Thorough end-to-end verification is a **release requirement** for this work — not a nice-to-have. Changes ship only after frontend UX coverage **and** backend/regression suites pass with sufficient breadth. Prefer extending existing harnesses in `tests/` and the gates in `docs/TESTING.md` over inventing parallel tooling.
+
+### Release gate (must all pass before claiming done)
+
+| Gate | Command | Required |
+|------|---------|----------|
+| Typecheck + unit + integration + lint + production build | `npm run validate` | Yes |
+| Playwright E2E (includes production build) | `npm run test:e2e` | Yes |
+| Full credential-free local verify (when touching workspace/sandbox paths or as final ship check) | `npm run verify:local` | Yes for final ship; at minimum `validate` + `test:e2e` after each meaningful slice |
+| Live / generative evals | `test:gen-eval` / `test:live-providers` / `verify:live-fire-local` | Only if Brain routing or workspace build contracts change; otherwise record “not required — UI-only” in the PR notes |
+
+If any gate fails, **fix before proceeding** — do not weaken assertions, skip suites, or claim UX polish while regressions remain.
+
+### Frontend coverage matrix (new + regression)
+
+| Area | Cases to cover | How |
+|------|----------------|-----|
+| Landing → demo | Enter demo lands on Brain; shell renders | E2E (existing + extend) |
+| Cross-view navigation | Brain ↔ Spending ↔ Portfolio ↔ Cash flow via sidebar **and** mobile nav; URL matches view; shell (sidebar/topbar) remains stable | E2E |
+| Motion / reduced motion | Default path completes without hang; `prefers-reduced-motion: reduce` still navigates and shows correct view | E2E (+ manual spot-check for morph quality) |
+| Ask the Brain handoff | From Spending, Portfolio, and Cash flow: navigates to Brain, prompt consumed, handoff banner visible with source label, dismiss works, banner gone after first send | E2E |
+| Brain guidance | Chips visible per page; chip click fills/sends expected prompt path; `?` opens/closes; Escape/keyboard dismiss; session dismiss persists within session | E2E + unit for content map |
+| Brain welcome / try-next | Welcome states Ask · Decide · Build; after mocked assistant reply, try-next chips appear and are actionable | E2E (mocked Brain, same pattern as existing suite) |
+| Metric hints | Safe-to-spend, allocation drift, runway/outlook one-liners present where specified | E2E or component assertion |
+| Typography readability | Computed styles for body/table/chat meet minimum comfortable sizes (e.g. body ≥ 14px) on desktop and ~390px mobile; no horizontal document overflow | E2E asserts + manual |
+| Spending | Search, date presets, filters, activity vs recurring, recurring list/calendar | E2E regression (extend existing) |
+| Portfolio | Holdings/allocation surfaces still interactive; Ask the Brain still works | E2E regression |
+| Cash flow | Forecast / safe-to-spend / ask-about-month still work | E2E regression |
+| My tools / workspaces | Library select, open artifact, version UI; iframe isolation unchanged | E2E regression (existing) |
+| Demo reset | Clears local tools and returns to landing | E2E |
+| A11y | axe on Brain + one detail view after changes; `?` and banner have accessible names; focus not trapped; no new serious/critical axe violations | E2E (`@axe-core/playwright`) |
+| Console hygiene | No new console errors during nav + handoff + mocked Brain flows | E2E |
+
+### Backend / domain coverage matrix (regression — UI must not break contracts)
+
+UI-only work still requires these suites so navigation/handoff refactors cannot silently break the Brain or workspace stack:
+
+| Area | Suite | Why |
+|------|-------|-----|
+| Brain intent routing | `tests/unit/brain-routing.test.ts` | Ask/build classification unchanged |
+| Brain SSE / route | `tests/integration/brain-route.test.ts` | Prompt from handoff still hits `/api/brain` correctly |
+| Finance ledger / cash flow / portfolio math | `tests/unit/finance-core.test.ts` | Metric copy must not imply wrong numbers |
+| Capability / artifact token | `tests/integration/capability-route.test.ts` | Workspace grants unchanged |
+| Workspace persistence | `tests/integration/workspace-persistence.test.ts` | My tools library still durable |
+| Workspace policy, quotas, grounding, bundle, model policy, workflow failures | existing `tests/unit/workspace-*.test.ts` + workflow unit tests | No accidental import/contract drift |
+| Preflight / sandbox parity | integration + `test:local-sandbox` when generator/sandbox touched | Only if those files change |
+
+**Rule:** Every PR slice for this initiative runs `npm run test:unit` and `npm run test:integration` (via `validate`). Do not treat “CSS-only” as exempt from Brain/integration regression.
+
+### Unit tests to add (UX-specific)
+
+Extract pure helpers where needed and cover:
+
+1. **Guidance map** — every `DemoView` key has chips + `?` copy; no empty pages  
+2. **Handoff state machine** — create → dismiss; create → consume-on-send; leave Brain clears  
+3. **`viewFromPath` / nav helpers** — path ↔ view mapping (if extracted)  
+4. **Typography token invariants** (optional) — CSS variable presence or documented min sizes in a small contract test if practical  
+
+### E2E tests to add or extend
+
+Extend `tests/e2e/findex.spec.ts` (or a focused sibling) with explicit cases for:
+
+1. Smooth nav smoke: visit each `/demo/*` route in sequence; assert landmark headings and no crash  
+2. Ask the Brain from each detail page with handoff banner assertions  
+3. Guidance chips + `?` on Brain and at least one detail page  
+4. Reduced-motion navigation  
+5. Minimum font-size checks on transaction list / chat input / metric labels  
+6. Existing mocked Brain + workspace journeys still green  
+
+### Manual verification checklist (required once before merge)
+
+- [ ] Navigate all four pages quickly: no hard white flash / layout jump of the shell  
+- [ ] Shared-element morph feels calm (or fade fallback is acceptable on unsupported browsers)  
+- [ ] Read Spending transactions and Brain chat without zooming (desktop + phone width)  
+- [ ] Non-finance plain-language: chips/`?`/metric hints make Ask · Decide · Build obvious  
+- [ ] Start a workspace build (dev) and navigate away/back: run not cancelled by UI transitions  
+- [ ] Theme still feels like Findex (paper, emerald, serif display) — polish, not a redesign  
+
+### Must not break (summary)
 
 - Landing → enter demo → Brain home  
-- Nav between all four views (desktop sidebar + mobile nav)  
+- Nav between all four views (desktop + mobile)  
 - Ask the Brain from Spending / Portfolio / Cash flow → prompt lands and runs  
 - Brain Q&A SSE, purchase decision UI, workspace build / reconnect / cancel  
 - My tools drawer and library select / rename / duplicate / delete / restore  
 - Spending filters, recurring list/calendar, portfolio & cash-flow interactions  
 - Demo reset  
-
-### Verification layers
-
-| Layer | What |
-|-------|------|
-| Manual / browser | Every view: no hard flicker, readable type, calm chips/`?`/handoff |
-| Unit | Guidance map keys, handoff dismiss rules, extracted view helpers |
-| E2E (Playwright) | Cross-view nav; Ask the Brain from Spending reaches Brain UI; reduced-motion path does not hang |
-| A11y smoke | `?` popover keyboard-dismissible; banner has appropriate `aria`; contrast spirit preserved |
+- All credential-free backend suites above  
 
 ### Success criteria
 
@@ -178,6 +248,8 @@ chips / ? read current view key
 - Body, tables, and chat readable without zoom at laptop and phone widths  
 - A non-finance user can discover Ask / Decide / Build without a separate tutorial  
 - Existing Brain and workspace functionality unchanged  
+- **`npm run validate` and `npm run test:e2e` are green**; final ship also clears `npm run verify:local` when applicable  
+- New UX behaviors have automated coverage listed in the matrices above — not “manually verified only” 
 
 ## Follow-up proposals (document only — not this pass)
 
@@ -199,9 +271,11 @@ Ideas researched / brainstormed for later, kept intentionally out of scope:
 - `components/dashboard/{spending,portfolio,cash-flow}-view.tsx` — chips, `?`, metric hints, ask meta  
 - `app/globals.css` — typography tokens, view-transition / reduced-motion styles  
 - New small presentational components under `components/brain/` or `components/dashboard/`  
-- Tests under `tests/unit` and `tests/e2e` as needed  
+- Tests under `tests/unit`, `tests/integration` (regression), and `tests/e2e` per the coverage matrices above  
 
 **Must preserve:** theme tokens (`--ink`, `--paper`, `--emerald`, serif display), demo data contracts, `/api/brain` SSE behavior, workspace artifact persistence.
+
+**Verification obligation:** Implementation plan must include explicit tasks to add/extend automated tests and to run the release gates; “done” means gates green, not merely UI merged.
 
 ## Research notes (summary)
 
