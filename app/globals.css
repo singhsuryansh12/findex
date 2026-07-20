@@ -14,6 +14,11 @@
   --emerald-pale: #dceae3;
   --terracotta: #c66f50;
   --gold: #ba8f4a;
+  --fd-text-body: 14.5px;
+  --fd-text-label: 12.5px;
+  --fd-text-meta: 12px;
+  --fd-text-caption: 11px;
+  --fd-text-table: 14px;
   --shadow: 0 20px 60px rgba(36, 54, 44, 0.08);
   --radius-xl: 26px;
   --radius-lg: 20px;
@@ -471,7 +476,7 @@ button {
   max-width: 91%;
   border-radius: 18px;
   padding: 12px 14px;
-  font-size: 11px;
+  font-size: var(--fd-text-body);
   line-height: 1.55;
   margin-bottom: 12px;
   white-space: pre-wrap;
@@ -673,7 +678,7 @@ button {
   background: rgba(255,255,255,.045);
   color: rgba(255,255,255,.66);
   border-radius: 999px;
-  font-size: 9px;
+  font-size: var(--fd-text-label);
   padding: 8px 10px;
   cursor: pointer;
 }
@@ -700,7 +705,7 @@ button {
   max-height: 100px;
   color: white;
   background: transparent;
-  font-size: 11px;
+  font-size: var(--fd-text-body);
 }
 
 .brain-input::placeholder {
@@ -1129,13 +1134,13 @@ button {
 }
 
 .fd-sidebar button strong {
-  font-size: 12px;
+  font-size: var(--fd-text-label);
   font-weight: 720;
 }
 
 .fd-sidebar button small {
   color: var(--muted);
-  font-size: 9px;
+  font-size: var(--fd-text-meta);
 }
 
 .fd-sidebar-foot {
@@ -1177,13 +1182,13 @@ button {
 }
 
 .fd-topbar > div > span {
-  font-size: 12px;
+  font-size: var(--fd-text-label);
   font-weight: 720;
 }
 
 .fd-topbar > div > small {
   color: var(--muted);
-  font-size: 9px;
+  font-size: var(--fd-text-meta);
 }
 
 .fd-as-of,
@@ -1196,7 +1201,7 @@ button {
   border-radius: 999px;
   color: var(--muted);
   padding: 8px 11px;
-  font-size: 10px;
+  font-size: var(--fd-text-meta);
   white-space: nowrap;
 }
 
@@ -1213,7 +1218,7 @@ button {
 
 .fd-eyebrow {
   color: var(--emerald);
-  font-size: 10px;
+  font-size: var(--fd-text-caption);
   font-weight: 780;
   letter-spacing: .15em;
   text-transform: uppercase;
@@ -1242,7 +1247,7 @@ button {
 .fd-page-heading p {
   margin: 0;
   color: var(--ink-soft);
-  font-size: 14px;
+  font-size: var(--fd-text-body);
   line-height: 1.6;
   max-width: 690px;
 }
@@ -1318,7 +1323,7 @@ button {
 
 .fd-metric-row span {
   color: var(--muted);
-  font-size: 10px;
+  font-size: var(--fd-text-label);
 }
 
 .fd-metric-row strong {
@@ -1329,7 +1334,7 @@ button {
 
 .fd-metric-row small {
   color: var(--muted);
-  font-size: 9px;
+  font-size: var(--fd-text-meta);
   line-height: 1.4;
 }
 
@@ -1408,7 +1413,7 @@ button {
 .fd-brain-hero p {
   color: var(--ink-soft);
   margin: 0 auto;
-  font-size: 14px;
+  font-size: var(--fd-text-body);
   line-height: 1.6;
   max-width: 630px;
 }
@@ -1450,7 +1455,7 @@ button {
 }
 
 .fd-brain-stage .message {
-  font-size: 13px;
+  font-size: var(--fd-text-body);
   line-height: 1.65;
 }
 
@@ -1485,7 +1490,7 @@ button {
   color: rgba(255,255,255,.74);
   border-color: rgba(255,255,255,.11);
   background: rgba(255,255,255,.035);
-  font-size: 10px;
+  font-size: var(--fd-text-label);
 }
 
 .fd-brain-stage .brain-composer {
@@ -1498,7 +1503,7 @@ button {
 
 .fd-brain-stage .brain-input {
   min-height: 48px;
-  font-size: 13px;
+  font-size: var(--fd-text-body);
 }
 
 .fd-brain-stage .composer-hint {
@@ -2070,7 +2075,7 @@ button {
 .fd-chart-data table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 10px;
+  font-size: var(--fd-text-table);
 }
 
 .fd-data-table caption {
@@ -2094,7 +2099,7 @@ button {
 .fd-data-table thead th,
 .fd-chart-data thead th {
   color: var(--muted);
-  font-size: 8px;
+  font-size: var(--fd-text-caption);
   letter-spacing: .08em;
   text-transform: uppercase;
 }
@@ -2821,7 +2826,7 @@ button {
   .fd-mobile-nav button.active { color: white; }
   .fd-page-heading { align-items: flex-start; flex-direction: column; }
   .fd-page-heading h1 { font-size: 48px; }
-  .fd-page-heading p { font-size: 12px; }
+  .fd-page-heading p { font-size: var(--fd-text-body); }
   .fd-brain-hero h1 { font-size: 58px; }
   .fd-brain-stage .suggestions { grid-template-columns: 1fr; }
   .fd-brain-stage .brain-messages { padding-inline: 14px; }
@@ -2837,7 +2842,7 @@ button {
 }
 
 @media (max-width: 560px) {
-  .fd-as-of { font-size: 8px; padding: 7px 8px; }
+  .fd-as-of { font-size: var(--fd-text-meta); padding: 7px 8px; }
   .fd-page-heading h1 { font-size: 42px; }
   .fd-metric-row { grid-template-columns: 1fr 1fr; gap: 8px; }
   .fd-cash-metrics { grid-template-columns: 1fr 1fr; }
@@ -2868,7 +2873,7 @@ button {
   .fd-data-table th,
   .fd-data-table td { border: 0; padding: 4px 0; text-align: right !important; }
   .fd-data-table th::before,
-  .fd-data-table td::before { content: attr(data-label); float: left; color: var(--muted); font-size: 8px; font-weight: 500; }
+  .fd-data-table td::before { content: attr(data-label); float: left; color: var(--muted); font-size: var(--fd-text-caption); font-weight: 500; }
   .fd-data-table tbody th { min-height: 20px; }
   .fd-ticker { min-width: auto; margin-right: 7px; }
   .preview-glances { grid-template-columns: 1fr; }
