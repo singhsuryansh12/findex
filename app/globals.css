@@ -458,7 +458,7 @@ button {
 
 .brain-status {
   color: rgba(255,255,255,.48);
-  font-size: 9px;
+  font-size: var(--fd-text-caption);
 }
 
 .brain-messages {
@@ -505,7 +505,7 @@ button {
   border-radius: 999px;
   background: rgba(74, 148, 112, .17);
   color: #a9d8c0;
-  font-size: 8px;
+  font-size: var(--fd-text-caption);
 }
 
 .brain-stage {
@@ -513,7 +513,7 @@ button {
   align-items: center;
   gap: 8px;
   color: #a9d8c0;
-  font-size: 10px;
+  font-size: var(--fd-text-caption);
   margin: 4px 2px 14px;
 }
 
@@ -524,7 +524,7 @@ button {
 
 .brain-stage small {
   color: rgba(255,255,255,.38);
-  font-size: 8px;
+  font-size: var(--fd-text-caption);
   font-weight: 400;
 }
 
@@ -553,14 +553,14 @@ button {
 
 .brain-progress-current strong {
   color: rgba(255,255,255,.88);
-  font-size: 10px;
+  font-size: var(--fd-text-caption);
   font-weight: 680;
 }
 
 .brain-progress-current small,
 .brain-progress-current time {
   color: rgba(255,255,255,.42);
-  font-size: 8px;
+  font-size: var(--fd-text-caption);
   font-weight: 400;
 }
 
@@ -580,7 +580,7 @@ button {
 .brain-phase-timeline li {
   position: relative;
   color: rgba(255,255,255,.38);
-  font-size: 8px;
+  font-size: var(--fd-text-caption);
 }
 
 .brain-phase-timeline li::before {
@@ -608,7 +608,7 @@ button {
   gap: 5px;
   background: transparent;
   color: rgba(255,255,255,.68);
-  font-size: 8px;
+  font-size: var(--fd-text-caption);
   cursor: pointer;
 }
 
@@ -631,7 +631,7 @@ button {
   display: grid;
   gap: 6px;
   color: rgba(255,255,255,.78);
-  font-size: 9px;
+  font-size: var(--fd-text-caption);
   line-height: 1.4;
 }
 
@@ -643,7 +643,7 @@ button {
   padding: 8px;
   color: white;
   background: rgba(0,0,0,.12);
-  font-size: 10px;
+  font-size: var(--fd-text-caption);
 }
 
 .clarification-card button {
@@ -652,7 +652,7 @@ button {
   background: #dceae3;
   color: var(--ink);
   padding: 9px 12px;
-  font-size: 9px;
+  font-size: var(--fd-text-caption);
   font-weight: 720;
 }
 
@@ -720,7 +720,7 @@ button {
 
 .composer-hint {
   color: rgba(255,255,255,.28);
-  font-size: 8px;
+  font-size: var(--fd-text-caption);
 }
 
 .send-button {
@@ -1439,7 +1439,7 @@ button {
 }
 
 .fd-brain-stage .brain-status {
-  font-size: 10px;
+  font-size: var(--fd-text-caption);
   margin-top: 2px;
 }
 
@@ -1507,7 +1507,7 @@ button {
 }
 
 .fd-brain-stage .composer-hint {
-  font-size: 9px;
+  font-size: var(--fd-text-caption);
 }
 
 .brain-insight-card {
@@ -1527,7 +1527,7 @@ button {
   color: var(--emerald);
   text-transform: uppercase;
   letter-spacing: .13em;
-  font-size: 8px;
+  font-size: var(--fd-text-caption);
   font-weight: 800;
 }
 
@@ -1559,7 +1559,7 @@ button {
 
 .brain-insight-metrics span {
   color: var(--muted);
-  font-size: 8px;
+  font-size: var(--fd-text-caption);
 }
 
 .brain-insight-metrics strong {
@@ -1570,7 +1570,7 @@ button {
 .brain-insight-card details {
   margin: 11px 0;
   color: var(--muted);
-  font-size: 9px;
+  font-size: var(--fd-text-caption);
 }
 
 .brain-insight-card details ul {
@@ -1584,7 +1584,7 @@ button {
   align-items: center;
   gap: 6px;
   text-decoration: none;
-  font-size: 10px;
+  font-size: var(--fd-text-caption);
   font-weight: 750;
 }
 
@@ -1616,12 +1616,12 @@ button {
 
 .purchase-form-title small {
   color: rgba(255,255,255,.45);
-  font-size: 8px;
+  font-size: var(--fd-text-caption);
 }
 
 .purchase-scenario-form label {
   color: rgba(255,255,255,.58);
-  font-size: 8px;
+  font-size: var(--fd-text-caption);
   display: grid;
   gap: 4px;
 }
@@ -1634,7 +1634,7 @@ button {
   border: 1px solid rgba(255,255,255,.12);
   border-radius: 9px;
   padding: 8px;
-  font-size: 10px;
+  font-size: var(--fd-text-caption);
 }
 
 .purchase-scenario-form > div:last-child {
@@ -1650,7 +1650,7 @@ button {
   color: white;
   border-radius: 999px;
   padding: 7px 11px;
-  font-size: 9px;
+  font-size: var(--fd-text-caption);
   cursor: pointer;
 }
 
@@ -2819,9 +2819,9 @@ button {
     color: rgba(255,255,255,.46);
     display: grid;
     place-items: center;
-    gap: 3px;
-    font-size: 7px;
-    padding: 6px 2px;
+    gap: 4px;
+    font-size: var(--fd-text-meta);
+    padding: 8px 4px;
   }
   .fd-mobile-nav button.active { color: white; }
   .fd-page-heading { align-items: flex-start; flex-direction: column; }
