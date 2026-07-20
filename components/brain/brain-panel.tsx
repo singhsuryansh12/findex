@@ -4,6 +4,7 @@ import { FormEvent, KeyboardEvent as ReactKeyboardEvent, useCallback, useEffect,
 import Link from "next/link";
 import { ArrowRight, ArrowUp, CarFront, Database, LoaderCircle, RotateCw, Sparkles, Square } from "lucide-react";
 import type { BrainEvent, BrainInsightCard } from "@/lib/brain/contracts";
+import { getTryNextPrompts } from "@/lib/brain/guidance";
 import type { WorkspaceArtifactV2, WorkspaceProgressPhase } from "@/lib/workspaces/contracts";
 import { clearActiveBrainRun, getActiveBrainRun, saveActiveBrainRun, type ActiveBrainRun } from "@/lib/workspaces/persistence";
 
@@ -75,7 +76,7 @@ export function BrainPanel({
   const [messages, setMessages] = useState<Message[]>([{
     id: "intro",
     role: "assistant",
-    content: "I’m grounded in Jordan’s spending, income, cash flow, and synthetic portfolio. Ask a question, test a purchase, or describe a financial tool you want me to build.",
+    content: "I can help in three ways: Ask about your money, Decide on a purchase, or Build a custom tool. I’m grounded in Jordan’s demo spending, income, cash flow, and portfolio.",
   }]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -492,7 +493,18 @@ export function BrainPanel({
   };
 
   const isPristine = messages.length === 1 && messages[0]?.id === "intro";
+  const lastMessage = messages[messages.length - 1];
+  const lastUserPrompt = [...messages].reverse().find((item) => item.role === "user")?.content;
+  const showTryNext = !busy && !pending && !isPristine
+    && lastMessage?.role === "assistant"
+    && lastMessage.content.trim().length > 0;
+  const tryNextPrompts = showTryNext ? getTryNextPrompts("brain", lastUserPrompt).slice(0, 2) : [];
   const visiblePhases = phaseHistory.slice(-4);
+
+  const activatePrompt = (prompt: string) => {
+    if (prompt.startsWith("Can I afford")) setPurchaseOpen(true);
+    else void send(prompt);
+  };
 
   return (
     <section className={`brain-panel${isPristine ? " is-pristine" : ""}`} aria-label="Financial Brain">
@@ -529,10 +541,29 @@ export function BrainPanel({
           </form>
         )}
       </div>
-      {!pending && <div className="suggestions" aria-label="Suggested prompts">
-        {retryRequest && <button className="suggestion retry" onClick={() => void send(retryRequest.message, { token: retryRequest.token, clarificationAnswers: retryRequest.clarificationAnswers })} disabled={busy}><RotateCw size={11} />Retry last build</button>}
-        {suggestions.map((suggestion) => <button className="suggestion" onClick={() => suggestion.startsWith("Can I afford") ? setPurchaseOpen(true) : void send(suggestion)} disabled={busy} key={suggestion}>{suggestion}</button>)}
-      </div>}
+      {!pending && isPristine && (
+        <div className="suggestions" aria-label="Suggested prompts">
+          {suggestions.map((suggestion) => (
+            <button className="suggestion" onClick={() => activatePrompt(suggestion)} disabled={busy} key={suggestion}>{suggestion}</button>
+          ))}
+        </div>
+      )}
+      {!pending && (showTryNext || retryRequest) && !isPristine && (
+        <div className="suggestions" aria-label={showTryNext ? "Try next" : "Suggested prompts"}>
+          {retryRequest && (
+            <button
+              className="suggestion retry"
+              onClick={() => void send(retryRequest.message, { token: retryRequest.token, clarificationAnswers: retryRequest.clarificationAnswers })}
+              disabled={busy}
+            >
+              <RotateCw size={11} />Retry last build
+            </button>
+          )}
+          {tryNextPrompts.map((prompt) => (
+            <button className="suggestion" onClick={() => activatePrompt(prompt)} disabled={busy} key={prompt}>{prompt}</button>
+          ))}
+        </div>
+      )}
       {purchaseOpen && !busy && (
         <form className="purchase-scenario-form" onSubmit={submitPurchase}>
           <div className="purchase-form-title"><CarFront size={15} /><span><strong>Test a car purchase</strong><small>I’ll compare it with the next 90 days.</small></span></div>
