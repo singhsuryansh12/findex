@@ -137,6 +137,22 @@ describe("forecast recurrence and protection", () => {
     expect(month.netCents).not.toBe(month.incomeCents - month.committedCents - month.flexibleCents - month.investmentCents - month.internalTransferCents);
   });
 
+  it("maps cash-flow horizons to one modeled month per 30 days", () => {
+    const thirty = getCashFlowForecast({ days: 30 });
+    const sixty = getCashFlowForecast({ days: 60 });
+    const ninety = getCashFlowForecast({ days: 90 });
+
+    // Daily runway still spans the selected horizon (as-of Jul 19 → +N days).
+    expect(thirty.throughDate).toBe("2026-08-18");
+    expect(sixty.throughDate).toBe("2026-09-17");
+    expect(ninety.throughDate).toBe("2026-10-17");
+
+    // Monthly chart buckets are whole cycles, not every calendar month touched.
+    expect(thirty.months.map((month) => month.month)).toEqual(["2026-07"]);
+    expect(sixty.months.map((month) => month.month)).toEqual(["2026-07", "2026-08"]);
+    expect(ninety.months.map((month) => month.month)).toEqual(["2026-07", "2026-08", "2026-09"]);
+  });
+
   it("classifies the fixed car scenario from the base forecast deterministically", () => {
     const input = { date: "2026-08-15", upfrontCostCents: 1_500_000, monthlyCostCents: 65_000 };
     const first = evaluatePurchaseScenario(input);

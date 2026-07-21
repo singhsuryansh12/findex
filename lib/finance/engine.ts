@@ -1,4 +1,4 @@
-import { format, getDaysInMonth, parseISO, startOfMonth, subMonths } from "date-fns";
+import { addMonths, format, getDaysInMonth, parseISO, startOfMonth, subMonths } from "date-fns";
 import demoDataJson from "@/data/demo-data.json";
 import { asDate, compactDate, dateRange, formatISODate, previousCalendarMonth } from "./dates";
 import type {
@@ -268,6 +268,15 @@ function averageFlexibleSpending() {
   return Math.round(total / Math.max(1, months.length));
 }
 
+function forwardMonthKeys(asOfDate: string, days: 30 | 60 | 90): string[] {
+  // Horizons map to whole modeled months (30→1, 60→2, 90→3), not every
+  // calendar month a daily runway merely touches. From mid-July, a 30-day
+  // runway reaches mid-August, but that should still be one monthly cycle.
+  const monthCount = days / 30;
+  const start = startOfMonth(asDate(asOfDate));
+  return Array.from({ length: monthCount }, (_, index) => formatISODate(addMonths(start, index)).slice(0, 7));
+}
+
 export function getCashFlowForecast({ days = 90, scenario }: { days?: 30 | 60 | 90; scenario?: PurchaseScenario } = {}): CashFlowForecast {
   const runway = getForecast(days);
   const flexibleCents = averageFlexibleSpending();
@@ -280,7 +289,7 @@ export function getCashFlowForecast({ days = 90, scenario }: { days?: 30 | 60 | 
   const internalTransferCents = 100_000;
   const incomeCents = demoData.persona.monthlyTakeHomeCents;
   const expectedMonthlySurplusCents = incomeCents - committedCents - flexibleCents - investmentCents;
-  const monthKeys = [...new Set(runway.points.map((point) => point.date.slice(0, 7)))];
+  const monthKeys = forwardMonthKeys(demoData.metadata.asOfDate, days);
   const monthLabels = new Intl.DateTimeFormat("en-US", { month: "short", year: "numeric", timeZone: "UTC" });
   const months = monthKeys.map((month) => {
     const date = new Date(`${month}-01T12:00:00Z`);
