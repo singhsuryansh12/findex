@@ -1,6 +1,6 @@
 # FinDex: Your money, your tools
 
-FinDex is a Brain-first, AI-native personal finance demo. Finance is personal: other apps ship a fixed dashboard; FinDex keeps spending, portfolio, income, and cash flow in one picture, then lets you **Ask**, **Decide**, or **Build** a tool that fits how *you* track money—and keep it in **My tools**.
+**[FinDex](https://tryfindex.vercel.app/)** is a Brain-first, AI-native personal finance demo. Finance is personal: other apps ship a fixed dashboard; FinDex keeps spending, portfolio, income, and cash flow in one picture, then lets you **Ask**, **Decide**, or **Build** a tool that fits how *you* track money—and keep it in **My tools**.
 
 The public demo is an anonymous, single-user synthetic ledger (Jordan Lee). It never asks for bank credentials, moves money, executes trades, or presents model output as individualized financial advice.
 
