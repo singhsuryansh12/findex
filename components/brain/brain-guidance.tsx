@@ -109,12 +109,12 @@ export function BrainGuidance({
   );
 
   const tip = showTip ? (
-    <div className="fd-guidance-tip" role="status">
-      <p>Try a prompt below, or open help for what the Brain can do.</p>
-      <button type="button" onClick={dismissTip}>
-        Got it
-      </button>
-    </div>
+          <div className="fd-guidance-tip">
+            <p>Try a prompt below, or open help for what the Brain can do.</p>
+            <button type="button" onClick={dismissTip}>
+              Got it
+            </button>
+          </div>
   ) : null;
 
   const barClass = [

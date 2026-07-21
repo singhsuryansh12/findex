@@ -495,7 +495,7 @@ test("an active workspace run reconnects after reload and recovers a missed publ
   const input = page.getByLabel("Message the Financial Brain");
   await input.fill("Build a recovered purchase lab");
   await input.press("Enter");
-  await expect(page.getByRole("status")).toContainText("Findex is building the application");
+  await expect(page.locator(".brain-progress")).toContainText("Findex is building the application");
   await expect.poll(() => page.evaluate(async () => {
     const request = indexedDB.open("findex-generative-workspaces", 3);
     return new Promise<number | null>((resolve, reject) => {
