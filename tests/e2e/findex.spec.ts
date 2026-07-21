@@ -303,6 +303,44 @@ test("cash-flow horizons update details without double-counting payroll", async 
   await expect(page.locator(".fd-chart-data table")).toBeVisible();
 });
 
+test("cash flow assumptions card lists each method as a structured bullet", async ({ page }) => {
+  await enterDemo(page);
+  await page.goto("/demo/cash-flow");
+  const card = page.getByRole("article", { name: "How this forecast works" });
+  await expect(card.getByRole("heading", { name: "Known money and estimated money stay separate." })).toBeVisible();
+  const items = card.locator(".fd-assumptions-list li");
+  await expect(items).toHaveCount(4);
+  await expect(items.nth(0)).toContainText("deterministic recurring ledger");
+  await expect(items.nth(3)).toContainText("not deducted from take-home again");
+  const geometry = await card.evaluate((el) => {
+    const header = el.querySelector(".fd-assumptions-header");
+    const heading = el.querySelector("h2");
+    const list = el.querySelector(".fd-assumptions-list");
+    const bullets = [...el.querySelectorAll(".fd-assumptions-list li")];
+    if (!(header instanceof HTMLElement) || !(heading instanceof HTMLElement) || !(list instanceof HTMLElement)) {
+      return null;
+    }
+    const headerBox = header.getBoundingClientRect();
+    const headingBox = heading.getBoundingClientRect();
+    const listBox = list.getBoundingClientRect();
+    const lefts = [headerBox.left, headingBox.left, listBox.left];
+    const bulletGaps = bullets.slice(1).map((item, index) => {
+      const prev = bullets[index]!.getBoundingClientRect();
+      const next = item.getBoundingClientRect();
+      return next.top - prev.bottom;
+    });
+    return {
+      leftSpread: Math.max(...lefts) - Math.min(...lefts),
+      minBulletGap: Math.min(...bulletGaps),
+      unusedBottom: el.getBoundingClientRect().bottom - listBox.bottom,
+    };
+  });
+  expect(geometry).not.toBeNull();
+  expect(geometry!.leftSpread).toBeLessThanOrEqual(2);
+  expect(geometry!.minBulletGap).toBeGreaterThanOrEqual(8);
+  expect(geometry!.unusedBottom).toBeLessThanOrEqual(24);
+});
+
 test("cash flow summary figures share one aligned baseline", async ({ page }, testInfo) => {
   await enterDemo(page);
   await page.goto("/demo/cash-flow");

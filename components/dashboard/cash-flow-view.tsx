@@ -86,7 +86,19 @@ export function CashFlowView({ dataset, onAskBrain }: { dataset: DemoDataset; on
           {selected && <div className="fd-month-breakdown"><div><span>Take-home income</span><strong>+{formatMoney(selected.incomeCents)}</strong></div><div><span>Known commitments</span><strong>−{formatMoney(selected.committedCents)}</strong></div><div><span>Typical flexible spending</span><strong>−{formatMoney(selected.flexibleCents)}</strong></div><div><span>Roth + brokerage from checking</span><strong>−{formatMoney(selected.investmentCents)}</strong></div><div className="total"><span>Expected net</span><strong>{selected.netCents >= 0 ? "+" : "−"}{formatMoney(Math.abs(selected.netCents))}</strong></div></div>}
           <button className="fd-inline-action" onClick={() => onAskBrain(`Explain the ${selected?.label ?? "next month"} cash-flow projection`)}>Ask the Brain about this month<ChevronRight size={14} /></button>
         </article>
-        <article className="fd-card fd-assumptions-card"><span className="fd-insight-icon"><Info size={17} /></span><div><span className="fd-eyebrow">How this forecast works</span><h2>Known money and estimated money stay separate.</h2><ul><li>Salary and scheduled obligations use the deterministic recurring ledger.</li><li>Flexible spending uses the trailing three complete months.</li><li>The $1,000 savings transfer moves liquid cash but does not reduce net worth.</li><li>401(k) and HSA payroll contributions are not deducted from take-home again.</li></ul></div></article>
+        <article className="fd-card fd-assumptions-card" aria-label="How this forecast works">
+          <header className="fd-assumptions-header">
+            <span className="fd-insight-icon" aria-hidden="true"><Info size={17} /></span>
+            <span className="fd-eyebrow">How this forecast works</span>
+          </header>
+          <h2>Known money and estimated money stay separate.</h2>
+          <ul className="fd-assumptions-list">
+            <li>Salary and scheduled obligations use the deterministic recurring ledger.</li>
+            <li>Flexible spending uses the trailing three complete months.</li>
+            <li>The $1,000 savings transfer moves liquid cash but does not reduce net worth.</li>
+            <li>401(k) and HSA payroll contributions are not deducted from take-home again.</li>
+          </ul>
+        </article>
       </section>
 
       <details className="fd-card fd-runway-details">
