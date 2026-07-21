@@ -22,7 +22,7 @@ const instrumentSerif = localFont({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://findex-financial-os.vercel.app"),
-  title: "FinDex — Your money, your tools",
+  title: "FinDex: Your money, your tools",
   description:
     "Personal finance you shape yourself. Your data is already here—ask, decide, or build the tools you need and keep them.",
   icons: {
@@ -33,14 +33,14 @@ export const metadata: Metadata = {
     shortcut: "/favicon.ico",
   },
   openGraph: {
-    title: "FinDex — Your money, your tools",
+    title: "FinDex: Your money, your tools",
     description: "Ask, decide, or build finance tools on your money picture—and keep them.",
     type: "website",
-    images: [{ url: "/findex-og.png", width: 1200, height: 630, alt: "FinDex — Your money, your tools" }],
+    images: [{ url: "/findex-og.png", width: 1200, height: 630, alt: "FinDex: Your money, your tools" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "FinDex — Your money, your tools",
+    title: "FinDex: Your money, your tools",
     description: "Ask, decide, or build finance tools on your money picture—and keep them.",
     images: ["/findex-og.png"],
   },
