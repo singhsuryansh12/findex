@@ -296,11 +296,17 @@ test("cash-flow horizons update details without double-counting payroll", async 
   await expect(page.getByRole("img", { name: "90 day monthly income, outflow, and investing projection" })).toBeVisible();
   await page.getByRole("button", { name: "30 days" }).click();
   await expect(page.getByRole("img", { name: "30 day monthly income, outflow, and investing projection" })).toBeVisible();
-  await expect(page.getByText("401(k) and HSA payroll contributions are not deducted from take-home again.")).toBeVisible();
+  await expect(page.getByLabel("Select forecast month").getByRole("button")).toHaveCount(1);
+  await expect(page.getByRole("button", { name: "Jul 2026" })).toBeVisible();
+  await page.getByRole("button", { name: "60 days" }).click();
+  await expect(page.getByLabel("Select forecast month").getByRole("button")).toHaveCount(2);
+  await expect(page.getByRole("button", { name: "Aug 2026" })).toBeVisible();
   await page.getByRole("button", { name: "Aug 2026" }).click();
   await expect(page.locator(".fd-month-detail").getByRole("heading", { name: "Aug 2026" })).toBeVisible();
+  await expect(page.getByText("401(k) and HSA payroll contributions are not deducted from take-home again.")).toBeVisible();
   await page.getByText("View forecast as a table").click();
   await expect(page.locator(".fd-chart-data table")).toBeVisible();
+  await expect(page.locator(".fd-chart-data table tbody tr")).toHaveCount(2);
 });
 
 test("cash flow assumptions card lists each method as a structured bullet", async ({ page }) => {
