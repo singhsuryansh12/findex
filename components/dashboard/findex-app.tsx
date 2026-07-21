@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { BarChart3, Bot, BriefcaseBusiness, CalendarDays, ChevronRight, ReceiptText, Settings, Sparkles, WalletCards } from "lucide-react";
 import type { DemoDataset } from "@/lib/finance/types";
@@ -15,6 +15,7 @@ import {
   saveWorkspaceArtifact,
   workspaceStorageUsage,
 } from "@/lib/workspaces/persistence";
+import { BrainBuildReadyBanner, type BuildReadyNotice } from "@/components/brain/brain-build-ready-banner";
 import { BrainGuidance } from "@/components/brain/brain-guidance";
 import { BrainHandoffBanner } from "@/components/brain/brain-handoff-banner";
 import { BrainPanel } from "@/components/brain/brain-panel";
@@ -53,18 +54,50 @@ export function FinDexApp({ dataset, snapshot }: { dataset: DemoDataset; snapsho
   const [widgetPrompt, setWidgetPrompt] = useState<string | null>(null);
   const [draftPrompt, setDraftPrompt] = useState<string | null>(null);
   const [handoff, setHandoff] = useState<BrainHandoff | null>(null);
+  const [buildReadyNotice, setBuildReadyNotice] = useState<BuildReadyNotice | null>(null);
   const [prevView, setPrevView] = useState(view);
   const generatedRef = useRef<HTMLDetailsElement>(null);
   const brainStageRef = useRef<HTMLElement>(null);
+  const buildReadyNotifiedProjects = useRef<Set<string>>(new Set());
+  const buildReadyTimer = useRef<number | null>(null);
+  const viewRef = useRef(view);
   const cashFlow = useMemo(() => getCashFlowForecast({ days: 90 }), []);
+  const brainParked = view !== "brain";
+
+  useLayoutEffect(() => {
+    viewRef.current = view;
+  }, [view]);
 
   // Clear handoff when navigating away from Brain (adjust during render — not an effect).
   if (view !== prevView) {
     setPrevView(view);
     if (view !== "brain") {
       setHandoff(null);
+    } else {
+      setBuildReadyNotice(null);
     }
   }
+
+  useEffect(() => () => {
+    if (buildReadyTimer.current !== null) window.clearTimeout(buildReadyTimer.current);
+  }, []);
+
+  const dismissBuildReady = useCallback(() => {
+    if (buildReadyTimer.current !== null) {
+      window.clearTimeout(buildReadyTimer.current);
+      buildReadyTimer.current = null;
+    }
+    setBuildReadyNotice(null);
+  }, []);
+
+  const showBuildReady = useCallback((notice: BuildReadyNotice) => {
+    if (buildReadyTimer.current !== null) window.clearTimeout(buildReadyTimer.current);
+    setBuildReadyNotice(notice);
+    buildReadyTimer.current = window.setTimeout(() => {
+      buildReadyTimer.current = null;
+      setBuildReadyNotice(null);
+    }, 7000);
+  }, []);
 
   const loadLibrary = useCallback(async (preferredProjectId?: string | null) => {
     const nextProjects = await listWorkspaceProjects();
@@ -110,6 +143,13 @@ export function FinDexApp({ dataset, snapshot }: { dataset: DemoDataset; snapsho
     await loadLibrary(nextArtifact.projectId);
     const usage = await workspaceStorageUsage();
     setStorageWarning((usage ?? 0) >= 0.8);
+    if (viewRef.current !== "brain") {
+      if (!buildReadyNotifiedProjects.current.has(nextArtifact.projectId)) {
+        buildReadyNotifiedProjects.current.add(nextArtifact.projectId);
+        showBuildReady({ title: nextArtifact.title, projectId: nextArtifact.projectId });
+      }
+      return;
+    }
     window.setTimeout(() => generatedRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 120);
   };
 
@@ -156,7 +196,13 @@ export function FinDexApp({ dataset, snapshot }: { dataset: DemoDataset; snapsho
     setWidgetPrompt(prompt);
     if (source) setHandoff(createHandoff(source, prompt));
     else setHandoff(null);
+    dismissBuildReady();
     navigate("brain");
+  };
+  const viewReadyTool = () => {
+    dismissBuildReady();
+    navigate("brain");
+    window.setTimeout(() => generatedRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 120);
   };
 
   if (!hydrated || !entered || pathname === "/") return <Landing forecast={snapshot.forecast} onEnter={enterDemo} />;
@@ -178,8 +224,11 @@ export function FinDexApp({ dataset, snapshot }: { dataset: DemoDataset; snapsho
         </header>
 
         <div className="fd-view-stage">
-          {view === "brain" && (
-            <main className="fd-brain-home">
+          <main
+            className={brainParked ? "fd-brain-home fd-brain-home--parked" : "fd-brain-home"}
+            hidden={brainParked}
+            inert={brainParked || undefined}
+          >
               <header className="fd-brain-hero"><span className="fd-eyebrow"><Sparkles size={12} />Your money, your starting point</span><h1 className="serif">Your money,<br /><em>your tools.</em></h1><p>Spending, portfolio, and cash flow are already connected. Ask a question, test a decision, or build a tool that fits how you track money.</p></header>
 
               <section className="fd-brain-stage" ref={brainStageRef}>
@@ -221,13 +270,20 @@ export function FinDexApp({ dataset, snapshot }: { dataset: DemoDataset; snapsho
                 <summary><span><Bot size={17} /><span><strong>My tools</strong><small>{projects.length ? `${projects.length} saved tool${projects.length === 1 ? "" : "s"}` : "Build tools on your money picture"}</small></span></span><ChevronRight size={16} /></summary>
                 <div className="fd-tools-content"><WorkspaceLibrary projects={projects} activeProjectId={artifact?.projectId ?? null} versions={versions} storageWarning={storageWarning} onNew={newWorkspace} onSelect={(projectId) => void selectWorkspace(projectId)} onRename={(name) => { if (artifact) void renameWorkspaceProject(artifact.projectId, name).then(() => loadLibrary(artifact.projectId)); }} onDuplicate={() => void duplicateWorkspace()} onDelete={() => { if (!artifact || !window.confirm(`Delete ${artifact.title} and all of its versions?`)) return; void deleteWorkspaceProject(artifact.projectId).then(() => loadLibrary(null)); }} onRestore={(version) => void restoreVersion(version)} />{artifact ? <WorkspaceArtifactCard artifact={artifact} /> : <div className="fd-empty-tools"><Sparkles size={18} /><div><strong>Describe the tool you need.</strong><p>FinDex builds it on your demo data, then you save and reuse it here.</p></div></div>}</div>
               </details>
-            </main>
-          )}
+          </main>
           {view === "spending" && <main><SpendingView dataset={dataset} onAskBrain={(prompt) => askBrain(prompt, "spending")} /></main>}
           {view === "portfolio" && <main><PortfolioView dataset={dataset} onAskBrain={(prompt) => askBrain(prompt, "portfolio")} /></main>}
           {view === "cash-flow" && <main><CashFlowView dataset={dataset} onAskBrain={(prompt) => askBrain(prompt, "cash-flow")} /></main>}
         </div>
       </div>
+
+      {buildReadyNotice && brainParked && (
+        <BrainBuildReadyBanner
+          notice={buildReadyNotice}
+          onView={viewReadyTool}
+          onDismiss={dismissBuildReady}
+        />
+      )}
 
       <nav className="fd-mobile-nav" aria-label="Mobile navigation">{navItems.map((item) => { const Icon = item.icon; return <button key={item.view} className={view === item.view ? "active" : ""} aria-current={view === item.view ? "page" : undefined} onClick={() => navigate(item.view)}><Icon size={18} /><span>{item.label === "Financial Brain" ? "Brain" : item.label}</span></button>; })}</nav>
     </div>

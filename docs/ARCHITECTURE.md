@@ -4,7 +4,7 @@
 
 FinDex is a Brain-first personal finance demo. Users enter via **Try the demo**, land on the Financial Brain, and move through Spending, Portfolio, and Cash flow under one shell. The Brain supports Ask / Decide / Build: grounded answers, purchase stress tests, and durable generation of custom tools saved in **My tools**.
 
-Cross-cutting UI concerns live in the dashboard shell: page-aware Brain guidance, Ask-the-Brain handoffs, view transitions between money views, and shared navigation (desktop complementary nav + mobile bottom bar).
+Cross-cutting UI concerns live in the dashboard shell: page-aware Brain guidance, Ask-the-Brain handoffs, view transitions between money views, and shared navigation (desktop complementary nav + mobile bottom bar). Within a demo session, the Brain home (including chat and in-flight build streams) stays mounted and is parked with `hidden`/`inert` when navigating to Spending, Portfolio, or Cash flow, so builds and conversation continue without remounting. A minimal shell notice can surface when a tool publishes while the user is off Brain. Hard reload still uses the IndexedDB durable-run cursor (chat UI resets; the run reconnects).
 
 ## Repository boundaries
 
