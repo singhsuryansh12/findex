@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { getGuidance, GUIDANCE_DISMISS_KEY, type DemoView } from "@/lib/brain/guidance";
 
 const GUIDANCE_DISMISS_EVENT = "findex-guidance-dismiss";
@@ -80,18 +80,61 @@ export function BrainGuidance({
     window.dispatchEvent(new Event(GUIDANCE_DISMISS_EVENT));
   }
 
-  return (
-    <div className="fd-brain-guidance" ref={rootRef}>
-      {showTip ? (
-        <div className="fd-guidance-tip">
-          <p>Try a prompt below, or open help for what the Brain can do.</p>
-          <button type="button" onClick={dismissTip}>
-            Got it
-          </button>
+  const helpControl = (
+    <div className="fd-guidance-help">
+      <button
+        type="button"
+        aria-label="What can the Financial Brain do?"
+        aria-expanded={helpOpen}
+        onClick={() => setHelpOpen((open) => !open)}
+      >
+        ?
+      </button>
+
+      {helpOpen ? (
+        <div className="fd-guidance-popover" role="region" aria-label={guidance.helpTitle}>
+          <strong>{guidance.helpTitle}</strong>
+          <p>{guidance.helpBody}</p>
+          <ul>
+            {guidance.capabilities.map((capability) => (
+              <li key={capability.title}>
+                <strong>{capability.title}</strong>
+                <span>{capability.detail}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       ) : null}
+    </div>
+  );
 
-      <div className={`fd-guidance-toolbar${showChips ? "" : " is-help-only"}`}>
+  const tip = showTip ? (
+    <div className="fd-guidance-tip" role="status">
+      <p>Try a prompt below, or open help for what the Brain can do.</p>
+      <button type="button" onClick={dismissTip}>
+        Got it
+      </button>
+    </div>
+  ) : null;
+
+  const barClass = [
+    "fd-guidance-bar",
+    showChips ? "has-chips" : "is-compact",
+    showTip ? "has-tip" : "tip-dismissed",
+  ].join(" ");
+
+  let body: ReactNode;
+  if (!showChips && showTip) {
+    body = (
+      <div className="fd-guidance-cluster">
+        {tip}
+        {helpControl}
+      </div>
+    );
+  } else {
+    body = (
+      <>
+        {tip}
         {showChips ? (
           <div className="fd-guidance-chips" aria-label="Suggested prompts">
             {guidance.chips.map((prompt) => (
@@ -106,33 +149,14 @@ export function BrainGuidance({
             ))}
           </div>
         ) : null}
+        {helpControl}
+      </>
+    );
+  }
 
-        <div className="fd-guidance-help">
-          <button
-            type="button"
-            aria-label="What can the Financial Brain do?"
-            aria-expanded={helpOpen}
-            onClick={() => setHelpOpen((open) => !open)}
-          >
-            ?
-          </button>
-
-          {helpOpen ? (
-            <div className="fd-guidance-popover" role="region" aria-label={guidance.helpTitle}>
-              <strong>{guidance.helpTitle}</strong>
-              <p>{guidance.helpBody}</p>
-              <ul>
-                {guidance.capabilities.map((capability) => (
-                  <li key={capability.title}>
-                    <strong>{capability.title}</strong>
-                    <span>{capability.detail}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-        </div>
-      </div>
+  return (
+    <div className="fd-brain-guidance" ref={rootRef}>
+      <div className={barClass}>{body}</div>
     </div>
   );
 }

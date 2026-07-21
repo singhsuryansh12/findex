@@ -3080,38 +3080,100 @@ button {
 
 /* Brain guidance, handoff, metric hints */
 .fd-brain-guidance {
-  display: grid;
-  gap: 10px;
-  margin: 0 0 14px;
-  padding: 0 2px;
+  margin: 0 0 12px;
+  padding: 0;
   max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
 }
 
+.fd-guidance-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* Brain home: tip + help sit on one compact row */
+.fd-guidance-bar.is-compact {
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.fd-guidance-bar.is-compact.tip-dismissed {
+  justify-content: flex-end;
+}
+
+/* One visual unit: tip copy + Got it + ? */
+.fd-guidance-cluster {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  max-width: min(100%, 34rem);
+  min-width: 0;
+  padding: 4px 4px 4px 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 252, 0.72);
+  /* Keep overflow visible so the help popover is not clipped. */
+}
+
+.fd-guidance-cluster .fd-guidance-tip {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  max-width: none;
+  flex: 0 1 auto;
+  min-width: 0;
+  padding: 5px 8px 5px 12px;
+}
+
+.fd-guidance-cluster .fd-guidance-help {
+  flex: 0 0 auto;
+  align-self: center;
+}
+
+.fd-guidance-cluster .fd-guidance-help > button {
+  width: 28px;
+  height: 28px;
+  min-height: 28px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+}
+
 .fd-guidance-tip {
   margin: 0;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 11px 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px 7px 12px;
   border: 1px solid var(--line);
-  border-radius: 14px;
+  border-radius: 12px;
   background: rgba(255, 255, 252, 0.72);
   color: var(--ink-soft);
   font-size: var(--fd-text-meta);
-  line-height: 1.45;
-  max-width: 100%;
+  line-height: 1.4;
+  width: fit-content;
+  max-width: min(100%, 34rem);
   min-width: 0;
   box-sizing: border-box;
-  overflow: hidden;
+}
+
+/* Detail views: tip spans the row above chips + help */
+.fd-guidance-bar.has-chips.has-tip .fd-guidance-tip {
+  flex: 1 1 100%;
+  width: auto;
+  max-width: 100%;
 }
 
 .fd-guidance-tip p {
   margin: 0;
   min-width: 0;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   overflow-wrap: anywhere;
 }
 
@@ -3125,19 +3187,6 @@ button {
   padding: 0;
   white-space: nowrap;
   flex: 0 0 auto;
-}
-
-.fd-guidance-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  max-width: 100%;
-  min-width: 0;
-}
-
-.fd-guidance-toolbar.is-help-only {
-  justify-content: flex-end;
 }
 
 .fd-guidance-chips {
@@ -3175,6 +3224,12 @@ button {
 .fd-guidance-help {
   position: relative;
   display: inline-flex;
+  flex: 0 0 auto;
+  align-self: center;
+}
+
+.fd-guidance-bar.has-chips .fd-guidance-help {
+  margin-left: auto;
 }
 
 .fd-guidance-help > button {
@@ -3182,7 +3237,7 @@ button {
   height: 28px;
   border-radius: 999px;
   border: 1px solid var(--line);
-  background: transparent;
+  background: rgba(255, 255, 252, 0.55);
   color: var(--muted);
   font-size: var(--fd-text-label);
   font-weight: 700;

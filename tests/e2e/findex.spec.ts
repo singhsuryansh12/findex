@@ -144,6 +144,35 @@ test("demo login lands on a calm Brain-first home", async ({ page }, testInfo) =
   await expect(page.getByRole("button", { name: "Can I afford a car next month?" })).toHaveCount(1);
   await expect(page.getByRole("button", { name: "What can the Financial Brain do?" })).toBeVisible();
   await expect(page.locator(".fd-guidance-tip")).toContainText("Try a prompt below, or open help for what the Brain can do.");
+  // Tip + help share one compact cluster (no orphaned "?" below a full-bleed banner).
+  await expect(page.locator(".fd-guidance-cluster")).toBeVisible();
+  const guidanceGeometry = await page.locator(".fd-guidance-cluster").evaluate((cluster) => {
+    const tip = cluster.querySelector(".fd-guidance-tip");
+    const help = cluster.querySelector(".fd-guidance-help > button");
+    if (!(tip instanceof HTMLElement) || !(help instanceof HTMLElement)) {
+      return null;
+    }
+    const clusterBox = cluster.getBoundingClientRect();
+    const tipBox = tip.getBoundingClientRect();
+    const helpBox = help.getBoundingClientRect();
+    const stage = cluster.closest(".fd-brain-stage");
+    const stageWidth = stage?.getBoundingClientRect().width ?? clusterBox.width;
+    return {
+      clusterWidth: clusterBox.width,
+      clusterHeight: clusterBox.height,
+      stageWidth,
+      verticalGap: Math.abs((tipBox.top + tipBox.height / 2) - (helpBox.top + helpBox.height / 2)),
+      helpLeftOfTipEnd: helpBox.left - tipBox.right,
+    };
+  });
+  expect(guidanceGeometry).not.toBeNull();
+  expect(guidanceGeometry!.verticalGap).toBeLessThanOrEqual(6);
+  expect(guidanceGeometry!.helpLeftOfTipEnd).toBeGreaterThanOrEqual(0);
+  expect(guidanceGeometry!.helpLeftOfTipEnd).toBeLessThanOrEqual(8);
+  expect(guidanceGeometry!.clusterHeight).toBeLessThanOrEqual(72);
+  if (testInfo.project.name === "desktop") {
+    expect(guidanceGeometry!.clusterWidth).toBeLessThan(guidanceGeometry!.stageWidth * 0.85);
+  }
   await expect(page.locator(".recharts-wrapper")).toHaveCount(0);
   if (testInfo.project.name === "mobile-390") {
     await expect(page.getByRole("navigation", { name: "Mobile navigation" }).getByRole("button")).toHaveCount(4);
