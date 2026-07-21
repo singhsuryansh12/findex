@@ -303,6 +303,33 @@ test("cash-flow horizons update details without double-counting payroll", async 
   await expect(page.locator(".fd-chart-data table")).toBeVisible();
 });
 
+test("cash flow summary figures share one aligned baseline", async ({ page }, testInfo) => {
+  await enterDemo(page);
+  await page.goto("/demo/cash-flow");
+  const summary = page.getByRole("region", { name: "Cash flow summary" });
+  await expect(summary.locator("article")).toHaveCount(5);
+  const geometry = await summary.locator(".fd-metric-value").evaluateAll((values) => {
+    const boxes = values.map((el) => el.getBoundingClientRect());
+    const tops = boxes.map((box) => box.top);
+    const lefts = boxes.map((box) => box.left);
+    const rowSpread = (start: number, end: number) => {
+      const slice = tops.slice(start, end);
+      return Math.max(...slice) - Math.min(...slice);
+    };
+    return {
+      topSpread: Math.max(...tops) - Math.min(...tops),
+      firstRowSpread: rowSpread(0, Math.min(2, tops.length)),
+      strictlyIncreasingLeft: lefts.every((left, index) => index === 0 || left > lefts[index - 1] + 8),
+    };
+  });
+  if (testInfo.project.name === "desktop") {
+    expect(geometry.topSpread).toBeLessThanOrEqual(2);
+    expect(geometry.strictlyIncreasingLeft).toBe(true);
+  } else {
+    expect(geometry.firstRowSpread).toBeLessThanOrEqual(2);
+  }
+});
+
 test("Financial Brain streams the exact grounded dining answer", async ({ page }) => {
   await mockBrain(page);
   await enterDemo(page);
