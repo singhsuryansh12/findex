@@ -143,36 +143,43 @@ test("demo login lands on a calm Brain-first home", async ({ page }, testInfo) =
   await expect(page.getByRole("region", { name: "Financial glances" }).getByRole("button")).toHaveCount(3);
   await expect(page.getByRole("button", { name: "Can I afford a car next month?" })).toHaveCount(1);
   await expect(page.getByRole("button", { name: "What can the Financial Brain do?" })).toBeVisible();
-  await expect(page.locator(".fd-guidance-tip")).toContainText("Try a prompt below, or open help for what the Brain can do.");
-  // Tip + help share one compact cluster (no orphaned "?" below a full-bleed banner).
+  await expect(page.locator(".fd-guidance-cluster")).toContainText("Try a prompt below, or open help for what the Brain can do.");
+  await expect(page.locator(".fd-guidance-kicker")).toHaveText("Getting started");
+  // Tip bar matches Brain panel width; copy left, actions right on one row.
   await expect(page.locator(".fd-guidance-cluster")).toBeVisible();
   const guidanceGeometry = await page.locator(".fd-guidance-cluster").evaluate((cluster) => {
-    const tip = cluster.querySelector(".fd-guidance-tip");
+    const copy = cluster.querySelector(".fd-guidance-copy");
+    const dismiss = cluster.querySelector(".fd-guidance-dismiss");
     const help = cluster.querySelector(".fd-guidance-help > button");
-    if (!(tip instanceof HTMLElement) || !(help instanceof HTMLElement)) {
+    const panel = cluster.closest(".fd-brain-stage")?.querySelector(".brain-panel");
+    if (
+      !(copy instanceof HTMLElement)
+      || !(dismiss instanceof HTMLElement)
+      || !(help instanceof HTMLElement)
+      || !(panel instanceof HTMLElement)
+    ) {
       return null;
     }
     const clusterBox = cluster.getBoundingClientRect();
-    const tipBox = tip.getBoundingClientRect();
+    const copyBox = copy.getBoundingClientRect();
+    const dismissBox = dismiss.getBoundingClientRect();
     const helpBox = help.getBoundingClientRect();
-    const stage = cluster.closest(".fd-brain-stage");
-    const stageWidth = stage?.getBoundingClientRect().width ?? clusterBox.width;
+    const panelBox = panel.getBoundingClientRect();
     return {
       clusterWidth: clusterBox.width,
+      panelWidth: panelBox.width,
       clusterHeight: clusterBox.height,
-      stageWidth,
-      verticalGap: Math.abs((tipBox.top + tipBox.height / 2) - (helpBox.top + helpBox.height / 2)),
-      helpLeftOfTipEnd: helpBox.left - tipBox.right,
+      actionsAligned: Math.abs((dismissBox.top + dismissBox.height / 2) - (helpBox.top + helpBox.height / 2)) <= 6,
+      copyLeftOfActions: copyBox.right <= dismissBox.left + 1,
+      helpAfterDismiss: helpBox.left >= dismissBox.right - 1,
     };
   });
   expect(guidanceGeometry).not.toBeNull();
-  expect(guidanceGeometry!.verticalGap).toBeLessThanOrEqual(6);
-  expect(guidanceGeometry!.helpLeftOfTipEnd).toBeGreaterThanOrEqual(0);
-  expect(guidanceGeometry!.helpLeftOfTipEnd).toBeLessThanOrEqual(8);
-  expect(guidanceGeometry!.clusterHeight).toBeLessThanOrEqual(72);
-  if (testInfo.project.name === "desktop") {
-    expect(guidanceGeometry!.clusterWidth).toBeLessThan(guidanceGeometry!.stageWidth * 0.85);
-  }
+  expect(Math.abs(guidanceGeometry!.clusterWidth - guidanceGeometry!.panelWidth)).toBeLessThanOrEqual(2);
+  expect(guidanceGeometry!.clusterHeight).toBeLessThanOrEqual(testInfo.project.name === "mobile-390" ? 120 : 88);
+  expect(guidanceGeometry!.actionsAligned).toBe(true);
+  expect(guidanceGeometry!.copyLeftOfActions).toBe(true);
+  expect(guidanceGeometry!.helpAfterDismiss).toBe(true);
   await expect(page.locator(".recharts-wrapper")).toHaveCount(0);
   if (testInfo.project.name === "mobile-390") {
     await expect(page.getByRole("navigation", { name: "Mobile navigation" }).getByRole("button")).toHaveCount(4);
