@@ -1,26 +1,50 @@
 # FinDex: Your money, your tools
 
-FinDex is a Brain-first, AI-native personal finance demo. Finance is personal: other apps ship a fixed dashboard; FinDex keeps your spending, portfolio, income, and cash flow in one picture, then lets you **Ask**, **Decide**, or **Build** a tool that fits how *you* track money—and keep it in **My tools**.
+FinDex is a Brain-first, AI-native personal finance demo. Finance is personal: other apps ship a fixed dashboard; FinDex keeps spending, portfolio, income, and cash flow in one picture, then lets you **Ask**, **Decide**, or **Build** a tool that fits how *you* track money—and keep it in **My tools**.
 
 The public demo is an anonymous, single-user synthetic ledger (Jordan Lee). It never asks for bank credentials, moves money, executes trades, or presents model output as individualized financial advice.
 
 ![FinDex social preview](public/findex-og.png)
 
+## Built with Codex
+
+I used **Codex** as the coding agent for FinDex end to end—from ideation through the bulk of product, engineering, and design implementation—on **GPT-5.6 Sol with Extra High effort** throughout. For planning against my requirements, and for complex surfaces like Brain, I used **plan mode** first, then implemented. The shipped Brain also runs on **GPT-5.6** (Terra / Sol) with host-owned routing. Codex built the system; GPT-5.6 runs Ask / Decide / Build for the user.
+
+### Where Codex accelerated the workflow
+
+- Plan-mode design passes on my requirements before code—especially Brain (Ask / Decide / Build, draft-then-verify, routing, sandbox trust boundary).
+- Turning the product thesis into a working Next.js app: finance engine, deterministic demo ledger, and the four money surfaces wired to one shell.
+- Implementing the Brain path: SSE Q&A with grounded tools, durable workspace runs, multi-file codegen, draft publish, sandbox validation, and independent review.
+- Iterating the hard parts under time pressure—CSP iframe runtime, signed capability broker, model/effort routing, and reload-safe build progress—without pausing for boilerplate.
+- Compressing design/engineering loops: try a UX cut, see it fail in the sandbox or on device, fix, ship the next cut.
+
+### Decisions I owned
+
+- **Product:** Brain-first (Ask / Decide / Build) over another opinionated dashboard; one connected money picture as the grounding layer for every answer and tool.
+- **UX:** Draft-first tool builds so users get something interactive quickly, with verification and polish continuing in the background.
+- **Routing:** Terra for ordinary Q&A and standard builds; Sol for complex planning, every review, and the single targeted repair—pay for depth only when complexity warrants it.
+- **Trust boundary:** Opaque sandboxed iframe, no browser-side compiler, signed session/artifact capability grants, explicit provider failures (never mock “live” data).
+- **Demo scope:** Synthetic ledger, no bank login—prove the Brain loop before production APIs.
+
+### How that shows up in the result
+
+A host-owned GPT-5.6 Brain on a Codex-built codebase: grounded questions, purchase decisions against cash flow, and finance-native tools kept in **My tools**—planned, validated, reviewed, and isolated by design.
+
 ## Product surfaces
 
-1. **Financial Brain** (`/demo/brain`) — default home. Page-aware Getting started guidance, Ask / Decide / Build help, grounded insight cards, purchase decision checks, and a natural-language tool builder with durable progress.
-2. **Spending** (`/demo/spending`) — searchable, filterable activity; recurring list and calendar; plain-language insight; Ask the Brain handoff.
-3. **Portfolio and net worth** (`/demo/portfolio`) — four reconciled synthetic U.S. accounts, holdings, allocation vs target, history, contributions, IRS references.
-4. **Income and cash flow** (`/demo/cash-flow`) — 30/60/90-day projections, reserve-protected safe-to-spend, transparent assumptions, account runway, decision CTA.
-5. **My tools** — FinDex durably plans, builds, validates, reviews, versions, and publishes isolated finance-native React tools (draft first, then verified) inside the Brain drawer.
+1. **Financial Brain** (`/demo/brain`) — default home. Ask / Decide / Build, grounded insight cards, purchase checks, and a natural-language tool builder with durable progress.
+2. **Spending** (`/demo/spending`) — searchable activity, recurring list/calendar, Ask the Brain handoff.
+3. **Portfolio and net worth** (`/demo/portfolio`) — four reconciled synthetic U.S. accounts, holdings, allocation vs target, history, contributions.
+4. **Income and cash flow** (`/demo/cash-flow`) — 30/60/90-day projections, reserve-protected safe-to-spend, transparent assumptions, decision CTA.
+5. **My tools** — plans, builds, validates, reviews, versions, and publishes isolated finance-native React tools (draft first, then verified).
 
-Cross-cutting UX: shared shell with desktop sidebar + mobile bottom nav, view transitions between money views, Brain handoff banners when you Ask from a detail page, and comfortable typography throughout.
+Cross-cutting: shared shell (desktop sidebar + mobile bottom nav), view transitions, Brain handoffs from detail pages.
 
-The frozen ledger prompt remains:
+Frozen ledger check:
 
 > How much did I spend on dining out last month?
 
-FinDex answers **$366.21 across 8 Dining transactions, June 1–30, 2026**, with provenance and a deterministic comparison to May.
+**$366.21 across 8 Dining transactions, June 1–30, 2026**, with provenance and a deterministic May comparison.
 
 ## Architecture
 
@@ -72,9 +96,9 @@ docs/                             Architecture, security, testing, and runbooks
 
 ## Host-owned GPT-5.6 routing
 
-Terra is the default for Q&A, complexity assessment, standard planning, and ordinary builds. Sol handles complex planning/building, every independent review, and the single targeted repair. Planning allows at most two paid attempts; building allows the initial pass plus one repair. Independent deadlines keep every Function step below 300 seconds, while Vercel Workflow gives the full run a 20-minute ceiling and resumable indexed progress. The exact routing, retry, deadline, and failure matrix lives in [Financial Brain workspace builds](docs/FINANCIAL_BRAIN_BUILDS.md).
+Runtime Brain uses GPT-5.6 with host-owned routing (not a free-form agent loop). Terra is default for Q&A, complexity assessment, standard planning, and ordinary builds. Sol handles complex planning/building, every independent review, and the single targeted repair. Planning allows at most two paid attempts; building allows the initial pass plus one repair. Function steps stay under 300 seconds; Vercel Workflow caps a full run at 20 minutes with resumable indexed progress. Matrix: [Financial Brain workspace builds](docs/FINANCIAL_BRAIN_BUILDS.md).
 
-The server raises build policy from declared capabilities and persistence requirements without paying for a redundant re-plan. Model, effort, attempt, response state, token usage, validation, and timings are recorded in each artifact’s collapsed technical provenance.
+The server raises build policy from declared capabilities and persistence requirements without a redundant re-plan. Model, effort, attempt, response state, token usage, validation, and timings land in each artifact’s collapsed technical provenance.
 
 ## Security boundary
 
