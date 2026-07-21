@@ -198,6 +198,28 @@ test("route navigation, refresh, and browser history preserve each money view", 
   await expect(page.getByRole("heading", { name: "Know what your money can handle next." })).toBeVisible();
 });
 
+test("spending plain-language insight is compact and structured", async ({ page }, testInfo) => {
+  await enterDemo(page);
+  await page.goto("/demo/spending");
+  const insight = page.getByRole("article", { name: "Plain-language spending read" });
+  await expect(insight.getByRole("heading", { level: 2 })).toBeVisible();
+  await expect(insight.getByRole("button", { name: "Ask why" })).toBeVisible();
+  await expect(insight.locator(".fd-insight-stats")).toBeVisible();
+  await expect(insight.locator(".fd-insight-stats dt")).toHaveCount(3);
+  const geometry = await insight.evaluate((el) => {
+    const rect = el.getBoundingClientRect();
+    const footer = el.querySelector(".fd-insight-footer");
+    const footerBottom = footer?.getBoundingClientRect().bottom ?? rect.bottom;
+    return {
+      height: rect.height,
+      unusedBottom: rect.bottom - footerBottom,
+    };
+  });
+  // Content should fill the card; absolute height can grow on stacked mobile stats.
+  expect(geometry.unusedBottom).toBeLessThanOrEqual(24);
+  expect(geometry.height).toBeLessThan(testInfo.project.name === "mobile-390" ? 420 : 320);
+});
+
 test("transaction filters and totals stay reconciled with displayed rows", async ({ page }) => {
   await enterDemo(page);
   await page.goto("/demo/spending");

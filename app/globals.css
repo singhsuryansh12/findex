@@ -2092,6 +2092,7 @@ button {
   grid-template-columns: 1.35fr .65fr;
   gap: 16px;
   margin-bottom: 16px;
+  align-items: start;
 }
 
 .fd-category-card,
@@ -2160,6 +2161,24 @@ button {
   color: white;
 }
 
+.fd-spending-insight {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  padding: 16px;
+  min-width: 0;
+}
+
+.fd-insight-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.fd-spending-insight .fd-eyebrow {
+  color: #9bd0b3;
+}
+
 .fd-insight-icon {
   width: 36px;
   height: 36px;
@@ -2171,16 +2190,92 @@ button {
   color: #9bd0b3;
 }
 
+.fd-insight-body {
+  display: grid;
+  gap: 8px;
+}
+
 .fd-spending-insight h2,
 .fd-assumptions-card h2 {
   margin: 7px 0;
   font-size: 20px;
 }
 
+.fd-spending-insight h2 {
+  margin: 0;
+  font-size: clamp(1.15rem, 1.5vw, 1.35rem);
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
 .fd-spending-insight p {
   color: rgba(255,255,255,.62);
   font-size: 11px;
   line-height: 1.55;
+}
+
+.fd-spending-insight .fd-insight-body p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: var(--fd-text-meta);
+  line-height: 1.5;
+}
+
+.fd-insight-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 10px 0 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.fd-insight-stats > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.fd-insight-stats dt {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.52);
+  font-size: var(--fd-text-caption);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.fd-insight-stats dd {
+  margin: 0;
+  color: #f4f7f5;
+  font-size: var(--fd-text-label);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.fd-insight-stats dd.positive {
+  color: #9bd0b3;
+}
+
+.fd-insight-stats dd.warning {
+  color: #f0c4a8;
+}
+
+.fd-insight-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 2px;
+}
+
+.fd-insight-footer small {
+  color: rgba(255, 255, 255, 0.48);
+  font-size: var(--fd-text-caption);
+  line-height: 1.35;
 }
 
 .fd-spending-insight button {
@@ -2191,6 +2286,22 @@ button {
   padding: 8px 11px;
   font-size: var(--fd-text-label);
   cursor: pointer;
+}
+
+.fd-insight-footer button {
+  flex: 0 0 auto;
+  font-weight: 700;
+}
+
+@media (max-width: 520px) {
+  .fd-insight-stats {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .fd-insight-footer {
+    flex-wrap: wrap;
+  }
 }
 
 .fd-table-card,
