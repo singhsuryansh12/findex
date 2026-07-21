@@ -72,6 +72,14 @@ export function SpendingView({ dataset, onAskBrain }: { dataset: DemoDataset; on
     return [...groups.entries()];
   }, [dataset.metadata.asOfDate, recurringSorted]);
   const subscriptionTotal = recurring.filter((item) => item.group === "Subscription").reduce((sum, item) => sum + Math.abs(item.amountCents), 0);
+  const topCategory = categories[0];
+  const periodLabel = (() => {
+    const start = filters.startDate ? new Date(`${filters.startDate}T12:00:00`) : null;
+    const end = filters.endDate ? new Date(`${filters.endDate}T12:00:00`) : null;
+    if (!start || !end) return "Selected period";
+    const fmt = (value: Date) => value.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    return `${fmt(start)} – ${fmt(end)}`;
+  })();
 
   return (
     <div className="fd-view fd-spending-view">
@@ -116,7 +124,38 @@ export function SpendingView({ dataset, onAskBrain }: { dataset: DemoDataset; on
                 {categories.map((category) => <button key={category.id} onClick={() => update("categoryId", filters.categoryId === category.id ? "" : category.id)} className={filters.categoryId === category.id ? "active" : ""}><span><b>{category.label}</b><em>{formatMoney(category.value)}</em></span><i><span style={{ width: `${(category.value / maximumCategory) * 100}%` }} /></i></button>)}
               </div>
             </article>
-            <article className="fd-card fd-spending-insight"><span className="fd-insight-icon"><Sparkles size={17} /></span><div><span className="fd-eyebrow">Plain-language read</span><h2>{netCents >= 0 ? "You kept more than you spent." : "Spending was ahead of income."}</h2><p>{netCents >= 0 ? `${formatMoney(netCents)} remained after recorded spending in this period.` : `${formatMoney(Math.abs(netCents))} more went out than came in during this period.`}</p><button onClick={() => onAskBrain(`Explain my spending from ${filters.startDate} to ${filters.endDate}`)}>Ask why</button></div></article>
+            <article className="fd-card fd-spending-insight" aria-label="Plain-language spending read">
+              <header className="fd-insight-header">
+                <span className="fd-insight-icon" aria-hidden="true"><Sparkles size={17} /></span>
+                <span className="fd-eyebrow">Plain-language read</span>
+              </header>
+              <div className="fd-insight-body">
+                <h2>{netCents >= 0 ? "You kept more than you spent." : "Spending was ahead of income."}</h2>
+                <p>
+                  {netCents >= 0
+                    ? `${formatMoney(netCents)} remained after recorded spending in this period.`
+                    : `${formatMoney(Math.abs(netCents))} more went out than came in during this period.`}
+                </p>
+              </div>
+              <dl className="fd-insight-stats">
+                <div>
+                  <dt>Net</dt>
+                  <dd className={netCents >= 0 ? "positive" : "warning"}>{formatMoney(netCents)}</dd>
+                </div>
+                <div>
+                  <dt>Spent</dt>
+                  <dd>{formatMoney(spendingCents)}</dd>
+                </div>
+                <div>
+                  <dt>Category</dt>
+                  <dd>{topCategory ? topCategory.label : "None"}</dd>
+                </div>
+              </dl>
+              <footer className="fd-insight-footer">
+                <small>{periodLabel}</small>
+                <button type="button" onClick={() => onAskBrain(`Explain my spending from ${filters.startDate} to ${filters.endDate}`)}>Ask why</button>
+              </footer>
+            </article>
           </section>
 
           <section className="fd-card fd-table-card">
