@@ -266,6 +266,27 @@ test("portfolio totals, allocation, account cards, and holdings reconcile", asyn
   await expect(table.locator("tbody tr").first()).toContainText("FXNAX");
 });
 
+test("portfolio card header actions open allocation help and chart table", async ({ page }) => {
+  await enterDemo(page);
+  await page.goto("/demo/portfolio");
+
+  const helpButton = page.getByRole("button", { name: "About this allocation target" });
+  await helpButton.click();
+  const help = page.getByRole("region", { name: "About this allocation target" });
+  await expect(help).toBeVisible();
+  await expect(help).toContainText("synthetic and not a recommendation");
+  await page.keyboard.press("Escape");
+  await expect(help).toHaveCount(0);
+
+  const chartTable = page.locator("#portfolio-chart-data table");
+  await expect(chartTable).toBeHidden();
+  await page.getByRole("button", { name: "Open chart data as a table" }).click();
+  await expect(chartTable).toBeVisible();
+  await expect(page.getByRole("button", { name: "Hide chart data table" })).toBeVisible();
+  await page.getByRole("button", { name: "Hide chart data table" }).click();
+  await expect(chartTable).toBeHidden();
+});
+
 test("cash-flow horizons update details without double-counting payroll", async ({ page }) => {
   await enterDemo(page);
   await page.goto("/demo/cash-flow");

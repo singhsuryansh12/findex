@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ArrowUpRight, BriefcaseBusiness, ChevronDown, CircleDollarSign, Info, Landmark, Sparkles } from "lucide-react";
 import { formatMoney, getPortfolioSnapshot } from "@/lib/finance/engine";
@@ -18,6 +18,9 @@ const allocationColors: Record<AssetClass, string> = {
 export function PortfolioView({ dataset, onAskBrain }: { dataset: DemoDataset; onAskBrain: (prompt: string) => void }) {
   const portfolio = useMemo(() => getPortfolioSnapshot(), []);
   const [sort, setSort] = useState<"value" | "name" | "asset">("value");
+  const [allocationHelpOpen, setAllocationHelpOpen] = useState(false);
+  const [chartTableOpen, setChartTableOpen] = useState(false);
+  const allocationHelpRef = useRef<HTMLDivElement>(null);
   const holdings = useMemo(() => [...portfolio.holdings].sort((a, b) => {
     if (sort === "name") return a.name.localeCompare(b.name);
     if (sort === "asset") return a.assetClass.localeCompare(b.assetClass) || b.marketValueCents - a.marketValueCents;
@@ -28,6 +31,31 @@ export function PortfolioView({ dataset, onAskBrain }: { dataset: DemoDataset; o
   const history = portfolio.history.map((point) => ({ ...point, gainsCents: point.valueCents - point.cumulativeContributionsCents }));
   const accountName = (id: string) => portfolio.accounts.find((account) => account.id === id)?.name ?? id;
   const assetLabel = (assetClass: AssetClass) => portfolio.allocation.find((item) => item.assetClass === assetClass)?.label ?? assetClass;
+
+  useEffect(() => {
+    if (!allocationHelpOpen) {
+      return;
+    }
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setAllocationHelpOpen(false);
+      }
+    }
+
+    function onPointerDown(event: MouseEvent) {
+      if (allocationHelpRef.current && !allocationHelpRef.current.contains(event.target as Node)) {
+        setAllocationHelpOpen(false);
+      }
+    }
+
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("mousedown", onPointerDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("mousedown", onPointerDown);
+    };
+  }, [allocationHelpOpen]);
 
   return (
     <div className="fd-view fd-portfolio-view">
@@ -45,7 +73,38 @@ export function PortfolioView({ dataset, onAskBrain }: { dataset: DemoDataset; o
 
       <section className="fd-portfolio-overview">
         <article className="fd-card fd-allocation-card">
-          <div className="fd-card-heading"><div><span className="fd-eyebrow">Allocation</span><h2>Close to Jordan’s saved target</h2><p>{largestDrift.label} has the largest drift at {Math.abs(largestDrift.driftBasisPoints / 100).toFixed(1)} percentage points {largestDrift.driftBasisPoints >= 0 ? "above" : "below"} target.</p><MetricHint>Drift is how far today’s mix sits from Jordan’s saved target — small gaps are normal.</MetricHint></div><Info size={16} /></div>
+          <div className="fd-card-heading">
+            <div>
+              <span className="fd-eyebrow">Allocation</span>
+              <h2>Close to Jordan’s saved target</h2>
+              <p>{largestDrift.label} has the largest drift at {Math.abs(largestDrift.driftBasisPoints / 100).toFixed(1)} percentage points {largestDrift.driftBasisPoints >= 0 ? "above" : "below"} target.</p>
+              <MetricHint>Drift is how far today’s mix sits from Jordan’s saved target — small gaps are normal.</MetricHint>
+            </div>
+            <div className="fd-card-action" ref={allocationHelpRef}>
+              <button
+                type="button"
+                className="fd-card-icon-button"
+                aria-label="About this allocation target"
+                aria-expanded={allocationHelpOpen}
+                aria-controls="allocation-help-popover"
+                onClick={() => setAllocationHelpOpen((open) => !open)}
+              >
+                <Info size={16} aria-hidden="true" />
+              </button>
+              {allocationHelpOpen ? (
+                <div
+                  id="allocation-help-popover"
+                  className="fd-card-help-popover"
+                  role="region"
+                  aria-label="About this allocation target"
+                >
+                  <strong>About this allocation</strong>
+                  <p>Jordan’s saved target is a demo mix used to show drift against today’s holdings. It is synthetic and not a recommendation.</p>
+                  <p>Drift is current weight minus target weight. Small gaps are normal as markets move between rebalances.</p>
+                </div>
+              ) : null}
+            </div>
+          </div>
           <div className="fd-allocation-bar" role="img" aria-label="Portfolio allocation: 61.1 percent U.S. equity, 20 percent international equity, 12.4 percent bonds, and 6.6 percent cash">
             {portfolio.allocation.map((item) => <span key={item.assetClass} style={{ width: `${item.basisPoints / 100}%`, background: allocationColors[item.assetClass] }} />)}
           </div>
@@ -54,11 +113,52 @@ export function PortfolioView({ dataset, onAskBrain }: { dataset: DemoDataset; o
         </article>
 
         <article className="fd-card fd-history-card">
-          <div className="fd-card-heading"><div><span className="fd-eyebrow">12-month path</span><h2>Growth, with contributions separated</h2><p>The ending value reconciles exactly to today’s holdings.</p></div><ArrowUpRight size={17} /></div>
+          <div className="fd-card-heading">
+            <div>
+              <span className="fd-eyebrow">12-month path</span>
+              <h2>Growth, with contributions separated</h2>
+              <p>The ending value reconciles exactly to today’s holdings.</p>
+            </div>
+            <button
+              type="button"
+              className="fd-card-icon-button"
+              aria-label={chartTableOpen ? "Hide chart data table" : "Open chart data as a table"}
+              aria-expanded={chartTableOpen}
+              aria-controls="portfolio-chart-data"
+              onClick={() => setChartTableOpen((open) => !open)}
+            >
+              <ArrowUpRight size={17} aria-hidden="true" />
+            </button>
+          </div>
           <div className="fd-portfolio-chart" role="img" aria-label="Twelve month portfolio value chart ending at 145,450 dollars">
             <ResponsiveContainer width="100%" height="100%"><AreaChart data={history} margin={{ top: 8, right: 4, bottom: 0, left: 0 }}><defs><linearGradient id="portfolioFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#3d9272" stopOpacity={0.28} /><stop offset="1" stopColor="#3d9272" stopOpacity={0.02} /></linearGradient></defs><CartesianGrid vertical={false} stroke="rgba(36,54,44,.08)" /><XAxis dataKey="month" tickFormatter={(value) => String(value).slice(5)} tick={{ fontSize: 10, fill: "#7f8b84" }} axisLine={false} tickLine={false} /><YAxis tickFormatter={(value) => `$${Math.round(Number(value) / 100_000)}k`} tick={{ fontSize: 10, fill: "#7f8b84" }} axisLine={false} tickLine={false} width={36} /><Tooltip formatter={(value) => formatMoney(Number(value))} labelFormatter={(value) => String(value)} /><Area type="monotone" dataKey="valueCents" name="Portfolio value" stroke="#2e765d" strokeWidth={2.5} fill="url(#portfolioFill)" /></AreaChart></ResponsiveContainer>
           </div>
-          <details className="fd-chart-data"><summary>View chart as a table</summary><table><thead><tr><th scope="col">Month</th><th scope="col">Value</th><th scope="col">Cumulative contributions</th></tr></thead><tbody>{portfolio.history.map((point) => <tr key={point.month}><th scope="row">{point.month}</th><td>{formatMoney(point.valueCents)}</td><td>{formatMoney(point.cumulativeContributionsCents)}</td></tr>)}</tbody></table></details>
+          <details
+            id="portfolio-chart-data"
+            className="fd-chart-data"
+            open={chartTableOpen}
+            onToggle={(event) => setChartTableOpen(event.currentTarget.open)}
+          >
+            <summary>View chart as a table</summary>
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Month</th>
+                  <th scope="col">Value</th>
+                  <th scope="col">Cumulative contributions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {portfolio.history.map((point) => (
+                  <tr key={point.month}>
+                    <th scope="row">{point.month}</th>
+                    <td>{formatMoney(point.valueCents)}</td>
+                    <td>{formatMoney(point.cumulativeContributionsCents)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </details>
         </article>
       </section>
 
