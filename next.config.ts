@@ -1,5 +1,9 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import type { NextConfig } from "next";
 import { withWorkflow } from "workflow/next";
+
+const configDir = path.dirname(fileURLToPath(import.meta.url));
 
 // Keep React/UI packages out of serverExternalPackages — Next/workflow already
 // transpile some of them, and that combination fails the production build.
@@ -18,6 +22,8 @@ const workspaceHostPackages = [
 ];
 
 const nextConfig: NextConfig = {
+  // Pin tracing to this app root so git worktrees are not confused by a parent lockfile.
+  outputFileTracingRoot: configDir,
   // Keep typescript bundled/traced normally. Marking it external makes
   // require.resolve("typescript/lib/tsc.js") return a non-runnable [externals] path.
   serverExternalPackages: ["esbuild"],

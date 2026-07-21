@@ -14,6 +14,7 @@ export default defineConfig({
   },
   webServer: {
     command: `npm run start -- --hostname 127.0.0.1 --port ${browserTestPort}`,
+    cwd: process.cwd(),
     url: `http://127.0.0.1:${browserTestPort}`,
     reuseExistingServer: false,
     timeout: 120_000,

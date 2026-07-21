@@ -184,6 +184,7 @@ export function FinDexApp({ dataset, snapshot }: { dataset: DemoDataset; snapsho
                 )}
                 <BrainGuidance
                   view="brain"
+                  showChips={false}
                   disabled={false}
                   onSelectChip={(prompt) => {
                     setHandoff(null);

@@ -30,6 +30,8 @@
   },
   "dependencies": {
     "@babel/parser": "^8.0.4",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
     "@vercel/analytics": "^2.0.1",
     "@vercel/sandbox": "^2.7.1",
     "@vercel/speed-insights": "^2.0.0",
@@ -40,12 +42,12 @@
     "openai": "^6.48.0",
     "react": "19.2.6",
     "react-dom": "19.2.6",
+    "react-markdown": "^10.1.0",
     "recharts": "^3.9.2",
+    "remark-gfm": "^4.0.1",
     "typescript": "5.9.3",
     "workflow": "4.6.0",
-    "zod": "^4.4.3",
-    "@types/react": "19.2.14",
-    "@types/react-dom": "19.2.3"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",

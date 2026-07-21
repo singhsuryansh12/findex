@@ -26,10 +26,13 @@ export function BrainGuidance({
   view,
   onSelectChip,
   disabled = false,
+  showChips = true,
 }: {
   view: DemoView;
   onSelectChip: (prompt: string) => void;
   disabled?: boolean;
+  /** When false, only tip + help are shown (avoids duplicating BrainPanel suggestions). */
+  showChips?: boolean;
 }) {
   const guidance = getGuidance(view);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -80,25 +83,29 @@ export function BrainGuidance({
   return (
     <div className="fd-brain-guidance" ref={rootRef}>
       {showTip ? (
-        <p className="fd-guidance-tip">
-          <span>Try a prompt below, or open help for what the Brain can do.</span>
+        <div className="fd-guidance-tip">
+          <p>Try a prompt below, or open help for what the Brain can do.</p>
           <button type="button" onClick={dismissTip}>
             Got it
           </button>
-        </p>
+        </div>
       ) : null}
 
-      <div className="fd-guidance-chips">
-        {guidance.chips.map((prompt) => (
-          <button
-            key={prompt}
-            type="button"
-            disabled={disabled}
-            onClick={() => onSelectChip(prompt)}
-          >
-            {prompt}
-          </button>
-        ))}
+      <div className={`fd-guidance-toolbar${showChips ? "" : " is-help-only"}`}>
+        {showChips ? (
+          <div className="fd-guidance-chips" aria-label="Suggested prompts">
+            {guidance.chips.map((prompt) => (
+              <button
+                key={prompt}
+                type="button"
+                disabled={disabled}
+                onClick={() => onSelectChip(prompt)}
+              >
+                {prompt}
+              </button>
+            ))}
+          </div>
+        ) : null}
 
         <div className="fd-guidance-help">
           <button
