@@ -2252,8 +2252,7 @@ button {
   color: var(--emerald);
 }
 
-.fd-spending-insight,
-.fd-assumptions-card {
+.fd-spending-insight {
   display: flex;
   align-items: flex-start;
   gap: 13px;
@@ -2295,8 +2294,7 @@ button {
   gap: 8px;
 }
 
-.fd-spending-insight h2,
-.fd-assumptions-card h2 {
+.fd-spending-insight h2 {
   margin: 7px 0;
   font-size: 20px;
 }
@@ -2911,8 +2909,24 @@ button {
 }
 
 .fd-assumptions-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  padding: 18px;
   background: #fffefa;
   color: var(--ink);
+  min-width: 0;
+}
+
+.fd-assumptions-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.fd-assumptions-card .fd-eyebrow {
+  color: var(--emerald);
 }
 
 .fd-assumptions-card .fd-insight-icon {
@@ -2920,11 +2934,40 @@ button {
   color: var(--emerald);
 }
 
-.fd-assumptions-card ul {
-  color: var(--muted);
-  font-size: var(--fd-text-body);
-  line-height: 1.55;
-  padding-left: 18px;
+.fd-assumptions-card h2 {
+  margin: 0;
+  font-size: clamp(1.05rem, 1.35vw, 1.2rem);
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.fd-assumptions-list {
+  list-style: none;
+  margin: 0;
+  padding: 10px 0 0;
+  display: grid;
+  gap: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.fd-assumptions-list li {
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  color: var(--ink-soft);
+  font-size: var(--fd-text-meta);
+  line-height: 1.5;
+}
+
+.fd-assumptions-list li::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  margin-top: 0.55em;
+  border-radius: 50%;
+  background: var(--emerald);
 }
 
 .fd-runway-details {
