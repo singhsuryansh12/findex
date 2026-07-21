@@ -692,6 +692,35 @@ test("reduced motion still navigates between views", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Your long-term money, in one picture." })).toBeVisible();
 });
 
+test("navigating between views resets window scroll to the top", async ({ page }) => {
+  await enterDemo(page);
+  await page.getByRole("button", { name: /^Spending/ }).click();
+  await expect(page).toHaveURL(/\/demo\/spending$/);
+  await expect(page.getByRole("heading", { name: "See where your money went." })).toBeVisible();
+
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  await expect.poll(async () => page.evaluate(() => window.scrollY)).toBeGreaterThan(100);
+
+  await page.getByRole("button", { name: /^Cash flow/ }).click();
+  await expect(page).toHaveURL(/\/demo\/cash-flow$/);
+  await expect(page.getByRole("heading", { name: "Know what your money can handle next." })).toBeVisible();
+  await expect.poll(async () => page.evaluate(() => window.scrollY)).toBe(0);
+
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  await expect.poll(async () => page.evaluate(() => window.scrollY)).toBeGreaterThan(100);
+
+  await page.getByRole("button", { name: /^Portfolio/ }).click();
+  await expect(page).toHaveURL(/\/demo\/portfolio$/);
+  await expect.poll(async () => page.evaluate(() => window.scrollY)).toBe(0);
+
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  await expect.poll(async () => page.evaluate(() => window.scrollY)).toBeGreaterThan(100);
+
+  await page.getByRole("button", { name: /^Financial Brain|^Brain$/ }).click();
+  await expect(page).toHaveURL(/\/demo\/brain$/);
+  await expect.poll(async () => page.evaluate(() => window.scrollY)).toBe(0);
+});
+
 test("spending table and brain composer meet comfortable font sizes", async ({ page }) => {
   await enterDemo(page);
   const brainInput = page.getByLabel("Message the Financial Brain");

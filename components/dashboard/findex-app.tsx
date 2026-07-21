@@ -68,6 +68,16 @@ export function FinDexApp({ dataset, snapshot }: { dataset: DemoDataset; snapsho
     viewRef.current = view;
   }, [view]);
 
+  // Shared document scroll persists across parked/swapped views; reset on each tab change.
+  // Temporarily disable CSS smooth scrolling so the jump is instant (html { scroll-behavior: smooth }).
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    const previous = root.style.scrollBehavior;
+    root.style.scrollBehavior = "auto";
+    window.scrollTo(0, 0);
+    root.style.scrollBehavior = previous;
+  }, [view]);
+
   // Clear handoff when navigating away from Brain (adjust during render — not an effect).
   if (view !== prevView) {
     setPrevView(view);
