@@ -52,4 +52,5 @@ next-env.d.ts
 /infrastructure/workspace-sandbox/test-results/
 /.swc
 .firecrawl/
+.superpowers/
 .worktrees/

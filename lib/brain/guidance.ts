@@ -28,7 +28,7 @@ const CAPABILITIES: GuidancePage["capabilities"] = [
   },
   {
     title: "Build a tool",
-    detail: "Create a custom calculator or planner in My tools.",
+    detail: "Create a planner or calculator that fits your way—and keep it in My tools.",
   },
 ];
 
@@ -41,7 +41,7 @@ const GUIDANCE: Record<DemoView, GuidancePage> = {
     ],
     helpTitle: "What can the Financial Brain do?",
     helpBody:
-      "Ask about your money, decide on a purchase, or build a custom tool. Everything is grounded in Jordan's demo spending, income, cash flow, and portfolio.",
+      "Ask, decide, or build. Everything runs on your money picture—no copy-paste into other calculators.",
     capabilities: CAPABILITIES,
   },
   spending: {
@@ -51,7 +51,7 @@ const GUIDANCE: Record<DemoView, GuidancePage> = {
     ],
     helpTitle: "Ask the Brain from Spending",
     helpBody:
-      "Explore where money went, spot recurring bills, and see what is coming up next from this page.",
+      "Explore where money went, spot recurring bills, and see what is coming up next—or ask the Brain to build a view around what you care about.",
     capabilities: CAPABILITIES,
   },
   portfolio: {
@@ -61,7 +61,7 @@ const GUIDANCE: Record<DemoView, GuidancePage> = {
     ],
     helpTitle: "Ask the Brain from Portfolio",
     helpBody:
-      "Check allocation balance, understand your largest holdings, and get plain-language portfolio context.",
+      "Check allocation balance, understand your largest holdings, or ask the Brain to build a tool around the positions that matter to you.",
     capabilities: CAPABILITIES,
   },
   "cash-flow": {
@@ -71,7 +71,7 @@ const GUIDANCE: Record<DemoView, GuidancePage> = {
     ],
     helpTitle: "Ask the Brain from Cash flow",
     helpBody:
-      "See what is safe to spend, how income and bills line up, and stress-test a big purchase against your forecast.",
+      "See what is safe to spend, stress-test a big purchase against this forecast, or build a planner that fits how you plan ahead.",
     capabilities: CAPABILITIES,
   },
 };

@@ -14,6 +14,9 @@ const eslintConfig = defineConfig([
     "app/.well-known/workflow/**",
     "infrastructure/workspace-sandbox/dist/**",
     "infrastructure/workspace-sandbox/test-results/**",
+    ".worktrees/**",
+    ".superpowers/**",
+    "test-results/**",
     "next-env.d.ts",
   ]),
 ]);

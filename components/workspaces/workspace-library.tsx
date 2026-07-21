@@ -34,7 +34,7 @@ export function WorkspaceLibrary({
     <section className="workspace-library" aria-label="Saved workspace library">
       <div className="workspace-library-main">
         <div>
-          <div className="section-eyebrow">Adaptive workspace library</div>
+          <div className="section-eyebrow">Your tool library</div>
           {editing ? (
             <form className="workspace-rename" onSubmit={(event) => { event.preventDefault(); if (name.trim()) onRename(name); setEditing(false); }}>
               <input aria-label="Workspace name" value={name} onChange={(event) => setName(event.target.value.slice(0, 80))} autoFocus />

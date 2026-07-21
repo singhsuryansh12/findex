@@ -1,6 +1,6 @@
-# Findex — Generative Financial OS
+# FinDex — Your money, your tools
 
-Findex is a Brain-first, AI-native personal finance demo. Its Financial Brain connects a deterministic spending ledger, U.S. portfolio, income, and forward cash flow so a user can ask a question or test a decision before opening a detailed view.
+FinDex is a Brain-first, AI-native personal finance demo. Finance is personal: your spending, portfolio, income, and cash flow are already connected, so you can ask a question, test a decision, or build the exact tool you need—and keep it in My tools.
 
 The public demo is intentionally anonymous and single-user. It never asks for bank credentials, moves money, executes trades, or represents model output as individualized financial advice.
 
@@ -105,7 +105,7 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) and choose **Login as Demo User**. Deterministic ledger questions work without credentials. Generative builds require `OPENAI_API_KEY`; missing credentials return an explicit failure and never a sample tool.
+Open [http://localhost:3000](http://localhost:3000) and choose **Try the demo**. Deterministic ledger questions work without credentials. Generative builds require `OPENAI_API_KEY`; missing credentials return an explicit failure and never a sample tool.
 
 Local builds use an isolated temporary directory with the same fixed TypeScript, bundle, Vitest, Chromium interaction, responsive screenshot, and review path as hosted builds:
 

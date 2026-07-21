@@ -9,9 +9,9 @@ export function WorkspaceArtifactCard({ artifact, onRetry }: { artifact: Workspa
     <article className="panel generated-card" aria-label={artifact.title}>
       <header className="generated-header">
         <div>
-          <div className="generated-badge"><Sparkles size={11} />Generated workspace · v{artifact.version}</div>
+          <div className="generated-badge"><Sparkles size={11} />Your tool · v{artifact.version}</div>
           <h2 className="panel-title">{artifact.title}</h2>
-          <div className="panel-subtitle">Built, checked, and reviewed by Findex</div>
+          <div className="panel-subtitle">Built, checked, and reviewed by FinDex</div>
         </div>
         <div className="validation-row" aria-label="Artifact validation summary">
           <span><CheckCircle2 size={11} />{artifact.validation.checks.length} checks</span>

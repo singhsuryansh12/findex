@@ -22,9 +22,9 @@ const instrumentSerif = localFont({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://findex-financial-os.vercel.app"),
-  title: "Findex — Your financial life, anticipated",
+  title: "FinDex — Your money, your tools",
   description:
-    "An AI-native financial operating system with predictive cashflow and tools built live by Codex.",
+    "Personal finance you shape yourself. Your data is already here—ask, decide, or build the tools you need and keep them.",
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "64x64" },
@@ -33,15 +33,15 @@ export const metadata: Metadata = {
     shortcut: "/favicon.ico",
   },
   openGraph: {
-    title: "Findex — Your financial life, anticipated",
-    description: "Predict cashflow, ask your money questions, and build the tools you need.",
+    title: "FinDex — Your money, your tools",
+    description: "Ask, decide, or build finance tools on your money picture—and keep them.",
     type: "website",
-    images: [{ url: "/findex-og.png", width: 1200, height: 630, alt: "Findex — Money, anticipated" }],
+    images: [{ url: "/findex-og.png", width: 1200, height: 630, alt: "FinDex — Your money, your tools" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Findex — Your financial life, anticipated",
-    description: "Predict cashflow, ask your money questions, and build the tools you need.",
+    title: "FinDex — Your money, your tools",
+    description: "Ask, decide, or build finance tools on your money picture—and keep them.",
     images: ["/findex-og.png"],
   },
 };

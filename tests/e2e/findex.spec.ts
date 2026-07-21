@@ -68,10 +68,12 @@ async function mockBrain(page: import("@playwright/test").Page) {
 
 async function enterDemo(page: import("@playwright/test").Page) {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: /Money,/ })).toBeVisible();
-  await page.getByRole("button", { name: "Login as Demo User" }).click();
+  await expect(page.getByText("Finance, personal by design")).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Your money,/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /your tools/i })).toBeVisible();
+  await page.getByRole("button", { name: "Try the demo" }).click();
   await expect(page).toHaveURL(/\/demo\/brain$/);
-  await expect(page.getByRole("heading", { name: "Ask about your money, or test a decision." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Your money, your tools." })).toBeVisible();
 }
 
 async function seedWorkspace(page: import("@playwright/test").Page) {
@@ -140,11 +142,21 @@ export default function App(){const [amount,setAmount]=useState(50000);return <m
 test("demo login lands on a calm Brain-first home", async ({ page }, testInfo) => {
   await enterDemo(page);
   await expect(page.getByRole("region", { name: "Financial Brain" })).toBeVisible();
+  await expect(page.getByText("Grounded in your full money picture")).toBeVisible();
+  await expect(page.getByText(/already connected/i)).toBeVisible();
+  await expect(page.getByText(/build a tool that fits how you track money/i)).toBeVisible();
+  await expect(page.getByLabel("Message the Financial Brain")).toHaveAttribute(
+    "placeholder",
+    "Ask, decide, or describe a tool to build…",
+  );
   await expect(page.getByRole("region", { name: "Financial glances" }).getByRole("button")).toHaveCount(3);
   await expect(page.getByRole("button", { name: "Can I afford a car next month?" })).toHaveCount(1);
   await expect(page.getByRole("button", { name: "What can the Financial Brain do?" })).toBeVisible();
   await expect(page.locator(".fd-guidance-cluster")).toContainText("Try a prompt below, or open help for what the Brain can do.");
   await expect(page.locator(".fd-guidance-kicker")).toHaveText("Getting started");
+  if (testInfo.project.name !== "mobile-390") {
+    await expect(page.getByRole("complementary", { name: "Primary navigation" })).toContainText("Ask, decide, build");
+  }
   // Tip bar matches Brain panel width; copy left, actions right on one row.
   await expect(page.locator(".fd-guidance-cluster")).toBeVisible();
   const guidanceGeometry = await page.locator(".fd-guidance-cluster").evaluate((cluster) => {
@@ -703,4 +715,73 @@ test("brain assistant replies render markdown structure", async ({ page }) => {
   await expect(reply.locator("strong").filter({ hasText: "$145,450 portfolio" })).toBeVisible();
   await expect(reply).not.toContainText("|---|");
   await expect(reply).not.toContainText("### Takeaway");
+});
+
+test("messaging surfaces personal finance you shape yourself", async ({ page }, testInfo) => {
+  await page.goto("/");
+  await expect(page.getByText("Finance, personal by design")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Your money, your tools." })).toBeVisible();
+  await expect(page.getByText(/spending, portfolio, and cash flow are already here/i)).toBeVisible();
+  await expect(page.getByText(/build the exact tool you need/i)).toBeVisible();
+  await expect(page.getByText("No account or financial credentials required")).toBeVisible();
+  await expect(page.getByText("Build on your money picture")).toBeVisible();
+
+  if (testInfo.project.name === "desktop") {
+    await expect(page.locator(".landing")).toHaveScreenshot("messaging-landing.png", {
+      mask: [page.locator(".preview-glances strong")],
+      maxDiffPixelRatio: 0.02,
+    });
+  }
+
+  await page.getByRole("button", { name: "Try the demo" }).click();
+  await expect(page.getByRole("heading", { name: "Your money, your tools." })).toBeVisible();
+  // Welcome copy lives in .brain-messages, which is intentionally hidden while pristine.
+  await expect(page.locator(".brain-messages")).toContainText("Three ways I can help");
+  await expect(page.locator(".brain-messages")).toContainText("Build a custom tool");
+
+  const tools = page.locator(".fd-tools-drawer");
+  await expect(tools.getByText("Build tools on your money picture")).toBeVisible();
+  await tools.locator("summary").click();
+  await expect(tools.getByText("Describe the tool you need.")).toBeVisible();
+  await expect(tools.getByText(/FinDex builds it on your demo data/i)).toBeVisible();
+  await expect(page.getByText("Your tool library")).toBeVisible();
+
+  await page.getByRole("button", { name: "What can the Financial Brain do?" }).click();
+  await expect(page.getByText(/fits your way/i)).toBeVisible();
+  await expect(page.getByText(/keep it in My tools/i)).toBeVisible();
+  await expect(page.getByText(/no copy-paste into other calculators/i)).toBeVisible();
+
+  if (testInfo.project.name === "desktop") {
+    await page.getByRole("button", { name: "What can the Financial Brain do?" }).click();
+    await expect(page.locator(".fd-brain-hero")).toHaveScreenshot("messaging-brain-hero.png", {
+      maxDiffPixelRatio: 0.02,
+    });
+    await expect(page.locator(".fd-tools-drawer")).toHaveScreenshot("messaging-my-tools-empty.png", {
+      maxDiffPixelRatio: 0.02,
+    });
+  }
+
+  await page.goto("/demo/spending");
+  await expect(page.getByText(/build a view that tracks what you care about/i)).toBeVisible();
+  if (testInfo.project.name === "desktop") {
+    await expect(page.locator(".fd-page-heading")).toHaveScreenshot("messaging-spending-header.png", {
+      maxDiffPixelRatio: 0.02,
+    });
+  }
+
+  await page.goto("/demo/portfolio");
+  await expect(page.getByText(/build a tool around the holdings that matter to you/i)).toBeVisible();
+  if (testInfo.project.name === "desktop") {
+    await expect(page.locator(".fd-page-heading")).toHaveScreenshot("messaging-portfolio-header.png", {
+      maxDiffPixelRatio: 0.02,
+    });
+  }
+
+  await page.goto("/demo/cash-flow");
+  await expect(page.getByText(/build a planner on this forecast/i)).toBeVisible();
+  if (testInfo.project.name === "desktop") {
+    await expect(page.locator(".fd-page-heading")).toHaveScreenshot("messaging-cash-flow-header.png", {
+      maxDiffPixelRatio: 0.02,
+    });
+  }
 });

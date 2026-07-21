@@ -8,7 +8,7 @@ async function capture(name: string, viewport: { width: number; height: number }
   const page = await context.newPage();
   await page.addInitScript(() => window.sessionStorage.setItem("findex-demo-entered-v1", "true"));
   await page.goto(`${baseURL}/demo/brain`, { waitUntil: "networkidle" });
-  await page.getByRole("heading", { name: "Ask about your money, or test a decision." }).waitFor();
+  await page.getByRole("heading", { name: "Your money, your tools." }).waitFor();
   await page.waitForTimeout(800);
   await page.screenshot({ path: `public/${name}.png`, fullPage: false });
   await context.close();

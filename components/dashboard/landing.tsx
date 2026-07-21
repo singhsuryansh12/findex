@@ -13,11 +13,11 @@ export function Landing({ forecast, onEnter }: { forecast: ForecastResult; onEnt
           <BrandLogo />
 
           <div>
-            <div className="landing-kicker">Your financial operating system</div>
-            <h1 className="landing-title serif">Money,<br /><em>anticipated.</em></h1>
-            <p className="landing-subtitle">Ask one question and see spending, income, cash flow, and investments connect into a clear next step.</p>
+            <div className="landing-kicker">Finance, personal by design</div>
+            <h1 className="landing-title serif">Your money,<br /><em>your tools.</em></h1>
+            <p className="landing-subtitle">Your spending, portfolio, and cash flow are already here. Ask, decide, or build the exact tool you need—and keep it.</p>
             <button className="primary-button" onClick={onEnter}>
-              Login as Demo User
+              Try the demo
               <span className="button-icon"><ArrowRight size={15} /></span>
             </button>
             <div className="landing-note"><span className="landing-note-dot" />No account or financial credentials required</div>
@@ -31,10 +31,10 @@ export function Landing({ forecast, onEnter }: { forecast: ForecastResult; onEnt
             <div className="preview-toolbar"><div className="preview-dots"><span /><span /><span /></div><div className="preview-pill"><Sparkles size={10} />Financial Brain</div></div>
             <div className="landing-brain-preview">
               <span className="preview-brain-orb"><Bot size={18} /></span>
-              <div className="landing-eyebrow">Your financial starting point</div>
+              <div className="landing-eyebrow">Build on your money picture</div>
               <h2 className="serif">What do you want<br />your money to do?</h2>
-              <div className="preview-composer">Ask about your money, or test a decision…<span><ArrowRight size={12} /></span></div>
-              <div className="preview-prompts"><span>Can I afford a car?</span><span>Where did my money go?</span></div>
+              <div className="preview-composer">Ask, decide, or describe a tool to build…<span><ArrowRight size={12} /></span></div>
+              <div className="preview-prompts"><span>Can I afford a car?</span><span>Build a safe-to-spend planner</span></div>
             </div>
             <div className="preview-glances"><div><ReceiptText size={12} /><span>Safe to spend<strong>{formatMoney(forecast.safeToSpendNowCents)}</strong></span></div><div><BriefcaseBusiness size={12} /><span>Net worth<strong>$180,558</strong></span></div><div><BarChart3 size={12} /><span>90-day outlook<strong>Covered</strong></span></div></div>
           </div>
