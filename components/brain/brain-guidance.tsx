@@ -109,12 +109,12 @@ export function BrainGuidance({
   );
 
   const tip = showTip ? (
-          <div className="fd-guidance-tip">
-            <p>Try a prompt below, or open help for what the Brain can do.</p>
-            <button type="button" onClick={dismissTip}>
-              Got it
-            </button>
-          </div>
+    <div className="fd-guidance-tip">
+      <p>Try a prompt below, or open help for what the Brain can do.</p>
+      <button type="button" onClick={dismissTip}>
+        Got it
+      </button>
+    </div>
   ) : null;
 
   const barClass = [
@@ -127,8 +127,16 @@ export function BrainGuidance({
   if (!showChips && showTip) {
     body = (
       <div className="fd-guidance-cluster">
-        {tip}
-        {helpControl}
+        <div className="fd-guidance-copy">
+          <span className="fd-guidance-kicker">Getting started</span>
+          <p>Try a prompt below, or open help for what the Brain can do.</p>
+        </div>
+        <div className="fd-guidance-actions">
+          <button type="button" className="fd-guidance-dismiss" onClick={dismissTip}>
+            Got it
+          </button>
+          {helpControl}
+        </div>
       </div>
     );
   } else {

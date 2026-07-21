@@ -3338,6 +3338,7 @@ button {
 .fd-brain-guidance {
   margin: 0 0 12px;
   padding: 0;
+  width: 100%;
   max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
@@ -3348,11 +3349,12 @@ button {
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
+  width: 100%;
   max-width: 100%;
   min-width: 0;
 }
 
-/* Brain home: tip + help sit on one compact row */
+/* Brain home: tip bar matches Brain panel width */
 .fd-guidance-bar.is-compact {
   flex-wrap: nowrap;
   justify-content: flex-start;
@@ -3363,28 +3365,73 @@ button {
   justify-content: flex-end;
 }
 
-/* One visual unit: tip copy + Got it + ? */
+.fd-guidance-bar.is-compact.has-tip {
+  display: block;
+}
+
+/* Full-width tip strip aligned with the chat panel below */
 .fd-guidance-cluster {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 2px;
-  max-width: min(100%, 34rem);
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  max-width: 100%;
   min-width: 0;
-  padding: 4px 4px 4px 0;
+  box-sizing: border-box;
+  padding: 12px 14px 12px 16px;
   border: 1px solid var(--line);
-  border-radius: 12px;
-  background: rgba(255, 255, 252, 0.72);
+  border-radius: 16px;
+  background: rgba(255, 255, 252, 0.82);
   /* Keep overflow visible so the help popover is not clipped. */
 }
 
-.fd-guidance-cluster .fd-guidance-tip {
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  max-width: none;
-  flex: 0 1 auto;
+.fd-guidance-copy {
+  display: grid;
+  gap: 3px;
   min-width: 0;
-  padding: 5px 8px 5px 12px;
+  flex: 1 1 auto;
+}
+
+.fd-guidance-kicker {
+  color: var(--emerald);
+  font-size: var(--fd-text-caption);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+.fd-guidance-copy > p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: var(--fd-text-meta);
+  line-height: 1.45;
+  max-width: 52ch;
+}
+
+.fd-guidance-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.fd-guidance-dismiss {
+  border: 0;
+  border-radius: 999px;
+  background: var(--emerald-pale);
+  color: var(--emerald);
+  font-size: var(--fd-text-caption);
+  font-weight: 700;
+  cursor: pointer;
+  padding: 7px 12px;
+  white-space: nowrap;
+}
+
+.fd-guidance-dismiss:hover {
+  background: rgba(46, 118, 93, 0.18);
+  color: var(--ink);
 }
 
 .fd-guidance-cluster .fd-guidance-help {
@@ -3393,12 +3440,24 @@ button {
 }
 
 .fd-guidance-cluster .fd-guidance-help > button {
-  width: 28px;
-  height: 28px;
-  min-height: 28px;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
+  width: 30px;
+  height: 30px;
+  min-height: 30px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 252, 0.9);
+}
+
+@media (max-width: 520px) {
+  .fd-guidance-cluster {
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .fd-guidance-actions {
+    margin-left: auto;
+  }
 }
 
 .fd-guidance-tip {
