@@ -60,7 +60,7 @@ export function PortfolioView({ dataset, onAskBrain }: { dataset: DemoDataset; o
   return (
     <div className="fd-view fd-portfolio-view">
       <header className="fd-page-heading">
-        <div><span className="fd-eyebrow">Portfolio & net worth</span><h1 className="serif">Your long-term money, in one picture.</h1><p>Four synthetic U.S. investment accounts, organized by purpose, tax treatment, and what they hold.</p></div>
+        <div><span className="fd-eyebrow">Portfolio & net worth</span><h1 className="serif">Your long-term money, in one picture.</h1><p>Four synthetic U.S. investment accounts by purpose and tax treatment—ask about them, or build a tool around the holdings that matter to you.</p></div>
         <button className="fd-ask-button" onClick={() => onAskBrain("How is my portfolio allocation balanced?")}><Sparkles size={15} />Ask the Brain</button>
       </header>
 

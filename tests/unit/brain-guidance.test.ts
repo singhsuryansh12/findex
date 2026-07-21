@@ -14,6 +14,28 @@ describe("brain guidance", () => {
     }
   });
 
+  it("frames Build as a personal tool kept in My tools", () => {
+    const build = getGuidance("brain").capabilities.find((capability) => capability.title === "Build a tool");
+    expect(build?.detail).toMatch(/your way/i);
+    expect(build?.detail).toMatch(/My tools/);
+  });
+
+  it("keeps help bodies free of OS and Codex marketing language", () => {
+    for (const view of views) {
+      const page = getGuidance(view);
+      const blob = [page.helpBody, ...page.capabilities.map((capability) => capability.detail)].join("\n");
+      expect(blob).not.toMatch(/operating system/i);
+      expect(blob).not.toMatch(/Codex/);
+      expect(blob).not.toMatch(/Jordan/);
+    }
+  });
+
+  it("grounds brain help in money picture plus build agency", () => {
+    const brain = getGuidance("brain");
+    expect(brain.helpBody).toMatch(/money picture/i);
+    expect(brain.helpBody).toMatch(/build/i);
+  });
+
   it("creates a spending handoff with a plain-language label", () => {
     const handoff = createHandoff("spending", "Where did my money go last month?");
     expect(handoff).toEqual({

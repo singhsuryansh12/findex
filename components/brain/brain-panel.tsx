@@ -82,7 +82,7 @@ export function BrainPanel({
   const [messages, setMessages] = useState<Message[]>([{
     id: "intro",
     role: "assistant",
-    content: "I can help in three ways: Ask about your money, Decide on a purchase, or Build a custom tool. I’m grounded in Jordan’s demo spending, income, cash flow, and portfolio.",
+    content: "Three ways I can help: Ask about your money, Decide on a purchase, or Build a custom tool—all on your spending, income, cash flow, and portfolio.",
   }]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -541,7 +541,7 @@ export function BrainPanel({
   return (
     <section className={`brain-panel${isPristine ? " is-pristine" : ""}`} aria-label="Financial Brain">
       <header className="brain-header">
-        <div className="brain-title-row"><span className="brain-orb"><Sparkles size={15} /></span><div><div className="brain-title">Financial Brain</div><div className="brain-status">{activeWorkspace ? `Editing ${activeWorkspace.title} · v${activeWorkspace.version}${activeWorkspace.qualityTier === "draft" ? " · draft" : ""}` : "Grounded in your complete demo picture"}</div></div></div>
+        <div className="brain-title-row"><span className="brain-orb"><Sparkles size={15} /></span><div><div className="brain-title">Financial Brain</div><div className="brain-status">{activeWorkspace ? `Editing ${activeWorkspace.title} · v${activeWorkspace.version}${activeWorkspace.qualityTier === "draft" ? " · draft" : ""}` : "Grounded in your full money picture"}</div></div></div>
       </header>
       <div className="brain-messages" aria-live="polite" ref={messagesRef}>
         {messages.map((message) => (
@@ -610,7 +610,7 @@ export function BrainPanel({
         </form>
       )}
       <form className="brain-composer" onSubmit={submit}>
-        <textarea ref={inputRef} className="brain-input" value={input} onChange={(event) => setInput(event.target.value.slice(0, 1_000))} onKeyDown={onComposerKeyDown} placeholder={pending ? "Answer the questions above…" : activeWorkspace ? "Ask for a refinement, or describe what to change…" : "Ask about your money, or describe a tool…"} aria-label="Message the Financial Brain" aria-describedby="brain-composer-hint" />
+        <textarea ref={inputRef} className="brain-input" value={input} onChange={(event) => setInput(event.target.value.slice(0, 1_000))} onKeyDown={onComposerKeyDown} placeholder={pending ? "Answer the questions above…" : activeWorkspace ? "Ask for a refinement, or describe what to change…" : "Ask, decide, or describe a tool to build…"} aria-label="Message the Financial Brain" aria-describedby="brain-composer-hint" />
         <div className="composer-footer"><span className="composer-hint" id="brain-composer-hint">Enter to send · Shift+Enter for a new line · {input.length}/1000 · Educational, not advice</span><button className="send-button" disabled={busy || !input.trim()} aria-label="Send message"><ArrowUp size={14} /></button></div>
       </form>
     </section>

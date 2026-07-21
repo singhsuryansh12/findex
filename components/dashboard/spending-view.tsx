@@ -84,7 +84,7 @@ export function SpendingView({ dataset, onAskBrain }: { dataset: DemoDataset; on
   return (
     <div className="fd-view fd-spending-view">
       <header className="fd-page-heading">
-        <div><span className="fd-eyebrow">Spending & activity</span><h1 className="serif">See where your money went.</h1><p>Search every demo transaction, then zoom out to bills, subscriptions, and recurring investments.</p></div>
+        <div><span className="fd-eyebrow">Spending & activity</span><h1 className="serif">See where your money went.</h1><p>Search every demo transaction, zoom out to bills and subscriptions, then ask the Brain—or build a view that tracks what you care about.</p></div>
         <button className="fd-ask-button" onClick={() => onAskBrain("Where did my money go last month?")}><Sparkles size={15} />Ask the Brain</button>
       </header>
 

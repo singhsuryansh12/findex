@@ -34,7 +34,7 @@ const SESSION_KEY = "findex-demo-entered-v1";
 const ACTIVE_WORKSPACE_KEY = "findex-active-workspace-v2";
 
 const navItems: Array<{ view: DemoView; label: string; description: string; icon: typeof Bot }> = [
-  { view: "brain", label: "Financial Brain", description: "Ask and decide", icon: Bot },
+  { view: "brain", label: "Financial Brain", description: "Ask, decide, build", icon: Bot },
   { view: "spending", label: "Spending", description: "Activity & recurring", icon: ReceiptText },
   { view: "portfolio", label: "Portfolio", description: "Holdings & net worth", icon: BriefcaseBusiness },
   { view: "cash-flow", label: "Cash flow", description: "Income & outlook", icon: BarChart3 },
@@ -180,7 +180,7 @@ export function FinDexApp({ dataset, snapshot }: { dataset: DemoDataset; snapsho
         <div className="fd-view-stage">
           {view === "brain" && (
             <main className="fd-brain-home">
-              <header className="fd-brain-hero"><span className="fd-eyebrow"><Sparkles size={12} />Your financial starting point</span><h1 className="serif">Ask about your money,<br /><em>or test a decision.</em></h1><p>One place to connect spending, income, cash flow, and investments—then understand what to do next.</p></header>
+              <header className="fd-brain-hero"><span className="fd-eyebrow"><Sparkles size={12} />Your money, your starting point</span><h1 className="serif">Your money,<br /><em>your tools.</em></h1><p>Spending, portfolio, and cash flow are already connected. Ask a question, test a decision, or build a tool that fits how you track money.</p></header>
 
               <section className="fd-brain-stage" ref={brainStageRef}>
                 {handoff && (
@@ -218,8 +218,8 @@ export function FinDexApp({ dataset, snapshot }: { dataset: DemoDataset; snapsho
               <section className="fd-today-brief"><div className="fd-brief-heading"><span className="fd-eyebrow">Today’s brief</span><h2>Two things worth knowing.</h2></div><article><span>01</span><div><strong>Your lowest cash point is covered.</strong><p>Checking bottoms at {formatMoney(snapshot.forecast.lowestBalanceCents)} on Jul 24, above the protected buffer.</p><button onClick={() => navigate("cash-flow")}>See the forecast</button></div></article><article><span>02</span><div><strong>Your portfolio is close to its saved target.</strong><p>The largest allocation drift is only 2.6 percentage points, in bonds.</p><button onClick={() => navigate("portfolio")}>Review allocation</button></div></article></section>
 
               <details className="fd-tools-drawer" ref={generatedRef} open={Boolean(artifact)}>
-                <summary><span><Bot size={17} /><span><strong>My tools</strong><small>{projects.length ? `${projects.length} saved workspace${projects.length === 1 ? "" : "s"}` : "Build and save a custom financial workspace"}</small></span></span><ChevronRight size={16} /></summary>
-                <div className="fd-tools-content"><WorkspaceLibrary projects={projects} activeProjectId={artifact?.projectId ?? null} versions={versions} storageWarning={storageWarning} onNew={newWorkspace} onSelect={(projectId) => void selectWorkspace(projectId)} onRename={(name) => { if (artifact) void renameWorkspaceProject(artifact.projectId, name).then(() => loadLibrary(artifact.projectId)); }} onDuplicate={() => void duplicateWorkspace()} onDelete={() => { if (!artifact || !window.confirm(`Delete ${artifact.title} and all of its versions?`)) return; void deleteWorkspaceProject(artifact.projectId).then(() => loadLibrary(null)); }} onRestore={(version) => void restoreVersion(version)} />{artifact ? <WorkspaceArtifactCard artifact={artifact} /> : <div className="fd-empty-tools"><Sparkles size={18} /><div><strong>Describe the tool you need in the Brain.</strong><p>Findex can build, test, save, and revise a custom planner or visualization.</p></div></div>}</div>
+                <summary><span><Bot size={17} /><span><strong>My tools</strong><small>{projects.length ? `${projects.length} saved tool${projects.length === 1 ? "" : "s"}` : "Build tools on your money picture"}</small></span></span><ChevronRight size={16} /></summary>
+                <div className="fd-tools-content"><WorkspaceLibrary projects={projects} activeProjectId={artifact?.projectId ?? null} versions={versions} storageWarning={storageWarning} onNew={newWorkspace} onSelect={(projectId) => void selectWorkspace(projectId)} onRename={(name) => { if (artifact) void renameWorkspaceProject(artifact.projectId, name).then(() => loadLibrary(artifact.projectId)); }} onDuplicate={() => void duplicateWorkspace()} onDelete={() => { if (!artifact || !window.confirm(`Delete ${artifact.title} and all of its versions?`)) return; void deleteWorkspaceProject(artifact.projectId).then(() => loadLibrary(null)); }} onRestore={(version) => void restoreVersion(version)} />{artifact ? <WorkspaceArtifactCard artifact={artifact} /> : <div className="fd-empty-tools"><Sparkles size={18} /><div><strong>Describe the tool you need.</strong><p>FinDex builds it on your demo data, then you save and reuse it here.</p></div></div>}</div>
               </details>
             </main>
           )}

@@ -25,7 +25,7 @@ export function CashFlowView({ dataset, onAskBrain }: { dataset: DemoDataset; on
   return (
     <div className="fd-view fd-cashflow-view">
       <header className="fd-page-heading">
-        <div><span className="fd-eyebrow">Income & cash flow</span><h1 className="serif">Know what your money can handle next.</h1><p>Take-home pay, upcoming commitments, typical spending, and investing—without counting the same dollar twice.</p></div>
+        <div><span className="fd-eyebrow">Income & cash flow</span><h1 className="serif">Know what your money can handle next.</h1><p>Take-home pay, commitments, spending, and investing—without double-counting. Stress-test a decision, or build a planner on this forecast.</p></div>
         <button className="fd-ask-button" onClick={() => onAskBrain("What is safe to spend and how does my cash flow look?")}><Sparkles size={15} />Ask the Brain</button>
       </header>
 
