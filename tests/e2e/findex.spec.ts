@@ -36,6 +36,25 @@ async function mockBrain(page: import("@playwright/test").Page) {
             },
             { type: "assistant_delta", delta: "This purchase is not covered by the modeled cash-flow buffer." },
           ]
+        : message.includes("portfolio allocation")
+          ? [
+              {
+                type: "assistant_delta",
+                delta: [
+                  "Your **$145,450 portfolio** is close to Jordan’s saved target.",
+                  "",
+                  "### Takeaway",
+                  "",
+                  "| Asset class | Current | Target | Difference |",
+                  "|---|---|---|---|",
+                  "| U.S. equity | **61.1%** | 60.0% | **+1.1 pts** |",
+                  "| Bonds | **12.4%** | 15.0% | **-2.6 pts** |",
+                  "",
+                  "- Keep contributions on autopilot",
+                  "- Recheck after the next paycheck",
+                ].join("\n"),
+              },
+            ]
         : [
             { type: "workspace_failed", code: "BUILD_UNAVAILABLE", message: "Findex couldn't start a workspace build because secure generation is unavailable. Nothing was published.", recoverable: true },
           ];
@@ -122,7 +141,9 @@ test("demo login lands on a calm Brain-first home", async ({ page }, testInfo) =
   await enterDemo(page);
   await expect(page.getByRole("region", { name: "Financial Brain" })).toBeVisible();
   await expect(page.getByRole("region", { name: "Financial glances" }).getByRole("button")).toHaveCount(3);
-  await expect(page.getByRole("button", { name: "Can I afford a car next month?" }).first()).toBeVisible();
+  await expect(page.getByRole("button", { name: "Can I afford a car next month?" })).toHaveCount(1);
+  await expect(page.getByRole("button", { name: "What can the Financial Brain do?" })).toBeVisible();
+  await expect(page.locator(".fd-guidance-tip")).toContainText("Try a prompt below, or open help for what the Brain can do.");
   await expect(page.locator(".recharts-wrapper")).toHaveCount(0);
   if (testInfo.project.name === "mobile-390") {
     await expect(page.getByRole("navigation", { name: "Mobile navigation" }).getByRole("button")).toHaveCount(4);
@@ -459,4 +480,17 @@ test("spending table and brain composer meet comfortable font sizes", async ({ p
   await expect(cell).toBeVisible();
   const tableSize = await cell.evaluate((el) => Number.parseFloat(getComputedStyle(el).fontSize));
   expect(tableSize).toBeGreaterThanOrEqual(13);
+});
+
+test("brain assistant replies render markdown structure", async ({ page }) => {
+  await mockBrain(page);
+  await enterDemo(page);
+  await page.getByRole("region", { name: "Financial Brain" }).getByRole("button", { name: "How is my portfolio allocation balanced?" }).click();
+  const reply = page.locator(".message.assistant .brain-markdown").filter({ hasText: "$145,450 portfolio" });
+  await expect(reply.getByRole("heading", { name: "Takeaway" })).toBeVisible({ timeout: 15_000 });
+  await expect(reply.locator("table")).toBeVisible();
+  await expect(reply.getByRole("columnheader", { name: "Asset class" })).toBeVisible();
+  await expect(reply.locator("strong").filter({ hasText: "$145,450 portfolio" })).toBeVisible();
+  await expect(reply).not.toContainText("|---|");
+  await expect(reply).not.toContainText("### Takeaway");
 });

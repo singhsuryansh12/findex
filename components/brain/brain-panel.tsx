@@ -7,6 +7,7 @@ import type { BrainEvent, BrainInsightCard } from "@/lib/brain/contracts";
 import { getTryNextPrompts } from "@/lib/brain/guidance";
 import type { WorkspaceArtifactV2, WorkspaceProgressPhase } from "@/lib/workspaces/contracts";
 import { clearActiveBrainRun, getActiveBrainRun, saveActiveBrainRun, type ActiveBrainRun } from "@/lib/workspaces/persistence";
+import { BrainMarkdown } from "@/components/brain/brain-markdown";
 
 type Message = { id: string; role: "user" | "assistant"; content: string; provenance?: string; insight?: BrainInsightCard };
 type PendingClarification = { token: string; questions: string[]; title: string };
@@ -522,7 +523,11 @@ export function BrainPanel({
       <div className="brain-messages" aria-live="polite" ref={messagesRef}>
         {messages.map((message) => (
           <div className={`message ${message.role}`} key={message.id}>
-            {message.content || (message.role === "assistant" && busy ? "…" : "")}
+            {message.role === "assistant"
+              ? (message.content
+                ? <BrainMarkdown content={message.content} />
+                : (busy ? "…" : null))
+              : (message.content || null)}
             {message.provenance && <div className="provenance-chip"><Database size={9} />{message.provenance}</div>}
             {message.insight && (
               <article className={`brain-insight-card ${message.insight.status ?? ""}`} aria-label={message.insight.title}>
