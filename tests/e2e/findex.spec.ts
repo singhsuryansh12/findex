@@ -205,7 +205,7 @@ test("getting started guidance cluster stays consistent across demo pages", asyn
 
   for (const path of ["/demo/brain", "/demo/spending", "/demo/portfolio", "/demo/cash-flow"] as const) {
     await page.goto(path);
-    const cluster = page.locator(".fd-guidance-cluster");
+    const cluster = page.locator(".fd-guidance-cluster").filter({ visible: true });
     await expect(cluster).toBeVisible();
     await expect(cluster.locator(".fd-guidance-kicker")).toHaveText("Getting started");
     await expect(cluster).toContainText("Try a prompt below, or open help for what the Brain can do.");
@@ -242,8 +242,8 @@ test("getting started guidance cluster stays consistent across demo pages", asyn
     expect(geometry!.copyLeftOfActions).toBe(true);
 
     if (path === "/demo/spending") {
-      await expect(page.locator(".fd-guidance-chips")).toBeVisible();
-      await expect(page.locator(".fd-guidance-toolbar .fd-guidance-help")).toHaveCount(0);
+      await expect(page.locator(".fd-guidance-chips").filter({ visible: true })).toBeVisible();
+      await expect(page.locator("main:not([hidden]) .fd-guidance-toolbar .fd-guidance-help")).toHaveCount(0);
     }
   }
 });
@@ -784,4 +784,153 @@ test("messaging surfaces personal finance you shape yourself", async ({ page }, 
       maxDiffPixelRatio: 0.02,
     });
   }
+});
+
+test("brain build progress survives navigating to spending and back", async ({ page }) => {
+  await enterDemo(page);
+  let brainPosts = 0;
+  await page.route(/\/api\/brain$/, async (route) => {
+    if (route.request().method() !== "POST") return route.fallback();
+    brainPosts += 1;
+    await route.fulfill({
+      status: 200,
+      headers: { "content-type": "text/event-stream; charset=utf-8", "cache-control": "no-store" },
+      body: `data: ${JSON.stringify({ type: "workspace_started", runId: "run-nav-persist", accessToken: "signed-run-token" })}\n\n`,
+    });
+  });
+  await page.route(/\/api\/brain\/runs\/run-nav-persist\/events/, async (route) => {
+    await route.fulfill({
+      status: 200,
+      headers: { "content-type": "text/event-stream; charset=utf-8", "cache-control": "no-store" },
+      body: `id: 0\ndata: ${JSON.stringify({ type: "build_progress", phase: "coding", detail: "Findex is building the application" })}\n\n`,
+    });
+  });
+  await page.route(/\/api\/brain\/runs\/run-nav-persist$/, async (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({ status: "running", returnValue: null }),
+  }));
+
+  const input = page.getByLabel("Message the Financial Brain");
+  await input.fill("Build a session persistence lab");
+  await input.press("Enter");
+  await expect(page.locator(".brain-progress")).toContainText("Findex is building the application");
+  await expect(page.getByText("Build a session persistence lab")).toBeVisible();
+
+  await page.getByRole("button", { name: /^Spending/ }).click();
+  await expect(page).toHaveURL(/\/demo\/spending$/);
+  await expect(page.getByRole("heading", { name: "See where your money went." })).toBeVisible();
+  await expect(page.locator(".fd-brain-home")).toBeHidden();
+  expect(brainPosts).toBe(1);
+
+  await page.getByRole("button", { name: /^Financial Brain|^Brain$/ }).click();
+  await expect(page).toHaveURL(/\/demo\/brain$/);
+  await expect(page.locator(".brain-progress")).toContainText("Findex is building the application");
+  await expect(page.getByText("Build a session persistence lab")).toBeVisible();
+  expect(brainPosts).toBe(1);
+});
+
+test("assessing brain request survives leaving brain before workspace_started", async ({ page }) => {
+  await enterDemo(page);
+  let brainPosts = 0;
+  await page.route(/\/api\/brain$/, async (route) => {
+    if (route.request().method() !== "POST") return route.fallback();
+    brainPosts += 1;
+    await new Promise((resolve) => setTimeout(resolve, 2_500));
+    await route.fulfill({
+      status: 200,
+      headers: { "content-type": "text/event-stream; charset=utf-8", "cache-control": "no-store" },
+      body: [
+        `data: ${JSON.stringify({ type: "build_progress", phase: "assessing", detail: "Findex is assessing the request" })}\n\n`,
+        `data: ${JSON.stringify({ type: "build_progress", phase: "planning", detail: "Findex is planning the tool" })}\n\n`,
+        `data: ${JSON.stringify({ type: "workspace_started", runId: "run-assess-nav", accessToken: "signed-run-token" })}\n\n`,
+      ].join(""),
+    });
+  });
+  await page.route(/\/api\/brain\/runs\/run-assess-nav\/events/, async (route) => {
+    await route.fulfill({
+      status: 200,
+      headers: { "content-type": "text/event-stream; charset=utf-8", "cache-control": "no-store" },
+      body: `id: 0\ndata: ${JSON.stringify({ type: "build_progress", phase: "coding", detail: "Findex is building the application" })}\n\n`,
+    });
+  });
+  await page.route(/\/api\/brain\/runs\/run-assess-nav$/, async (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({ status: "running", returnValue: null }),
+  }));
+
+  const input = page.getByLabel("Message the Financial Brain");
+  await input.fill("Build a prestart persistence lab");
+  await input.press("Enter");
+  await expect(page.locator(".brain-progress")).toBeVisible();
+
+  await page.getByRole("button", { name: /^Portfolio/ }).click();
+  await expect(page).toHaveURL(/\/demo\/portfolio$/);
+  expect(brainPosts).toBe(1);
+
+  await page.getByRole("button", { name: /^Financial Brain|^Brain$/ }).click();
+  await expect(page).toHaveURL(/\/demo\/brain$/);
+  await expect(page.locator(".brain-progress")).toContainText("Findex is building the application", { timeout: 15_000 });
+  await expect(page.getByText("Build a prestart persistence lab")).toBeVisible();
+  expect(brainPosts).toBe(1);
+});
+
+test("tool ready toast appears when a draft publishes off brain", async ({ page }) => {
+  await enterDemo(page);
+  const prior = await seedWorkspace(page);
+  const published: WorkspaceArtifactV2 = {
+    ...prior,
+    id: crypto.randomUUID(),
+    version: 3,
+    parentVersionId: prior.id,
+    title: "Off-brain draft lab",
+    prompt: "Build an off-brain draft lab",
+    plan: { ...prior.plan, title: "Off-brain draft lab" },
+    qualityTier: "draft",
+    model: "gpt-5.6-terra",
+    generatedAt: new Date().toISOString(),
+  };
+  let terminal = false;
+
+  await page.route(/\/api\/brain$/, async (route) => {
+    if (route.request().method() !== "POST") return route.fallback();
+    await route.fulfill({
+      status: 200,
+      headers: { "content-type": "text/event-stream; charset=utf-8", "cache-control": "no-store" },
+      body: `data: ${JSON.stringify({ type: "workspace_started", runId: "run-toast", accessToken: "signed-run-token" })}\n\n`,
+    });
+  });
+  await page.route(/\/api\/brain\/runs\/run-toast\/events/, async (route) => {
+    const event = terminal
+      ? { type: "workspace_published", artifact: published }
+      : { type: "build_progress", phase: "coding", detail: "Findex is building the application" };
+    await route.fulfill({
+      status: 200,
+      headers: { "content-type": "text/event-stream; charset=utf-8", "cache-control": "no-store" },
+      body: `id: ${terminal ? 1 : 0}\ndata: ${JSON.stringify(event)}\n\n`,
+    });
+  });
+  await page.route(/\/api\/brain\/runs\/run-toast$/, async (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify(terminal
+      ? { status: "completed", returnValue: { status: "completed", artifact: published } }
+      : { status: "running", returnValue: null }),
+  }));
+
+  const input = page.getByLabel("Message the Financial Brain");
+  await input.fill("Build an off-brain draft lab");
+  await input.press("Enter");
+  await expect(page.locator(".brain-progress")).toContainText("Findex is building the application");
+
+  await page.getByRole("button", { name: /^Spending/ }).click();
+  await expect(page).toHaveURL(/\/demo\/spending$/);
+  terminal = true;
+  await expect(page.getByRole("status", { name: "Tool build ready" })).toContainText("Your tool is ready", { timeout: 15_000 });
+  await expect(page.getByRole("status", { name: "Tool build ready" })).toContainText("Off-brain draft lab");
+  await page.getByRole("button", { name: "View tool" }).click();
+  await expect(page).toHaveURL(/\/demo\/brain$/);
+  await expect(page.getByRole("heading", { name: "Off-brain draft lab" }).first()).toBeVisible();
+  await expect(page.getByRole("status", { name: "Tool build ready" })).toHaveCount(0);
 });
