@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { getGuidance, GUIDANCE_DISMISS_KEY, type DemoView } from "@/lib/brain/guidance";
 
 const GUIDANCE_DISMISS_EVENT = "findex-guidance-dismiss";
@@ -31,7 +31,7 @@ export function BrainGuidance({
   view: DemoView;
   onSelectChip: (prompt: string) => void;
   disabled?: boolean;
-  /** When false, only tip + help are shown (avoids duplicating BrainPanel suggestions). */
+  /** When false, chips are omitted (Brain home already shows prompts in the panel). */
   showChips?: boolean;
 }) {
   const guidance = getGuidance(view);
@@ -108,63 +108,50 @@ export function BrainGuidance({
     </div>
   );
 
-  const tip = showTip ? (
-    <div className="fd-guidance-tip">
-      <p>Try a prompt below, or open help for what the Brain can do.</p>
-      <button type="button" onClick={dismissTip}>
-        Got it
-      </button>
-    </div>
-  ) : null;
-
-  const barClass = [
-    "fd-guidance-bar",
-    showChips ? "has-chips" : "is-compact",
-    showTip ? "has-tip" : "tip-dismissed",
-  ].join(" ");
-
-  let body: ReactNode;
-  if (!showChips && showTip) {
-    body = (
-      <div className="fd-guidance-cluster">
-        <div className="fd-guidance-copy">
-          <span className="fd-guidance-kicker">Getting started</span>
-          <p>Try a prompt below, or open help for what the Brain can do.</p>
-        </div>
-        <div className="fd-guidance-actions">
-          <button type="button" className="fd-guidance-dismiss" onClick={dismissTip}>
-            Got it
-          </button>
-          {helpControl}
-        </div>
-      </div>
-    );
-  } else {
-    body = (
-      <>
-        {tip}
-        {showChips ? (
-          <div className="fd-guidance-chips" aria-label="Suggested prompts">
-            {guidance.chips.map((prompt) => (
-              <button
-                key={prompt}
-                type="button"
-                disabled={disabled}
-                onClick={() => onSelectChip(prompt)}
-              >
-                {prompt}
-              </button>
-            ))}
-          </div>
-        ) : null}
-        {helpControl}
-      </>
-    );
-  }
+  const showChipRow = showChips;
+  const showHelpInToolbar = !showTip;
 
   return (
     <div className="fd-brain-guidance" ref={rootRef}>
-      <div className={barClass}>{body}</div>
+      {showTip ? (
+        <div className="fd-guidance-cluster">
+          <div className="fd-guidance-copy">
+            <span className="fd-guidance-kicker">Getting started</span>
+            <p>Try a prompt below, or open help for what the Brain can do.</p>
+          </div>
+          <div className="fd-guidance-actions">
+            <button type="button" className="fd-guidance-dismiss" onClick={dismissTip}>
+              Got it
+            </button>
+            {helpControl}
+          </div>
+        </div>
+      ) : null}
+
+      {showChipRow || showHelpInToolbar ? (
+        <div
+          className={[
+            "fd-guidance-toolbar",
+            showChipRow ? "has-chips" : "is-help-only",
+          ].join(" ")}
+        >
+          {showChipRow ? (
+            <div className="fd-guidance-chips" aria-label="Suggested prompts">
+              {guidance.chips.map((prompt) => (
+                <button
+                  key={prompt}
+                  type="button"
+                  disabled={disabled}
+                  onClick={() => onSelectChip(prompt)}
+                >
+                  {prompt}
+                </button>
+              ))}
+            </div>
+          ) : null}
+          {showHelpInToolbar ? helpControl : null}
+        </div>
+      ) : null}
     </div>
   );
 }

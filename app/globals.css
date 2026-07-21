@@ -3336,7 +3336,9 @@ button {
 
 /* Brain guidance, handoff, metric hints */
 .fd-brain-guidance {
-  margin: 0 0 12px;
+  display: grid;
+  gap: 10px;
+  margin: 0 0 14px;
   padding: 0;
   width: 100%;
   max-width: 100%;
@@ -3344,32 +3346,7 @@ button {
   box-sizing: border-box;
 }
 
-.fd-guidance-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-}
-
-/* Brain home: tip bar matches Brain panel width */
-.fd-guidance-bar.is-compact {
-  flex-wrap: nowrap;
-  justify-content: flex-start;
-  gap: 8px;
-}
-
-.fd-guidance-bar.is-compact.tip-dismissed {
-  justify-content: flex-end;
-}
-
-.fd-guidance-bar.is-compact.has-tip {
-  display: block;
-}
-
-/* Full-width tip strip aligned with the chat panel below */
+/* Full-width tip strip used on every demo page */
 .fd-guidance-cluster {
   display: flex;
   align-items: center;
@@ -3448,60 +3425,18 @@ button {
   background: rgba(255, 255, 252, 0.9);
 }
 
-@media (max-width: 520px) {
-  .fd-guidance-cluster {
-    align-items: flex-start;
-    gap: 10px;
-    padding: 12px;
-  }
-
-  .fd-guidance-actions {
-    margin-left: auto;
-  }
-}
-
-.fd-guidance-tip {
-  margin: 0;
-  display: inline-flex;
+.fd-guidance-toolbar {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
-  padding: 7px 10px 7px 12px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: rgba(255, 255, 252, 0.72);
-  color: var(--ink-soft);
-  font-size: var(--fd-text-meta);
-  line-height: 1.4;
-  width: fit-content;
-  max-width: min(100%, 34rem);
-  min-width: 0;
-  box-sizing: border-box;
-}
-
-/* Detail views: tip spans the row above chips + help */
-.fd-guidance-bar.has-chips.has-tip .fd-guidance-tip {
-  flex: 1 1 100%;
-  width: auto;
+  gap: 8px;
+  width: 100%;
   max-width: 100%;
-}
-
-.fd-guidance-tip p {
-  margin: 0;
   min-width: 0;
-  flex: 0 1 auto;
-  overflow-wrap: anywhere;
 }
 
-.fd-guidance-tip button {
-  border: 0;
-  background: transparent;
-  color: var(--emerald);
-  font-size: var(--fd-text-caption);
-  font-weight: 700;
-  cursor: pointer;
-  padding: 0;
-  white-space: nowrap;
-  flex: 0 0 auto;
+.fd-guidance-toolbar.is-help-only {
+  justify-content: flex-end;
 }
 
 .fd-guidance-chips {
@@ -3543,8 +3478,20 @@ button {
   align-self: center;
 }
 
-.fd-guidance-bar.has-chips .fd-guidance-help {
+.fd-guidance-toolbar.has-chips .fd-guidance-help {
   margin-left: auto;
+}
+
+@media (max-width: 520px) {
+  .fd-guidance-cluster {
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .fd-guidance-actions {
+    margin-left: auto;
+  }
 }
 
 .fd-guidance-help > button {

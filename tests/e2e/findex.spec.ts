@@ -188,6 +188,54 @@ test("demo login lands on a calm Brain-first home", async ({ page }, testInfo) =
   }
 });
 
+test("getting started guidance cluster stays consistent across demo pages", async ({ page }) => {
+  await enterDemo(page);
+
+  for (const path of ["/demo/brain", "/demo/spending", "/demo/portfolio", "/demo/cash-flow"] as const) {
+    await page.goto(path);
+    const cluster = page.locator(".fd-guidance-cluster");
+    await expect(cluster).toBeVisible();
+    await expect(cluster.locator(".fd-guidance-kicker")).toHaveText("Getting started");
+    await expect(cluster).toContainText("Try a prompt below, or open help for what the Brain can do.");
+    await expect(cluster.getByRole("button", { name: "Got it" })).toBeVisible();
+    await expect(cluster.getByRole("button", { name: "What can the Financial Brain do?" })).toBeVisible();
+
+    const geometry = await cluster.evaluate((el) => {
+      const parent = el.parentElement;
+      const dismiss = el.querySelector(".fd-guidance-dismiss");
+      const help = el.querySelector(".fd-guidance-help > button");
+      const copy = el.querySelector(".fd-guidance-copy");
+      if (
+        !(parent instanceof HTMLElement)
+        || !(dismiss instanceof HTMLElement)
+        || !(help instanceof HTMLElement)
+        || !(copy instanceof HTMLElement)
+      ) {
+        return null;
+      }
+      const clusterBox = el.getBoundingClientRect();
+      const parentBox = parent.getBoundingClientRect();
+      const dismissBox = dismiss.getBoundingClientRect();
+      const helpBox = help.getBoundingClientRect();
+      const copyBox = copy.getBoundingClientRect();
+      return {
+        widthDelta: Math.abs(clusterBox.width - parentBox.width),
+        actionsAligned: Math.abs((dismissBox.top + dismissBox.height / 2) - (helpBox.top + helpBox.height / 2)) <= 6,
+        copyLeftOfActions: copyBox.right <= dismissBox.left + 1,
+      };
+    });
+    expect(geometry).not.toBeNull();
+    expect(geometry!.widthDelta).toBeLessThanOrEqual(2);
+    expect(geometry!.actionsAligned).toBe(true);
+    expect(geometry!.copyLeftOfActions).toBe(true);
+
+    if (path === "/demo/spending") {
+      await expect(page.locator(".fd-guidance-chips")).toBeVisible();
+      await expect(page.locator(".fd-guidance-toolbar .fd-guidance-help")).toHaveCount(0);
+    }
+  }
+});
+
 test("route navigation, refresh, and browser history preserve each money view", async ({ page }) => {
   await enterDemo(page);
   await page.getByRole("button", { name: /^Spending/ }).click();
