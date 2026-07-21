@@ -481,6 +481,18 @@ test("unavailable generation fails explicitly without publishing an unrelated fa
   await expect(page.getByText("FIRE runway")).toHaveCount(0);
 });
 
+test("My tools New starts a Brain draft prompt and scrolls to the composer", async ({ page }) => {
+  await enterDemo(page);
+  await seedWorkspace(page);
+  await expect(page.getByRole("heading", { name: "Adaptive purchase lab" }).first()).toBeVisible();
+  await page.getByRole("button", { name: "New" }).click();
+  const composer = page.getByLabel("Message the Financial Brain");
+  await expect(composer).toHaveValue("Build a tool that ");
+  await expect(composer).toBeFocused();
+  await expect(page.getByRole("heading", { name: "Adaptive purchase lab" })).toHaveCount(0);
+  await expect(page.locator(".fd-brain-stage")).toBeInViewport();
+});
+
 test("saved workspace versions render in a locked interactive iframe and survive reload", async ({ page }) => {
   await enterDemo(page);
   await seedWorkspace(page);

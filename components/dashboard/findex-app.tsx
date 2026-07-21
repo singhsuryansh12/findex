@@ -51,9 +51,11 @@ export function FinDexApp({ dataset, snapshot }: { dataset: DemoDataset; snapsho
   const [versions, setVersions] = useState<WorkspaceArtifactV2[]>([]);
   const [storageWarning, setStorageWarning] = useState(false);
   const [widgetPrompt, setWidgetPrompt] = useState<string | null>(null);
+  const [draftPrompt, setDraftPrompt] = useState<string | null>(null);
   const [handoff, setHandoff] = useState<BrainHandoff | null>(null);
   const [prevView, setPrevView] = useState(view);
   const generatedRef = useRef<HTMLDetailsElement>(null);
+  const brainStageRef = useRef<HTMLElement>(null);
   const cashFlow = useMemo(() => getCashFlowForecast({ days: 90 }), []);
 
   // Clear handoff when navigating away from Brain (adjust during render — not an effect).
@@ -119,6 +121,8 @@ export function FinDexApp({ dataset, snapshot }: { dataset: DemoDataset; snapsho
     setArtifact(null);
     setVersions([]);
     window.localStorage.removeItem(ACTIVE_WORKSPACE_KEY);
+    setDraftPrompt("Build a tool that ");
+    window.setTimeout(() => brainStageRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 50);
   };
   const refreshArtifactToken = async (source: WorkspaceArtifactV2, artifactId: string) => {
     const response = await fetch("/api/workspace/artifact-token", {
@@ -178,7 +182,7 @@ export function FinDexApp({ dataset, snapshot }: { dataset: DemoDataset; snapsho
             <main className="fd-brain-home">
               <header className="fd-brain-hero"><span className="fd-eyebrow"><Sparkles size={12} />Your financial starting point</span><h1 className="serif">Ask about your money,<br /><em>or test a decision.</em></h1><p>One place to connect spending, income, cash flow, and investments—then understand what to do next.</p></header>
 
-              <section className="fd-brain-stage">
+              <section className="fd-brain-stage" ref={brainStageRef}>
                 {handoff && (
                   <BrainHandoffBanner handoff={handoff} onDismiss={() => setHandoff(null)} />
                 )}
@@ -195,7 +199,11 @@ export function FinDexApp({ dataset, snapshot }: { dataset: DemoDataset; snapsho
                   onWorkspace={handleWorkspace}
                   activeWorkspace={artifact}
                   initialPrompt={widgetPrompt}
-                  onPromptConsumed={() => setWidgetPrompt(null)}
+                  draftPrompt={draftPrompt}
+                  onPromptConsumed={() => {
+                    setWidgetPrompt(null);
+                    setDraftPrompt(null);
+                  }}
                   onUserSend={() => setHandoff(null)}
                   preserveHandoffBanner={Boolean(handoff)}
                 />

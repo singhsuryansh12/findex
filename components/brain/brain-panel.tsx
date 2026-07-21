@@ -65,6 +65,7 @@ export function BrainPanel({
   onWorkspace,
   activeWorkspace,
   initialPrompt,
+  draftPrompt,
   onPromptConsumed,
   onUserSend,
   preserveHandoffBanner = false,
@@ -72,6 +73,7 @@ export function BrainPanel({
   onWorkspace: (artifact: WorkspaceArtifactV2) => void | Promise<void>;
   activeWorkspace: WorkspaceArtifactV2 | null;
   initialPrompt: string | null;
+  draftPrompt?: string | null;
   onPromptConsumed: () => void;
   onUserSend?: () => void;
   /** When true, consuming initialPrompt skips clearing the handoff banner (real cross-page handoff). */
@@ -96,7 +98,9 @@ export function BrainPanel({
   const [reconnecting, setReconnecting] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const messagesRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const initialHandled = useRef<string | null>(null);
+  const draftHandled = useRef<string | null>(null);
   const resumeAttempted = useRef(false);
   const runStartedAt = useRef(0);
   const requestAbort = useRef<AbortController | null>(null);
@@ -480,6 +484,25 @@ export function BrainPanel({
     }
   }, [initialPrompt, busy, onPromptConsumed, preserveHandoffBanner, send]);
 
+  useEffect(() => {
+    if (!draftPrompt) {
+      draftHandled.current = null;
+      return;
+    }
+    if (draftHandled.current === draftPrompt || busy) return;
+    draftHandled.current = draftPrompt;
+    setInput(draftPrompt);
+    onPromptConsumed();
+    const timer = window.setTimeout(() => {
+      const field = inputRef.current;
+      if (!field) return;
+      field.focus();
+      const cursor = draftPrompt.length;
+      field.setSelectionRange(cursor, cursor);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [draftPrompt, busy, onPromptConsumed]);
+
   const submit = (event: FormEvent) => { event.preventDefault(); void send(input); };
   const onComposerKeyDown = (event: ReactKeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key !== "Enter" || event.shiftKey || event.nativeEvent.isComposing) return;
@@ -587,7 +610,7 @@ export function BrainPanel({
         </form>
       )}
       <form className="brain-composer" onSubmit={submit}>
-        <textarea className="brain-input" value={input} onChange={(event) => setInput(event.target.value.slice(0, 1_000))} onKeyDown={onComposerKeyDown} placeholder={pending ? "Answer the questions above…" : activeWorkspace ? "Ask for a refinement, or describe what to change…" : "Ask about your money, or describe a tool…"} aria-label="Message the Financial Brain" aria-describedby="brain-composer-hint" />
+        <textarea ref={inputRef} className="brain-input" value={input} onChange={(event) => setInput(event.target.value.slice(0, 1_000))} onKeyDown={onComposerKeyDown} placeholder={pending ? "Answer the questions above…" : activeWorkspace ? "Ask for a refinement, or describe what to change…" : "Ask about your money, or describe a tool…"} aria-label="Message the Financial Brain" aria-describedby="brain-composer-hint" />
         <div className="composer-footer"><span className="composer-hint" id="brain-composer-hint">Enter to send · Shift+Enter for a new line · {input.length}/1000 · Educational, not advice</span><button className="send-button" disabled={busy || !input.trim()} aria-label="Send message"><ArrowUp size={14} /></button></div>
       </form>
     </section>

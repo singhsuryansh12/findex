@@ -49,7 +49,7 @@ export function WorkspaceLibrary({
               {projects.map((project) => <option key={project.id} value={project.id}>{project.name}</option>)}
             </select>
           )}
-          <button onClick={onNew}><Plus size={12} />New</button>
+          <button type="button" onClick={onNew}><Plus size={12} />New</button>
           {active && <button onClick={() => { setName(active.name); setEditing(true); }}><Pencil size={12} />Rename</button>}
           {active && <button onClick={onDuplicate}><Copy size={12} />Duplicate</button>}
           {active && <button className="danger" onClick={onDelete}><Trash2 size={12} />Delete</button>}
