@@ -1,10 +1,10 @@
-# Financial Brain workspace builds
+# Financial Brain tool builds
 
-This document is the operational source of truth for Findex's generative workspace pipeline. The host owns model selection, retry limits, validation, and publication. User prompts and generated source cannot change these policies.
+This document is the operational source of truth for FinDex’s generative **My tools** pipeline. The host owns model selection, retry limits, validation, and publication. User prompts and generated source cannot change these policies. User-facing chrome says **tool** / **My tools**; code and APIs may still say `workspace`.
 
 ## Request routing
 
-`POST /api/brain` first routes a turn as either an ordinary financial question or a workspace request. The router recognizes explicit build verbs, workspace nouns, active-workspace revisions, and signed clarification continuations; it does not select a calculator or widget type.
+`POST /api/brain` first routes a turn as either an ordinary financial question or a tool/workspace request. The router recognizes explicit build verbs, tool/workspace nouns, active-tool revisions, and signed clarification continuations; it does not select a calculator or widget type.
 
 Workspace requests pass through a low-cost complexity assessment. If assessment is unavailable, Findex uses `simple` so ordinary calculators draft first. Host calibration also biases ordinary calculator/FIRE/wealth prompts to `simple`. Live market/research data, runtime AI, portfolio or tax logic, state migration, or several coordinated views can raise a request to `complex`. My-money prompts default-grant relevant `ledger.*` capabilities so builds ground in Jordan’s demo ledger.
 

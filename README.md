@@ -1,24 +1,26 @@
 # FinDex — Your money, your tools
 
-FinDex is a Brain-first, AI-native personal finance demo. Finance is personal: your spending, portfolio, income, and cash flow are already connected, so you can ask a question, test a decision, or build the exact tool you need—and keep it in My tools.
+FinDex is a Brain-first, AI-native personal finance demo. Finance is personal: other apps ship a fixed dashboard; FinDex keeps your spending, portfolio, income, and cash flow in one picture, then lets you **Ask**, **Decide**, or **Build** a tool that fits how *you* track money—and keep it in **My tools**.
 
-The public demo is intentionally anonymous and single-user. It never asks for bank credentials, moves money, executes trades, or represents model output as individualized financial advice.
+The public demo is an anonymous, single-user synthetic ledger (Jordan Lee). It never asks for bank credentials, moves money, executes trades, or presents model output as individualized financial advice.
 
-![Findex social preview](public/findex-og.png)
+![FinDex social preview](public/findex-og.png)
 
-## Product flows
+## Product surfaces
 
-1. **Financial Brain** — the default `/demo/brain` destination, with grounded inline insight cards, purchase decisions, and a natural-language workspace planner.
-2. **Spending** — searchable, filterable activity plus distinct recurring list/calendar views at `/demo/spending`.
-3. **Portfolio and net worth** — four reconciled synthetic U.S. investment accounts, holdings, allocation, history, contributions, and dated IRS references at `/demo/portfolio`.
-4. **Income and cash flow** — 30/60/90-day projections, a reserve-protected safe-to-spend amount, transparent assumptions, and account runway at `/demo/cash-flow`.
-5. **Generative tools** — Findex durably builds, validates, reviews, versions, and publishes isolated finance-native React workspaces inside the Brain’s **My tools** drawer.
+1. **Financial Brain** (`/demo/brain`) — default home. Page-aware Getting started guidance, Ask / Decide / Build help, grounded insight cards, purchase decision checks, and a natural-language tool builder with durable progress.
+2. **Spending** (`/demo/spending`) — searchable, filterable activity; recurring list and calendar; plain-language insight; Ask the Brain handoff.
+3. **Portfolio and net worth** (`/demo/portfolio`) — four reconciled synthetic U.S. accounts, holdings, allocation vs target, history, contributions, IRS references.
+4. **Income and cash flow** (`/demo/cash-flow`) — 30/60/90-day projections, reserve-protected safe-to-spend, transparent assumptions, account runway, decision CTA.
+5. **My tools** — FinDex durably plans, builds, validates, reviews, versions, and publishes isolated finance-native React tools (draft first, then verified) inside the Brain drawer.
+
+Cross-cutting UX: shared shell with desktop sidebar + mobile bottom nav, view transitions between money views, Brain handoff banners when you Ask from a detail page, and comfortable typography throughout.
 
 The frozen ledger prompt remains:
 
 > How much did I spend on dining out last month?
 
-Findex answers **$366.21 across 8 Dining transactions, June 1–30, 2026**, with provenance and a deterministic comparison to May.
+FinDex answers **$366.21 across 8 Dining transactions, June 1–30, 2026**, with provenance and a deterministic comparison to May.
 
 ## Architecture
 
@@ -29,7 +31,7 @@ flowchart LR
     I -->|Question| F["Terra · low reasoning · grounded tools"]
     I -->|Workspace| C
     C["Terra complexity preflight"]
-    C --> P["Adaptive structured workspace plan"]
+    C --> P["Host-owned structured tool plan"]
     P --> Q{"Clarification needed?"}
     Q -->|Yes, once| U
     Q -->|No| W["Vercel Workflow · resumable run"]
@@ -40,16 +42,16 @@ flowchart LR
     R --> A["Immutable WorkspaceArtifactV2"]
     A --> I["CSP-locked opaque iframe"]
     I <--> K["Validated capability broker"]
-    A --> D["IndexedDB project/version library"]
+    A --> D["IndexedDB My tools library"]
 ```
 
-There is no widget-kind enum, FIRE scaffold, generated-source fallback, or browser-side compiler. A narrow host-owned intent router keeps ordinary questions out of the paid workspace planner but never chooses a calculator kind. A failed build leaves the last published version unchanged and reports the real diagnostic.
+There is no widget-kind enum, FIRE scaffold, generated-source fallback, or browser-side compiler. A narrow host-owned intent router keeps ordinary questions out of the paid tool planner but never chooses a calculator kind. Draft tools can publish for interaction while background validation continues; a failed verified polish leaves the last good version in place and reports the real diagnostic.
 
-Detailed design references:
+Detailed references:
 
 - [Architecture and repository boundaries](docs/ARCHITECTURE.md)
 - [Financial Brain build policy and operations](docs/FINANCIAL_BRAIN_BUILDS.md)
-- [Generated workspace security](docs/SECURITY.md)
+- [Isolated tool runtime security](docs/SECURITY.md)
 - [Testing and release verification](docs/TESTING.md)
 - [Demo and release runbook](docs/DEMO_RUNBOOK.md)
 - [Contribution guidelines](CONTRIBUTING.md)
@@ -68,7 +70,7 @@ tests/{unit,integration,e2e,evaluations}/
 docs/                             Architecture, security, testing, and runbooks
 ```
 
-## Adaptive GPT-5.6 policy
+## Host-owned GPT-5.6 routing
 
 Terra is the default for Q&A, complexity assessment, standard planning, and ordinary builds. Sol handles complex planning/building, every independent review, and the single targeted repair. Planning allows at most two paid attempts; building allows the initial pass plus one repair. Independent deadlines keep every Function step below 300 seconds, while Vercel Workflow gives the full run a 20-minute ceiling and resumable indexed progress. The exact routing, retry, deadline, and failure matrix lives in [Financial Brain workspace builds](docs/FINANCIAL_BRAIN_BUILDS.md).
 
@@ -181,7 +183,7 @@ npm run test:local-sandbox
 npm run verify:local
 ```
 
-The regular suite covers finance reconciliation and purchase classification, adaptive effort floors, multi-file policy and bundling, signed grants, new portfolio/cash-flow capabilities, missing-provider states, IndexedDB versions/state, explicit no-fallback behavior, routed desktop/mobile journeys, axe accessibility scans, responsive reflow, iframe isolation, interaction, and reload persistence.
+The regular suite covers finance reconciliation and purchase classification, host-owned effort floors, multi-file policy and bundling, signed grants, portfolio/cash-flow capabilities, missing-provider states, IndexedDB versions/state, explicit no-fallback behavior, messaging ban-list and copy contracts, routed desktop/mobile journeys (including Try the demo → Brain / My tools), screenshot goldens for brand heroes, axe accessibility scans, responsive reflow, iframe isolation, interaction, and reload persistence.
 
 The opt-in live corpus contains more than 40 diverse, ambiguous, out-of-scope, and adversarial prompts. It plans all prompts and builds a configurable sample (three by default):
 
