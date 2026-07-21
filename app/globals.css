@@ -3398,7 +3398,7 @@ button {
   border: 0;
   border-radius: 999px;
   background: var(--emerald-pale);
-  color: var(--emerald);
+  color: var(--ink);
   font-size: var(--fd-text-caption);
   font-weight: 700;
   cursor: pointer;
@@ -3407,7 +3407,7 @@ button {
 }
 
 .fd-guidance-dismiss:hover {
-  background: rgba(46, 118, 93, 0.18);
+  background: rgba(46, 118, 93, 0.22);
   color: var(--ink);
 }
 
