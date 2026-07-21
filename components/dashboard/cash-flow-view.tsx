@@ -32,11 +32,43 @@ export function CashFlowView({ dataset, onAskBrain }: { dataset: DemoDataset; on
       <BrainGuidance view="cash-flow" onSelectChip={(prompt) => onAskBrain(prompt)} />
 
       <section className="fd-metric-row fd-cash-metrics" aria-label="Cash flow summary">
-        <article className="featured"><span>Safe to spend now</span><strong>{formatMoney(forecast.safeToSpendNowCents)}</strong><small>Protects the {formatMoney(dataset.persona.reserveFloorCents)} checking buffer</small><MetricHint>Cash you can use now while keeping the checking safety buffer intact.</MetricHint></article>
-        <article><span>Take-home income</span><strong>{formatMoney(forecast.monthlyTakeHomeCents)}</strong><small>{formatMoney(dataset.persona.grossAnnualIncomeCents)} gross salary · synthetic demo, not a tax estimate</small></article>
-        <article className={forecast.expectedMonthlySurplusCents >= 0 ? "positive" : "warning"}><span>Expected monthly surplus</span><strong>{formatMoney(forecast.expectedMonthlySurplusCents)}</strong><small>After spending and checking-funded investing</small></article>
-        <article><span>Lowest projected balance</span><strong>{formatMoney(forecast.lowestBalanceCents)}</strong><small>{new Date(`${forecast.lowestBalanceDate}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" })} · checking</small><MetricHint>Lowest point on the forecast — as long as it stays above the buffer, the plan holds.</MetricHint></article>
-        <article><span>Liquid cash</span><strong>{formatMoney(liquidCashCents)}</strong><small>Checking + savings</small></article>
+        <article className="featured">
+          <span className="fd-metric-label">Safe to spend now</span>
+          <strong className="fd-metric-value">{formatMoney(forecast.safeToSpendNowCents)}</strong>
+          <div className="fd-metric-meta">
+            <small>Protects the {formatMoney(dataset.persona.reserveFloorCents)} checking buffer</small>
+            <MetricHint>Cash you can use now while keeping the checking safety buffer intact.</MetricHint>
+          </div>
+        </article>
+        <article>
+          <span className="fd-metric-label">Take-home income</span>
+          <strong className="fd-metric-value">{formatMoney(forecast.monthlyTakeHomeCents)}</strong>
+          <div className="fd-metric-meta">
+            <small>{formatMoney(dataset.persona.grossAnnualIncomeCents)} gross salary · synthetic demo, not a tax estimate</small>
+          </div>
+        </article>
+        <article className={forecast.expectedMonthlySurplusCents >= 0 ? "positive" : "warning"}>
+          <span className="fd-metric-label">Expected monthly surplus</span>
+          <strong className="fd-metric-value">{formatMoney(forecast.expectedMonthlySurplusCents)}</strong>
+          <div className="fd-metric-meta">
+            <small>After spending and checking-funded investing</small>
+          </div>
+        </article>
+        <article>
+          <span className="fd-metric-label">Lowest projected balance</span>
+          <strong className="fd-metric-value">{formatMoney(forecast.lowestBalanceCents)}</strong>
+          <div className="fd-metric-meta">
+            <small>{new Date(`${forecast.lowestBalanceDate}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" })} · checking</small>
+            <MetricHint>Lowest point on the forecast — as long as it stays above the buffer, the plan holds.</MetricHint>
+          </div>
+        </article>
+        <article>
+          <span className="fd-metric-label">Liquid cash</span>
+          <strong className="fd-metric-value">{formatMoney(liquidCashCents)}</strong>
+          <div className="fd-metric-meta">
+            <small>Checking + savings</small>
+          </div>
+        </article>
       </section>
 
       <section className="fd-card fd-cashflow-chart-card">
