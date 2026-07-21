@@ -1,4 +1,4 @@
-# FinDex — Your money, your tools
+# FinDex: Your money, your tools
 
 FinDex is a Brain-first, AI-native personal finance demo. Finance is personal: other apps ship a fixed dashboard; FinDex keeps your spending, portfolio, income, and cash flow in one picture, then lets you **Ask**, **Decide**, or **Build** a tool that fits how *you* track money—and keep it in **My tools**.
 
