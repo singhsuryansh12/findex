@@ -1431,6 +1431,58 @@ button {
   line-height: 1.5;
 }
 
+.fd-card-action {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.fd-card-icon-button {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 252, 0.72);
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.fd-card-icon-button:hover,
+.fd-card-icon-button[aria-expanded="true"] {
+  color: var(--emerald);
+  border-color: rgba(46, 118, 93, 0.28);
+  background: var(--emerald-pale);
+}
+
+.fd-card-help-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 20;
+  width: min(280px, 78vw);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card-solid);
+  box-shadow: 0 12px 28px rgba(36, 54, 44, 0.1);
+  padding: 12px 13px 11px;
+  display: grid;
+  gap: 7px;
+  color: var(--ink);
+}
+
+.fd-card-help-popover > strong {
+  font-size: var(--fd-text-label);
+}
+
+.fd-card-help-popover > p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: var(--fd-text-meta);
+  line-height: 1.45;
+}
+
 .fd-metric-row {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
